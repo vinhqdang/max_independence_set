@@ -177,7 +177,7 @@ void Cascade::mark_dirty(int v) {
 void Cascade::refill_dirty() {
     dirty_.clear();
     dirty_head_ = 0;
-    for (int v = 0; v < g_.n; ++v) { dirty_.push_back(v); in_dirty_[v] = 1; }
+    for (int v : seeds_) { dirty_.push_back(v); in_dirty_[v] = 1; }
     // A shuffled sweep keeps successive regions from overlapping heavily.
     for (int i = (int)dirty_.size() - 1; i > 0; --i)
         std::swap(dirty_[i], dirty_[rng_() % (uint64_t)(i + 1)]);
@@ -325,7 +325,10 @@ void Cascade::perturb(double deadline, const std::function<double()>& elapsed) {
     // The kick gets stronger the longer the search goes without a gain, and
     // resets as soon as one is found.
     for (int f = 0; f < perturb_strength_; ++f) {
-        int v = (int)(rng_() % (uint64_t)g_.n);
+        // Kicks are aimed at the same set the sweep seeds from; perturbing a
+        // vertex the reductions already settled cannot help.
+        int v = seeds_.empty() ? (int)(rng_() % (uint64_t)g_.n)
+                               : seeds_[rng_() % (uint64_t)seeds_.size()];
         if (best_sol_[v]) continue;
         for (long long e = g_.start[v]; e < g_.start[v + 1]; ++e) {
             int u = g_.adj[e];
@@ -475,6 +478,22 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
     stats_.kernel_m = km / 2;
 
     if (cfg_.kernel_only) return 0;
+
+    // Everything the reductions decided is part of some maximum independent
+    // set, so an improvement has to touch a vertex that survived into the
+    // kernel.  Seeding the sweep from those vertices and their neighbours is
+    // what keeps a 4M-vertex instance with a 2000-vertex kernel from spending
+    // its whole budget re-examining settled ground.
+    seeds_.clear();
+    std::vector<char> is_seed(g_.n, 0);
+    for (int v = 0; v < g_.n; ++v) {
+        if (!dg_.alive(v)) continue;
+        if (!is_seed[v]) { is_seed[v] = 1; seeds_.push_back(v); }
+        for (long long e = g_.start[v]; e < g_.start[v + 1]; ++e)
+            if (!is_seed[g_.adj[e]]) { is_seed[g_.adj[e]] = 1; seeds_.push_back(g_.adj[e]); }
+    }
+    if (seeds_.empty())
+        for (int v = 0; v < g_.n; ++v) seeds_.push_back(v);
 
     for (int v = 0; v < dg_.capacity(); ++v) {
         if (!dg_.alive(v)) continue;

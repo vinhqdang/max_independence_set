@@ -7,6 +7,7 @@
 // "exactly optimal given the branching decisions".
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
@@ -76,8 +77,25 @@ public:
         queue_.push_back(v);
     }
 
+    // Seeds the queue so that low-degree vertices are examined first: they are
+    // the ones the cheap rules dispose of, and removing them shrinks the graph
+    // before the expensive tests ever reach the hubs.
     void push_all() {
-        for (int v = 0; v < g_->capacity(); ++v) push(v);
+        int maxdeg = 0;
+        for (int v = 0; v < g_->capacity(); ++v)
+            if (g_->alive(v)) maxdeg = std::max(maxdeg, g_->deg(v));
+        std::vector<int> count(maxdeg + 2, 0);
+        for (int v = 0; v < g_->capacity(); ++v)
+            if (g_->alive(v)) ++count[g_->deg(v)];
+        std::vector<int> start(maxdeg + 2, 0);
+        for (int d = maxdeg; d >= 0; --d) start[d] = start[d + 1] + count[d];
+        // order holds the highest degrees first; the queue is consumed from the
+        // back, so pushing in that order makes the lowest degrees pop first.
+        std::vector<int> order(start[0]);
+        std::vector<int> cursor(start.begin(), start.end());
+        for (int v = 0; v < g_->capacity(); ++v)
+            if (g_->alive(v)) order[--cursor[g_->deg(v)]] = v;
+        for (size_t i = 0; i < order.size(); ++i) push(order[i]);
     }
 
     // Puts v into the solution and deletes N[v].

@@ -7,10 +7,16 @@ OUT=${1:-results}
 TL=${2:-60}
 mkdir -p "$OUT"
 
-echo "== heuristic comparison (${TL}s budget, 3 seeds) =="
+echo "== heuristic comparison (${TL}s budget, all instances) =="
 python3 scripts/run_bench.py \
   --solvers cascade,redumis,online_mis,nearlinear,lineartime \
-  --time-limit "$TL" --seeds 1,2,3 --out "$OUT/heuristic.csv"
+  --time-limit "$TL" --out "$OUT/heuristic.csv"
+
+echo "== seed variance on a representative subset =="
+python3 scripts/run_bench.py \
+  --solvers cascade,redumis,online_mis --time-limit "$TL" --seeds 1,2,3 \
+  --instances del16,del18,rgg18,web-Stanford,roadNet-PA,frb40-19-1,frb53-24-1,frb59-26-1 \
+  --out "$OUT/variance.csv"
 
 echo "== exact solvers (${TL}s budget) on instances they can attempt =="
 python3 scripts/run_bench.py \

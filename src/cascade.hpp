@@ -144,6 +144,10 @@ private:
     std::vector<int> ball_, region_, ball_mark_, region_pos_;
     int ball_stamp_ = 0;
     // Worklist of seeds still worth examining at the current radius.
+    // Vertices the reductions did not decide, plus their neighbours: improving
+    // the solution can only come from this set, so it is what the sweep seeds
+    // from.  On a graph that reduces well this is a tiny fraction of the whole.
+    std::vector<int> seeds_;
     std::vector<int> dirty_;
     // tight_[v] counts how many neighbours of v are in the incumbent; a vertex
     // can only be added once every one of them has been freed.
