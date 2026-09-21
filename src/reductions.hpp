@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <vector>
 
 #include "dyngraph.hpp"
@@ -55,6 +56,14 @@ public:
         offset_ = 0;
         work_ = 0;
     }
+
+    // Reductions are optional: stopping early only leaves a larger kernel, so
+    // the loop can be given a deadline without affecting correctness.
+    void set_stop(std::function<bool()> stop) { stop_ = std::move(stop); }
+
+    // Rules can be swapped mid-run: they are all optional, so a cheaper set
+    // simply leaves more for the search to do.
+    void set_config(const ReduceConfig& cfg) { cfg_ = cfg; }
 
     long long offset() const { return offset_; }
     long long work() const { return work_; }
@@ -118,8 +127,10 @@ public:
     // Returns the number of vertices removed.
     int reduce() {
         int before = g_->num_alive();
+        long long ticks = 0;
         while (!queue_.empty()) {
             if (cfg_.work_budget >= 0 && work_ > cfg_.work_budget) break;
+            if (stop_ && (++ticks & 0x3ff) == 0 && stop_()) break;
             int v = queue_.back();
             queue_.pop_back();
             inq_[v] = 0;
@@ -375,4 +386,5 @@ private:
     std::vector<char> inq_;
     std::vector<int> mark_, mark2_;
     int stamp_ = 0, stamp2_ = 0;
+    std::function<bool()> stop_;
 };

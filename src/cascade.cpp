@@ -448,13 +448,15 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
 
     // Phase 1: exhaustive kernelization of the whole graph.
     double t0 = elapsed();
+    double kernel_deadline = cfg_.kernel_only ? 1e18 : t0 + cfg_.kernel_share * deadline;
+    red_.set_stop([&]() { return elapsed() > kernel_deadline; });
     red_.push_all();
     red_.reduce();
     long long live_edges = 0;
     for (int v = 0; v < dg_.next_fold(); ++v)
         if (dg_.alive(v)) live_edges += dg_.deg(v);
     live_edges /= 2;
-    if (cfg_.use_lp && live_edges <= cfg_.lp_max_edges) {
+    if (cfg_.use_lp && live_edges <= cfg_.lp_max_edges && elapsed() < kernel_deadline) {
         // The LP reduction looks at the whole graph, so it fires where the local
         // rules have stalled; each round it decides vertices can in turn unlock
         // more local rules, so the two alternate until neither moves.
@@ -470,6 +472,10 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
         }
     }
     stats_.kernel_seconds = elapsed() - t0;
+    stats_.kernel_truncated = elapsed() > kernel_deadline ? 1 : 0;
+    // The search itself only has to respect the overall deadline.
+    red_.set_stop([&]() { return elapsed() > deadline; });
+    red_.set_config(cfg_.dive_red);
     stats_.kernel_offset = red_.offset();
     stats_.kernel_n = dg_.num_alive();
     long long km = 0;

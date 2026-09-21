@@ -168,9 +168,12 @@ def main():
             continue
         if args.max_n and e["n"] > args.max_n:
             continue
+        # The prepared files always live next to the catalogue, not next to the
+        # instance: complemented instances point into prepared/ themselves.
+        root = os.path.dirname(os.path.abspath(args.catalogue))
         insts.append({"name": n, "path": e["path"], "family": e["family"],
                       "n": e["n"], "m": e["m"],
-                      "prepared": os.path.join(os.path.dirname(e["path"]), "prepared", n)})
+                      "prepared": os.path.join(root, "prepared", n)})
 
     new = not os.path.exists(args.out)
     with open(args.out, "a", newline="") as f:

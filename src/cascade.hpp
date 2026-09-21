@@ -36,6 +36,10 @@ struct CascadeConfig {
     int lns_max_target = 20000;
     long long lns_node_budget = 20000;
     bool kernel_only = false;   // stop after kernelization
+    // Share of the budget kernelization may use before the search takes over.
+    // A partial kernel is still sound, and on a graph whose kernel stays large
+    // the search is a better use of the remaining time than more reducing.
+    double kernel_share = 0.3;
     bool use_lp = true;         // Nemhauser-Trotter reduction during kernelization
     // The LP reduction has to run to completion to stay sound: a partial
     // matching still yields a valid cover, but not a minimum one, and
@@ -52,7 +56,12 @@ struct CascadeConfig {
     double lns_slice = 0.05;    // seconds allowed per neighbourhood solve
     double lns_max_slice = 1.0;
     long long lns_max_node_budget = 1000000;
+    // Kernelization runs the full suite once.  Diving re-runs reductions after
+    // every single decision, so it uses a cheaper set: the expensive rules cost
+    // more per decision than the vertices they save are worth, and a dive that
+    // does not finish is worth far less than a slightly weaker one that does.
     ReduceConfig red;
+    ReduceConfig dive_red;
 };
 
 struct CascadeStats {
@@ -76,6 +85,7 @@ struct CascadeStats {
     long long kernel_m = 0;
     long long kernel_offset = 0;
     long long lp_decided = 0;
+    int kernel_truncated = 0;
     long long dives = 0;
     long long moves_accepted = 0;
     long long decisions_total = 0;

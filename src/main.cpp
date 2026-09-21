@@ -35,6 +35,10 @@ int main(int argc, char** argv) {
     std::string path = argv[1];
     std::string out;
     CascadeConfig cfg;
+    // Diving re-reduces after every decision, so it drops the quadratic rules.
+    cfg.dive_red.unconfined = false;
+    cfg.dive_red.max_deg_domination = 8;
+    cfg.dive_red.max_deg_clique = 4;
     bool kernel_only = false;
     bool exact = false;
 
@@ -51,6 +55,7 @@ int main(int argc, char** argv) {
         else if (a == "--include-prob") cfg.include_prob = atof(next().c_str());
         else if (a == "--kernel-only") { kernel_only = true; cfg.kernel_only = true; }
         else if (a == "--no-lp") cfg.use_lp = false;
+        else if (a == "--kernel-share") cfg.kernel_share = atof(next().c_str());
         else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
         else if (a == "--no-dive-moves") cfg.use_dive_moves = false;
@@ -85,7 +90,7 @@ int main(int argc, char** argv) {
                "nodes=%lld proved_optimal=%d\n",
                path.c_str(), g.n, g.m, r.size, elapsed(), read_time, r.nodes,
                r.proved_optimal ? 1 : 0);
-        if (!out.empty()) {
+            if (!out.empty()) {
             FILE* f = fopen(out.c_str(), "wb");
             if (!f) { fprintf(stderr, "error: cannot write %s\n", out.c_str()); return 1; }
             std::string buf;
@@ -104,14 +109,15 @@ int main(int argc, char** argv) {
 
     const CascadeStats& st = solver.stats();
     printf("instance=%s n=%d m=%lld size=%lld time=%.3f read_time=%.3f "
-           "kernel_n=%lld kernel_m=%lld kernel_offset=%lld kernel_time=%.3f lp_decided=%lld "
-           "first_dive=%lld first_dive_time=%.3f dives=%lld iters=%lld accepted=%lld "
-           "lns_moves=%lld lns_impr=%lld lns_gain=%lld lns_target=%d lns_nodes=%lld lns_rv=%lld lns_proved=%lld\n",
+           "kernel_n=%lld kernel_m=%lld kernel_offset=%lld kernel_time=%.3f "
+           "lp_decided=%lld kernel_truncated=%d first_dive=%lld first_dive_time=%.3f "
+           "lns_moves=%lld lns_impr=%lld lns_gain=%lld lns_plateau=%lld "
+           "lns_free=%d restarts=%lld perturb=%lld sweeps=%lld\n",
            path.c_str(), g.n, g.m, size, total, read_time,
-           st.kernel_n, st.kernel_m, st.kernel_offset, st.kernel_seconds, st.lp_decided,
-           st.first_dive_value, st.first_dive_seconds, st.dives, st.iterations, st.moves_accepted,
-           st.lns_moves, st.lns_improvements, st.lns_gain, st.lns_target,
-           st.lns_nodes, st.lns_region_vertices, st.lns_proved, st.lns_sweeps);
+           st.kernel_n, st.kernel_m, st.kernel_offset, st.kernel_seconds,
+           st.lp_decided, st.kernel_truncated, st.first_dive_value, st.first_dive_seconds,
+           st.lns_moves, st.lns_improvements, st.lns_gain, st.lns_plateau,
+           st.lns_expand, st.restarts, st.perturbations, st.lns_sweeps);
 
     if (!out.empty()) {
         FILE* f = fopen(out.c_str(), "wb");
