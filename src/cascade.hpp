@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "dyngraph.hpp"
+#include "exact.hpp"
 #include "graph.hpp"
 #include "lp_reduce.hpp"
 #include "reductions.hpp"
@@ -53,6 +54,12 @@ struct CascadeConfig {
     // Fruitless perturbations at full strength before the search restarts from a
     // fresh randomised dive, keeping the best solution found so far.
     long long restart_after = 200;
+    // Restart when nothing has improved for this multiple of what one dive
+    // costs.  A restart throws away the search state and has to re-dive, so it
+    // is only worth doing where diving is cheap: on a small instance this turns
+    // the run into a multi-start search, while on a large one the threshold
+    // exceeds the whole budget and no restart ever fires.
+    double restart_idle_dives = 200.0;
     double lns_slice = 0.05;    // seconds allowed per neighbourhood solve
     double lns_max_slice = 1.0;
     long long lns_max_node_budget = 1000000;
@@ -148,6 +155,8 @@ private:
     void restart(double deadline, const std::function<double()>& elapsed);
     std::vector<int> tmp_;
     std::vector<char> blocked_;
+    ExactSolver region_solver_;
+    Graph sub_;
 
     // Large-neighbourhood search scratch space.
     int lns_target_ = 0;
@@ -170,6 +179,8 @@ private:
     int perturb_strength_ = 1;
     long long gain_at_perturb_ = 0;
     long long perturb_failures_ = 0;
+    double last_improve_ = 0.0;
+    bool improved_ = false;
     bool logging_ = false;
     std::vector<std::pair<int, char>> log_;
     void set_sol(int v, char value);

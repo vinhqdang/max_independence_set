@@ -15,7 +15,7 @@ python3 scripts/run_bench.py \
 echo "== seed variance on a representative subset =="
 python3 scripts/run_bench.py \
   --solvers cascade,redumis,online_mis --time-limit "$TL" --seeds 1,2,3 \
-  --instances del16,del18,rgg18,web-Stanford,roadNet-PA,frb40-19-1,frb53-24-1,frb59-26-1 \
+  --instances del16,del18,rgg18,web-Stanford,roadNet-PA,frb30-15-1,frb35-17-1,frb40-19-1,frb45-21-1,frb50-23-1,frb53-24-1,frb59-26-1 \
   --out "$OUT/variance.csv"
 
 echo "== exact solvers (${TL}s budget) on instances they can attempt =="

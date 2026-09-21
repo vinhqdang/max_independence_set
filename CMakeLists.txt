@@ -10,7 +10,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -funroll-loops -DNDEBUG")
 
 add_library(misgraph src/graph.cpp)
 
-add_executable(cascade src/main.cpp src/cascade.cpp src/exact.cpp)
+add_executable(cascade src/main.cpp src/cascade.cpp)
 target_link_libraries(cascade misgraph)
 
 add_executable(mis-convert tools/mis_convert.cpp)
@@ -20,6 +20,6 @@ add_executable(mis-verify tools/mis_verify.cpp)
 target_link_libraries(mis-verify misgraph)
 
 enable_testing()
-add_executable(mis-tests tests/test_correctness.cpp src/cascade.cpp src/exact.cpp)
+add_executable(mis-tests tests/test_correctness.cpp src/cascade.cpp)
 target_link_libraries(mis-tests misgraph)
 add_test(NAME correctness COMMAND mis-tests)

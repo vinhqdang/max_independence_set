@@ -60,6 +60,7 @@ public:
         alive_.assign(cap_, 0);
         deg_.assign(cap_, 0);
         exslot_.assign(cap_, -1);
+        exadj_.clear();  // init may be called repeatedly on a reused instance
         for (int v = 0; v < g.n; ++v) { alive_[v] = 1; deg_[v] = (int)g.degree(v); }
         nalive_ = g.n;
         next_fold_ = g.n;

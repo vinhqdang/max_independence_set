@@ -111,6 +111,7 @@ void Cascade::archive() {
     if (value_ <= archive_value_) return;
     archive_value_ = value_;
     archive_sol_ = best_sol_;
+    improved_ = true;
 }
 
 // Throws away the current incumbent and dives again from the kernel with fresh
@@ -216,7 +217,7 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
     ++ball_stamp_;
     for (int v : region_) ball_mark_[v] = ball_stamp_;
 
-    Graph sub;
+    Graph& sub = sub_;  // reused across moves so the buffers keep their capacity
     sub.n = (int)region_.size();
     sub.start.assign(sub.n + 1, 0);
     sub.adj.clear();
@@ -242,7 +243,7 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
     ec.lower_bound = incoming - 1;  // an equal-size region solution is still recorded
     ec.seed = rng_();
     double slice = std::min(deadline, elapsed() + slice_);
-    ExactResult res = solve_exact(sub, ec, slice, elapsed);
+    ExactResult res = region_solver_.solve(sub, ec, slice, elapsed);
     if (res.proved_optimal) ++stats_.lns_proved;
     stats_.lns_nodes += res.nodes;
     stats_.lns_region_vertices += (long long)region_.size();
@@ -518,6 +519,7 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
     stats_.first_dive_seconds = elapsed() - d0;
     stats_.first_dive_value = best_value_;
     value_ = best_value_;
+    last_improve_ = elapsed();
     rebuild_tight();
     archive();
 
@@ -537,9 +539,16 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
             }
             if (cfg_.use_perturbation && elapsed() < deadline) {
                 perturb(deadline, elapsed);
-                if (perturb_strength_ >= cfg_.perturb_max_strength &&
-                    perturb_failures_ >= cfg_.restart_after && elapsed() < deadline)
+                if (improved_) { improved_ = false; last_improve_ = elapsed(); }
+                bool stuck_on_kicks = perturb_strength_ >= cfg_.perturb_max_strength &&
+                                      perturb_failures_ >= cfg_.restart_after;
+                double idle_limit = std::max(0.02, cfg_.restart_idle_dives *
+                                                    stats_.first_dive_seconds);
+                bool stuck_on_time = elapsed() - last_improve_ > idle_limit;
+                if ((stuck_on_kicks || stuck_on_time) && elapsed() < deadline) {
                     restart(deadline, elapsed);
+                    last_improve_ = elapsed();
+                }
             }
         }
         if (!cfg_.use_dive_moves || decisions_.empty()) continue;

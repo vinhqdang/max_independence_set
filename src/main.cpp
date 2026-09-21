@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
         else if (a == "--include-prob") cfg.include_prob = atof(next().c_str());
         else if (a == "--kernel-only") { kernel_only = true; cfg.kernel_only = true; }
         else if (a == "--no-lp") cfg.use_lp = false;
+        else if (a == "--restart-idle") cfg.restart_idle_dives = atof(next().c_str());
         else if (a == "--kernel-share") cfg.kernel_share = atof(next().c_str());
         else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
