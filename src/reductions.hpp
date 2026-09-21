@@ -296,7 +296,8 @@ private:
         ++stamp2_;  // membership in N[S]
         mark_[v] = stamp_;
         mark2_[v] = stamp2_;
-        g_->for_each_nbr(v, [&](int u) { mark2_[u] = stamp2_; });
+        int ns_size = 1;
+        g_->for_each_nbr(v, [&](int u) { mark2_[u] = stamp2_; ++ns_size; });
 
         for (int iter = 0; iter < cfg_.unconfined_max_set; ++iter) {
             int best_u = -1, best_out = 1 << 30, best_w = -1;
@@ -308,6 +309,11 @@ private:
                 g_->for_each_nbr(s, [&](int u) {
                     if (mark_[u] == stamp_) return;         // u is in S
                     if (best_out == 0) return;
+                    // |N(u) \ N[S]| >= deg(u) - (|N[S]| - 1), so a neighbour of
+                    // high degree cannot be the one that extends S or closes the
+                    // test.  Skipping those outright is what makes this rule
+                    // affordable on graphs with skewed degrees.
+                    if (g_->deg(u) > ns_size) return;
                     int in_s = 0, outside = 0, witness = -1;
                     g_->for_each_nbr(u, [&](int y) {
                         if (mark_[y] == stamp_) ++in_s;
@@ -326,8 +332,10 @@ private:
             // Extend S by the single vertex outside N[S].
             s_set_.push_back(best_w);
             mark_[best_w] = stamp_;
-            mark2_[best_w] = stamp2_;
-            g_->for_each_nbr(best_w, [&](int y) { mark2_[y] = stamp2_; });
+            if (mark2_[best_w] != stamp2_) { mark2_[best_w] = stamp2_; ++ns_size; }
+            g_->for_each_nbr(best_w, [&](int y) {
+                if (mark2_[y] != stamp2_) { mark2_[y] = stamp2_; ++ns_size; }
+            });
         }
         return false;
     }
