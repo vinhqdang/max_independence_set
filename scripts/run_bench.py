@@ -128,7 +128,7 @@ def invoke(solver, inst, tl, seed, tmp):
 
     if solver.startswith("cascade"):
         cmd = [BIN["cascade"], path, "--output", sol, "--seed", str(seed),
-               "--time-limit", "%g" % tl, "--lns-free", "64"]
+               "--time-limit", "%g" % tl, "--lns-free", "4"]
         if solver == "cascade-exact":
             cmd.append("--exact")
         el, res, to = run(cmd, timeout=tl + 600)
