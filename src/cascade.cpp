@@ -19,6 +19,8 @@ void Cascade::setup() {
     hit_count_.assign(g_.n + 1, 0);
     tight_.assign(g_.n + 1, 0);
     free_target_ = cfg_.lns_start_free;
+    slice_ = cfg_.lns_slice;
+    node_budget_ = cfg_.lns_node_budget;
     dirty_.clear();
     dirty_head_ = 0;
     lns_target_ = cfg_.lns_start_target;
@@ -105,6 +107,43 @@ long long Cascade::maximalize(std::vector<char>& in_sol) const {
     return added;
 }
 
+void Cascade::archive() {
+    if (value_ <= archive_value_) return;
+    archive_value_ = value_;
+    archive_sol_ = best_sol_;
+}
+
+// Throws away the current incumbent and dives again from the kernel with fresh
+// randomness.  The archive keeps the best solution, so a restart can only cost
+// time, never quality.  This is the diversification that a single descent plus
+// perturbation cannot provide on adversarial instances.
+void Cascade::restart(double deadline, const std::function<double()>& elapsed) {
+    ++stats_.restarts;
+    archive();
+    red_.restore(root_state_);
+    cand_size_ = root_cand_;
+    decisions_.clear();
+    cfg_.include_prob = 0.05;  // a little randomness in the dive itself
+    dive(deadline, elapsed);
+
+    std::vector<char> in_sol(dg_.capacity(), 0);
+    residual_greedy(in_sol);
+    long long size = red_.lift(in_sol);
+    size += maximalize(in_sol);
+    best_sol_.swap(in_sol);
+    value_ = size;
+    best_value_ = std::max(best_value_, size);
+    rebuild_tight();
+    refill_dirty();
+    free_target_ = cfg_.lns_start_free;
+    slice_ = cfg_.lns_slice;
+    node_budget_ = cfg_.lns_node_budget;
+    perturb_strength_ = 1;
+    perturb_failures_ = 0;
+    plateau_ = false;
+    archive();
+}
+
 long long Cascade::snapshot_solution() {
     std::vector<char> in_sol(dg_.capacity(), 0);
     residual_greedy(in_sol);
@@ -116,9 +155,11 @@ long long Cascade::snapshot_solution() {
         best_sol_ = in_sol;
         // The incumbent was replaced wholesale, so the tightness counters the
         // neighbourhood search relies on must be recomputed.
+        value_ = size;
         rebuild_tight();
         if (!dirty_.empty()) refill_dirty();
     }
+    archive();
     return size;
 }
 
@@ -153,6 +194,11 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
             plateau_ = true;
             if (free_target_ < cfg_.lns_max_free)
                 free_target_ = std::min(cfg_.lns_max_free, free_target_ + free_target_ / 4 + 1);
+            // A sweep that converged also means there is room to spend more on
+            // each region.  Instances too large for a sweep to ever finish keep
+            // the cheap setting and simply make more moves instead.
+            slice_ = std::min(cfg_.lns_max_slice, slice_ * 2.0);
+            node_budget_ = std::min(cfg_.lns_max_node_budget, node_budget_ * 4);
         } else {
             plateau_ = false;
         }
@@ -192,10 +238,10 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
 
     ExactConfig ec;
     ec.red = cfg_.red;
-    ec.node_budget = cfg_.lns_node_budget;
+    ec.node_budget = node_budget_;
     ec.lower_bound = incoming - 1;  // an equal-size region solution is still recorded
     ec.seed = rng_();
-    double slice = std::min(deadline, elapsed() + cfg_.lns_slice);
+    double slice = std::min(deadline, elapsed() + slice_);
     ExactResult res = solve_exact(sub, ec, slice, elapsed);
     if (res.proved_optimal) ++stats_.lns_proved;
     stats_.lns_nodes += res.nodes;
@@ -245,6 +291,7 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
     }
     stats_.lns_expand = free_target_;
     stats_.lns_target = lns_target_;
+    stats_.lns_slice = slice_;
     return gain;
 }
 
@@ -275,8 +322,11 @@ void Cascade::perturb(double deadline, const std::function<double()>& elapsed) {
     log_.clear();
     logging_ = true;
 
-    int v = (int)(rng_() % (uint64_t)g_.n);
-    if (!best_sol_[v]) {
+    // The kick gets stronger the longer the search goes without a gain, and
+    // resets as soon as one is found.
+    for (int f = 0; f < perturb_strength_; ++f) {
+        int v = (int)(rng_() % (uint64_t)g_.n);
+        if (best_sol_[v]) continue;
         for (long long e = g_.start[v]; e < g_.start[v + 1]; ++e) {
             int u = g_.adj[e];
             if (best_sol_[u]) { set_sol(u, 0); --value_; }
@@ -306,6 +356,18 @@ void Cascade::perturb(double deadline, const std::function<double()>& elapsed) {
     }
     logging_ = false;
     if (value_ > best_value_) best_value_ = value_;
+
+    if (stats_.lns_gain != gain_at_perturb_) {
+        gain_at_perturb_ = stats_.lns_gain;
+        perturb_failures_ = 0;
+        perturb_strength_ = 1;
+    } else if (++perturb_failures_ > 32 && perturb_strength_ < cfg_.perturb_max_strength) {
+        perturb_failures_ = 0;
+        perturb_strength_ = std::min(cfg_.perturb_max_strength, perturb_strength_ * 2);
+    }
+    // Once the kick is at full strength the counter keeps running, so a search
+    // that is well and truly stuck eventually restarts instead of spinning.
+    stats_.perturb_strength = perturb_strength_;
 }
 
 void Cascade::rebuild_tight() {
@@ -385,17 +447,23 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
     double t0 = elapsed();
     red_.push_all();
     red_.reduce();
-    if (cfg_.use_lp) {
+    long long live_edges = 0;
+    for (int v = 0; v < dg_.next_fold(); ++v)
+        if (dg_.alive(v)) live_edges += dg_.deg(v);
+    live_edges /= 2;
+    if (cfg_.use_lp && live_edges <= cfg_.lp_max_edges) {
         // The LP reduction looks at the whole graph, so it fires where the local
         // rules have stalled; each round it decides vertices can in turn unlock
         // more local rules, so the two alternate until neither moves.
         LPReduction lp;
+        double lp_deadline = t0 + std::max(1.0, cfg_.lp_budget_share * deadline);
         for (int round = 0; round < 4; ++round) {
             int decided = lp.apply(dg_, red_);
             stats_.lp_decided += decided;
             if (decided == 0) break;
             red_.push_all();
-            if (red_.reduce() == 0 && decided == 0) break;
+            red_.reduce();
+            if (elapsed() > lp_deadline) break;
         }
     }
     stats_.kernel_seconds = elapsed() - t0;
@@ -406,12 +474,16 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
         if (dg_.alive(v)) km += dg_.deg(v);
     stats_.kernel_m = km / 2;
 
+    if (cfg_.kernel_only) return 0;
+
     for (int v = 0; v < dg_.capacity(); ++v) {
         if (!dg_.alive(v)) continue;
         in_cand_[v] = 1;
         cand_.push_back(v);
     }
     cand_size_ = (int)cand_.size();
+    root_state_ = red_.state();
+    root_cand_ = cand_size_;
 
     // Phase 2: first dive (this alone reproduces reduce-and-peel).
     decisions_.clear();
@@ -422,8 +494,9 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
     stats_.first_dive_value = best_value_;
     value_ = best_value_;
     rebuild_tight();
+    archive();
 
-    if (decisions_.empty()) return best_value_;  // solved purely by reductions
+    if (decisions_.empty()) { archive(); return archive_value_; }  // reductions solved it
 
     // Phase 3: local search over dives.  A move rewinds to a level, changes the
     // decision there, and re-dives; the cost is the suffix, not the instance.
@@ -437,7 +510,12 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
                 value_ += lns_move(deadline, elapsed);
                 if (value_ > best_value_) best_value_ = value_;
             }
-            if (cfg_.use_perturbation && elapsed() < deadline) perturb(deadline, elapsed);
+            if (cfg_.use_perturbation && elapsed() < deadline) {
+                perturb(deadline, elapsed);
+                if (perturb_strength_ >= cfg_.perturb_max_strength &&
+                    perturb_failures_ >= cfg_.restart_after && elapsed() < deadline)
+                    restart(deadline, elapsed);
+            }
         }
         if (!cfg_.use_dive_moves || decisions_.empty()) continue;
         ++stats_.iterations;
@@ -484,5 +562,6 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
             // exactly; the value is unchanged.
         }
     }
-    return best_value_;
+    archive();
+    return archive_value_;
 }

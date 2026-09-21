@@ -35,10 +35,23 @@ struct CascadeConfig {
     int lns_start_target = 64;  // neighbourhood size; doubled after each sweep
     int lns_max_target = 20000;
     long long lns_node_budget = 20000;
+    bool kernel_only = false;   // stop after kernelization
     bool use_lp = true;         // Nemhauser-Trotter reduction during kernelization
+    // The LP reduction has to run to completion to stay sound: a partial
+    // matching still yields a valid cover, but not a minimum one, and
+    // persistency only holds for an optimal LP solution.  It is therefore
+    // gated by size and by a share of the budget rather than interrupted.
+    long long lp_max_edges = 60000000;
+    double lp_budget_share = 0.25;
     bool use_perturbation = true;
     int perturb_rounds = 24;    // neighbourhood moves granted per perturbation
+    int perturb_max_strength = 32;
+    // Fruitless perturbations at full strength before the search restarts from a
+    // fresh randomised dive, keeping the best solution found so far.
+    long long restart_after = 200;
     double lns_slice = 0.05;    // seconds allowed per neighbourhood solve
+    double lns_max_slice = 1.0;
+    long long lns_max_node_budget = 1000000;
     ReduceConfig red;
 };
 
@@ -51,8 +64,11 @@ struct CascadeStats {
     long long lns_sweeps = 0;
     long long lns_plateau = 0;
     int lns_expand = 0;
+    double lns_slice = 0.0;
     long long perturbations = 0;
     long long perturb_accepted = 0;
+    int perturb_strength = 1;
+    long long restarts = 0;
     long long lns_nodes = 0;
     long long lns_region_vertices = 0;
     int lns_target = 0;
@@ -73,8 +89,8 @@ public:
     Cascade(const Graph& g, const CascadeConfig& cfg) : g_(g), cfg_(cfg), rng_(cfg.seed) {}
 
     const CascadeStats& stats() const { return stats_; }
-    long long best_value() const { return best_value_; }
-    const std::vector<char>& best_solution() const { return best_sol_; }
+    long long best_value() const { return archive_value_; }
+    const std::vector<char>& best_solution() const { return archive_sol_; }
 
     // Runs kernelization followed by decision-space local search until the
     // deadline.  Returns the size of the best independent set found.
@@ -112,8 +128,14 @@ private:
     int cand_size_ = 0;
 
     std::vector<Decision> decisions_;
-    std::vector<char> best_sol_;
+    std::vector<char> best_sol_;      // the working incumbent
     long long best_value_ = 0;
+    std::vector<char> archive_sol_;   // best seen across restarts
+    long long archive_value_ = 0;
+    Reducer::State root_state_{};
+    int root_cand_ = 0;
+    void archive();
+    void restart(double deadline, const std::function<double()>& elapsed);
     std::vector<int> tmp_;
     std::vector<char> blocked_;
 
@@ -127,8 +149,13 @@ private:
     // can only be added once every one of them has been freed.
     std::vector<int> tight_, hits_, touched_, freed_, hit_count_;
     int free_target_ = 4;
+    double slice_ = 0.05;
+    long long node_budget_ = 20000;
     long long value_ = 0;
     long long stale_ = 0;
+    int perturb_strength_ = 1;
+    long long gain_at_perturb_ = 0;
+    long long perturb_failures_ = 0;
     bool logging_ = false;
     std::vector<std::pair<int, char>> log_;
     void set_sol(int v, char value);

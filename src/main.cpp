@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
         else if (a == "--seed") cfg.seed = strtoull(next().c_str(), nullptr, 10);
         else if (a == "--sample") cfg.sample_size = atoi(next().c_str());
         else if (a == "--include-prob") cfg.include_prob = atof(next().c_str());
-        else if (a == "--kernel-only") kernel_only = true;
+        else if (a == "--kernel-only") { kernel_only = true; cfg.kernel_only = true; }
         else if (a == "--no-lp") cfg.use_lp = false;
         else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
     }
 
     Cascade solver(g, cfg);
-    long long size = solver.run(kernel_only ? 0.0 : cfg.time_limit, elapsed);
+    long long size = solver.run(cfg.time_limit, elapsed);
     double total = elapsed();
 
     const CascadeStats& st = solver.stats();
