@@ -18,3 +18,8 @@ target_link_libraries(mis-convert misgraph)
 
 add_executable(mis-verify tools/mis_verify.cpp)
 target_link_libraries(mis-verify misgraph)
+
+enable_testing()
+add_executable(mis-tests tests/test_correctness.cpp src/cascade.cpp src/exact.cpp)
+target_link_libraries(mis-tests misgraph)
+add_test(NAME correctness COMMAND mis-tests)

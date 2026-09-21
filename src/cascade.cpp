@@ -63,8 +63,14 @@ void Cascade::apply(int v, bool include) {
     for (int f = fold_mark; f < dg_.next_fold(); ++f) {
         if (!dg_.alive(f) || in_cand_[f]) continue;
         in_cand_[f] = 1;
-        if (cand_size_ == (int)cand_.size()) cand_.push_back(f);
-        else cand_[cand_size_] = f;  // slot in the dead region is free
+        // The entry sitting at the boundary belongs to a vertex that is dead now
+        // but comes back on undo, so it is moved aside rather than overwritten.
+        if (cand_size_ < (int)cand_.size()) {
+            cand_.push_back(cand_[cand_size_]);
+            cand_[cand_size_] = f;
+        } else {
+            cand_.push_back(f);
+        }
         ++cand_size_;
     }
 }
@@ -379,6 +385,19 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
     double t0 = elapsed();
     red_.push_all();
     red_.reduce();
+    if (cfg_.use_lp) {
+        // The LP reduction looks at the whole graph, so it fires where the local
+        // rules have stalled; each round it decides vertices can in turn unlock
+        // more local rules, so the two alternate until neither moves.
+        LPReduction lp;
+        for (int round = 0; round < 4; ++round) {
+            int decided = lp.apply(dg_, red_);
+            stats_.lp_decided += decided;
+            if (decided == 0) break;
+            red_.push_all();
+            if (red_.reduce() == 0 && decided == 0) break;
+        }
+    }
     stats_.kernel_seconds = elapsed() - t0;
     stats_.kernel_offset = red_.offset();
     stats_.kernel_n = dg_.num_alive();

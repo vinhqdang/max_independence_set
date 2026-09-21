@@ -20,7 +20,7 @@ struct ReduceConfig {
     bool twin = true;
     int max_deg_clique = 8;     // simplicial test is quadratic in the degree
     int max_deg_domination = 24;
-    int max_deg_unconfined = 64;   // the test is quadratic in the degree
+    long long unconfined_work = 20000;  // edges one unconfined test may scan
     int unconfined_max_set = 8;
     long long work_budget = -1; // -1 for unlimited; counted in scanned edges
 };
@@ -285,8 +285,11 @@ private:
 
     // Unconfined vertices (Xiao & Nagamochi): if the test succeeds, v lies
     // outside some maximum independent set and can be discarded.
+    // Bounded by scanned edges rather than by degree: a high-degree vertex in a
+    // web graph is still worth testing, a dense instance simply gives up early.
     bool rule_unconfined(int v) {
-        if (g_->deg(v) == 0 || g_->deg(v) > cfg_.max_deg_unconfined) return false;
+        if (g_->deg(v) == 0) return false;
+        long long budget = cfg_.unconfined_work;
         s_set_.clear();
         s_set_.push_back(v);
         ++stamp_;   // membership in S
@@ -300,6 +303,8 @@ private:
             for (size_t si = 0; si < s_set_.size(); ++si) {
                 int s = s_set_[si];
                 work_ += g_->deg(s);
+                budget -= g_->deg(s);
+                if (budget < 0) return false;
                 g_->for_each_nbr(s, [&](int u) {
                     if (mark_[u] == stamp_) return;         // u is in S
                     if (best_out == 0) return;
@@ -309,10 +314,12 @@ private:
                         else if (mark2_[y] != stamp2_) { ++outside; witness = y; }
                     });
                     work_ += g_->deg(u);
+                    budget -= g_->deg(u);
                     if (in_s != 1) return;
                     if (outside < best_out) { best_out = outside; best_u = u; best_w = witness; }
                 });
             }
+            if (budget < 0) return false;
             if (best_u < 0) return false;
             if (best_out == 0) { exclude(v); return true; }
             if (best_out > 1) return false;

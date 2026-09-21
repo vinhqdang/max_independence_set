@@ -4,6 +4,7 @@
 #include <string>
 
 #include "cascade.hpp"
+#include "exact.hpp"
 #include "graph.hpp"
 
 namespace {
@@ -21,6 +22,7 @@ void usage() {
             "  --sample N          candidates inspected per decision (default 32)\n"
             "  --include-prob P    probability of an include decision (default 0)\n"
             "  --kernel-only       stop after kernelization\n"
+            "  --exact             prove optimality by branch-and-reduce\n"
             "  --no-lns            disable exact neighbourhood moves (ablation)\n"
             "  --no-dive-moves     disable decision-space local search (ablation)\n"
             "  --no-reductions X   disable rules: fold2,twin,dom,unconf,degree\n");
@@ -34,6 +36,7 @@ int main(int argc, char** argv) {
     std::string out;
     CascadeConfig cfg;
     bool kernel_only = false;
+    bool exact = false;
 
     for (int i = 2; i < argc; ++i) {
         std::string a = argv[i];
@@ -47,6 +50,8 @@ int main(int argc, char** argv) {
         else if (a == "--sample") cfg.sample_size = atoi(next().c_str());
         else if (a == "--include-prob") cfg.include_prob = atof(next().c_str());
         else if (a == "--kernel-only") kernel_only = true;
+        else if (a == "--no-lp") cfg.use_lp = false;
+        else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
         else if (a == "--no-dive-moves") cfg.use_dive_moves = false;
         else if (a == "--dive-moves") cfg.use_dive_moves = true;
@@ -71,17 +76,39 @@ int main(int argc, char** argv) {
 
     auto tstart = std::chrono::steady_clock::now();
     auto elapsed = [&]() { return now_seconds(tstart); };
+
+    if (exact) {
+        ExactConfig ec;
+        ec.red = cfg.red;
+        ExactResult r = solve_exact(g, ec, cfg.time_limit, elapsed);
+        printf("instance=%s n=%d m=%lld size=%lld time=%.3f read_time=%.3f "
+               "nodes=%lld proved_optimal=%d\n",
+               path.c_str(), g.n, g.m, r.size, elapsed(), read_time, r.nodes,
+               r.proved_optimal ? 1 : 0);
+        if (!out.empty()) {
+            FILE* f = fopen(out.c_str(), "wb");
+            if (!f) { fprintf(stderr, "error: cannot write %s\n", out.c_str()); return 1; }
+            std::string buf;
+            buf.reserve(2 * g.n);
+            for (int v = 0; v < g.n; ++v)
+                { buf.push_back(v < (int)r.solution.size() && r.solution[v] ? '1' : '0'); buf.push_back('\n'); }
+            fwrite(buf.data(), 1, buf.size(), f);
+            fclose(f);
+        }
+        return 0;
+    }
+
     Cascade solver(g, cfg);
     long long size = solver.run(kernel_only ? 0.0 : cfg.time_limit, elapsed);
     double total = elapsed();
 
     const CascadeStats& st = solver.stats();
     printf("instance=%s n=%d m=%lld size=%lld time=%.3f read_time=%.3f "
-           "kernel_n=%lld kernel_m=%lld kernel_offset=%lld kernel_time=%.3f "
+           "kernel_n=%lld kernel_m=%lld kernel_offset=%lld kernel_time=%.3f lp_decided=%lld "
            "first_dive=%lld first_dive_time=%.3f dives=%lld iters=%lld accepted=%lld "
            "lns_moves=%lld lns_impr=%lld lns_gain=%lld lns_target=%d lns_nodes=%lld lns_rv=%lld lns_proved=%lld\n",
            path.c_str(), g.n, g.m, size, total, read_time,
-           st.kernel_n, st.kernel_m, st.kernel_offset, st.kernel_seconds,
+           st.kernel_n, st.kernel_m, st.kernel_offset, st.kernel_seconds, st.lp_decided,
            st.first_dive_value, st.first_dive_seconds, st.dives, st.iterations, st.moves_accepted,
            st.lns_moves, st.lns_improvements, st.lns_gain, st.lns_target,
            st.lns_nodes, st.lns_region_vertices, st.lns_proved, st.lns_sweeps);

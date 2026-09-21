@@ -18,6 +18,7 @@
 
 #include "dyngraph.hpp"
 #include "graph.hpp"
+#include "lp_reduce.hpp"
 #include "reductions.hpp"
 
 struct CascadeConfig {
@@ -34,6 +35,7 @@ struct CascadeConfig {
     int lns_start_target = 64;  // neighbourhood size; doubled after each sweep
     int lns_max_target = 20000;
     long long lns_node_budget = 20000;
+    bool use_lp = true;         // Nemhauser-Trotter reduction during kernelization
     bool use_perturbation = true;
     int perturb_rounds = 24;    // neighbourhood moves granted per perturbation
     double lns_slice = 0.05;    // seconds allowed per neighbourhood solve
@@ -57,6 +59,7 @@ struct CascadeStats {
     long long kernel_n = 0;
     long long kernel_m = 0;
     long long kernel_offset = 0;
+    long long lp_decided = 0;
     long long dives = 0;
     long long moves_accepted = 0;
     long long decisions_total = 0;
