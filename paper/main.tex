@@ -818,15 +818,15 @@ replication therefore covers 25 of the 27 instances.
 
 Table~\ref{tab:replication} reports the outcome. The question a reader needs
 answered is whether the \emph{ranking} in the main tables is a property of the
-solvers or of the machine, and on that the answer is unambiguous: on every
-instance, the set of solvers attaining the best value on the replication machine
-intersects the set attaining it on the original machine. No solver changes place
-with another. A reader can therefore take the comparisons in
+solvers or of the machine, and on that the answer is unambiguous: on all 25
+instances, the set of solvers attaining the best value on the replication
+machine intersects the set attaining it on the original machine. No solver
+changes place with another. A reader can therefore take the comparisons in
 Section~\ref{sec:experiments} as being about the algorithms.
 
 The individual values move a little, and the table shows where. The two
 deterministic solvers, reducing-peeling and near-linear kernelization, return
-\emph{identical} values on all instances, which is the control: it confirms that
+\emph{identical} values on all 25 instances, which is the control: it confirms that
 the instances, the conversions and the verifier are the same on both platforms,
 so any difference elsewhere comes from the solver rather than from the pipeline.
 The five randomised solvers differ by a fraction of a percent on average, and
@@ -838,7 +838,9 @@ instance, and differs by an average of $0.016\%$ on the geometric family.
 Two caveats belong with this. The replication machine is slower, so a solver
 that spends its whole budget does less work within it; that is visible as the
 larger spreads for the vertex cover local search solvers, which have no
-reduction phase to fall back on. And a fixed wall-clock budget on two machines
+reduction phase to fall back on, and most sharply as NuMVC exceeding the cutoff
+altogether on \texttt{roadNet-CA}, an instance it completed on the faster
+machine. And a fixed wall-clock budget on two machines
 of different speed is not the same experiment twice --- it is the same
 \emph{protocol} twice, which is what a practitioner choosing a solver under a
 deadline actually faces.

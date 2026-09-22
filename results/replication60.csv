@@ -170,3 +170,7 @@ rgg20,geometric,1048171,4188702,numvc,1,60.0,239138,364.117,1,maximal=yes
 rgg20,geometric,1048171,4188702,fastvc,1,60.0,256450,61.056,1,maximal=yes
 rgg20,geometric,1048171,4188702,nearlinear,1,60.0,256277,3.472,0,kernel=161404
 rgg20,geometric,1048171,4188702,lineartime,1,60.0,244769,0.647,0,kernel=1018429
+roadNet-CA,road,1965206,2766607,numvc,1,60.0,,960.014,0,TIMEOUT
+roadNet-CA,road,1965206,2766607,fastvc,1,60.0,959290,61.534,1,maximal=no
+roadNet-CA,road,1965206,2766607,nearlinear,1,60.0,957199,2.410,0,kernel=596329
+roadNet-CA,road,1965206,2766607,lineartime,1,60.0,956573,0.367,0,kernel=677814

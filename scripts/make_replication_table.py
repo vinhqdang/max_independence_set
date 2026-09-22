@@ -91,7 +91,10 @@ def main():
         r"solver returned on the machine used for the main tables and $s_2$ the size it "
         r"returned on the replication machine. LOWER IS BETTER: zero means the solver "
         r"returned the same value on both machines. \emph{Same} counts the instances on "
-        r"which it did so exactly, out of %d.}" % len(shared),
+        r"which it did so exactly, over the instances where the solver returned a value "
+        r"on both machines; that denominator is %d except for NuMVC, which exceeded the "
+        r"cutoff on \texttt{roadNet-CA} on the replication machine. \emph{Max} is the "
+        r"largest single relative difference.}" % len(shared),
         r"\label{tab:replication}",
         r"\begin{tabular}{l " + "r " * len(FAMILIES) + r"r r}", r"\toprule",
         r"Solver & " + " & ".join(f.capitalize() for f in FAMILIES)

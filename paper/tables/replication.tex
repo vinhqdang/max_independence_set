@@ -1,19 +1,19 @@
 \begin{table}[htbp]
 \centering
 \small
-\caption{Replication on a second platform. Each cell is the mean, over the instances of that family, of $100\,|s_2-s_1|/s_1$ where $s_1$ is the size the solver returned on the machine used for the main tables and $s_2$ the size it returned on the replication machine. LOWER IS BETTER: zero means the solver returned the same value on both machines. \emph{Same} counts the instances on which it did so exactly, out of 24.}
+\caption{Replication on a second platform. Each cell is the mean, over the instances of that family, of $100\,|s_2-s_1|/s_1$ where $s_1$ is the size the solver returned on the machine used for the main tables and $s_2$ the size it returned on the replication machine. LOWER IS BETTER: zero means the solver returned the same value on both machines. \emph{Same} counts the instances on which it did so exactly, over the instances where the solver returned a value on both machines; that denominator is 25 except for NuMVC, which exceeded the cutoff on \texttt{roadNet-CA} on the replication machine. \emph{Max} is the largest single relative difference.}
 \label{tab:replication}
 \begin{tabular}{l r r r r r r r}
 \toprule
 Solver & Geometric & Road & Web & Social & Bhoslib & Same & Max \\
 \midrule
-\textsc{Cascade} & 0.016 & 0.000 & 0.000 & 0.000 & 0.366 & 18/24 & 2.56 \\
-ReduMIS & 0.124 & 0.000 & 0.000 & 0.000 & 0.000 & 22/24 & 0.74 \\
-OnlineMIS & 0.608 & 0.164 & 0.157 & 0.000 & 0.000 & 16/24 & 1.76 \\
+\textsc{Cascade} & 0.016 & 0.000 & 0.000 & 0.000 & 0.366 & 18/25 & 2.56 \\
+ReduMIS & 0.124 & 0.000 & 0.000 & 0.000 & 0.000 & 22/25 & 0.74 \\
+OnlineMIS & 0.608 & 0.113 & 0.157 & 0.000 & 0.000 & 16/25 & 1.76 \\
 NuMVC & 0.021 & 0.006 & 0.008 & 0.002 & 0.560 & 8/24 & 2.00 \\
-FastVC & 0.058 & 0.019 & 0.009 & 0.000 & 1.144 & 9/24 & 2.22 \\
-NearLinear & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 & 24/24 & 0.00 \\
-LinearTime & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 & 24/24 & 0.00 \\
+FastVC & 0.058 & 0.042 & 0.009 & 0.000 & 1.144 & 9/25 & 2.22 \\
+NearLinear & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 & 25/25 & 0.00 \\
+LinearTime & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 & 25/25 & 0.00 \\
 \bottomrule
 \end{tabular}
 \end{table}
