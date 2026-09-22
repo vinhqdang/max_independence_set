@@ -233,3 +233,4 @@ paper/*.pdf
 paper/*.spl
 paper/figures/*.png
 .colab/
+.colab2/
