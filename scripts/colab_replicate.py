@@ -80,9 +80,12 @@ def setup_done(session):
     else the Colab client prints around it."""
     rc, out = exec_py(session, """
 import subprocess
-hit = subprocess.run(['bash','-c','grep -c SETUP_COMPLETE /content/setup.log 2>/dev/null || echo 0'],
+# grep -c exits 1 on a zero count, so a '|| echo 0' fallback fires ON TOP of
+# the '0' it already printed and the reply reads '0\n0'. Use grep -q and emit
+# exactly one token, so the answer cannot be two lines.
+hit = subprocess.run(['bash','-c','grep -q SETUP_COMPLETE /content/setup.log 2>/dev/null && echo yes || echo no'],
                      capture_output=True, text=True).stdout.strip()
-print('SETUP_STATE=' + ('READY' if hit not in ('', '0') else 'PENDING'))
+print('SETUP_STATE=' + ('READY' if hit == 'yes' else 'PENDING'))
 """, timeout=240)
     return "SETUP_STATE=READY" in out
 
