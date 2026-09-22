@@ -44,6 +44,7 @@ def convert(name, src, outdir, want_pace, complement=False):
            "--metis", os.path.join(prepared, name + ".graph"),
            "--chang", os.path.join(prepared, name),
            "--edgelist", os.path.join(prepared, name + ".el"),
+           "--dimacs", os.path.join(prepared, name + ".dimacs"),
            "--stats"]
     if complement:
         cmd.append("--complement")

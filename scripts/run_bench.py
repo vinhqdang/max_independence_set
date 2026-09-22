@@ -32,6 +32,8 @@ BIN = {
     "vcsolver": os.path.join(EXT, "vertex_cover"),
     "pace": os.path.join(EXT, "pace-2019", "optimized", "vc_solver"),
     "cascade": os.path.join(ROOT, "build", "cascade"),
+    "numvc": os.path.join(EXT, "libmvc", "numvc"),
+    "fastvc": os.path.join(EXT, "libmvc", "fastvc"),
 }
 
 # Solver identifier -> (paper, whether it is an exact solver)
@@ -49,6 +51,8 @@ SOLVERS = {
     "cascade-dive":   ("this work, decision-space moves instead", False),
     "cascade-exact": ("this work", True),
     "highs":       ("HiGHS MIP", True),
+    "numvc":       ("Cai et al., JAIR 2013", False),
+    "fastvc":      ("Cai et al., JAIR 2017", False),
 }
 
 
@@ -123,6 +127,28 @@ def invoke(solver, inst, tl, seed, tmp):
             return None, el, False, "TIMEOUT"
         size, note = verify(path, sol)
         return size, el, size is not None, "exact " + note
+
+    if solver in ("numvc", "fastvc"):
+        # LibMVC reads DIMACS and prints the independent set as 1-based ids on
+        # the line after "c independent set:".
+        dimacs = prepared + ".dimacs"
+        if not os.path.exists(dimacs):
+            return None, 0.0, False, "no DIMACS file"
+        el, res, to = run([BIN[solver], dimacs, "0", "%d" % int(tl)], timeout=tl + 900)
+        if res is None or res.stdout is None:
+            return None, el, False, "TIMEOUT"
+        lines = res.stdout.split("\n")
+        ids = ""
+        for i, line in enumerate(lines):
+            if line.startswith("c independent set") and i + 1 < len(lines):
+                ids = lines[i + 1]
+                break
+        if not ids.strip():
+            return None, el, False, "no solution printed"
+        with open(sol, "w") as f:
+            f.write("\n".join(ids.split()) + "\n")
+        size, note = verify(path, sol, extra=["--one-based"])
+        return size, el, size is not None, note
 
     if solver == "highs":
         ilp = os.path.join(ROOT, "tools", "ilp_baseline.py")
