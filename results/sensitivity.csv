@@ -13,3 +13,4 @@ del18,restart_idle_dives,--restart-idle,100,0,82639,60.036
 web-Stanford,kernel_share,--kernel-share,0.5,0,163375,60.008
 del18,lns_slice,--lns-slice,0.2,0,82656,60.000
 web-Stanford,kernel_share,--kernel-share,0.7,0,163375,60.010
+del18,lns_start_free,--lns-free,2,0,82650,60.039
