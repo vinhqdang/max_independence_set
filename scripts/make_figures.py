@@ -125,7 +125,8 @@ def seed_boxplot(path, out):
         patch.set_alpha(0.55)
         patch.set_linewidth(0.6)
     ax.set_xticks(range(len(insts)))
-    ax.set_xticklabels(insts, rotation=30, ha="right")
+    ax.set_xticklabels(insts, rotation=20, ha="center")
+    ax.tick_params(axis="x", pad=6)
     ax.set_ylabel("gap to best on the instance (\\%)")
     # The legend goes above the axes: inside it would sit on top of the boxes.
     handles = [plt.Line2D([], [], color=STYLE[s][0], linewidth=5, alpha=0.55, label=label(s))

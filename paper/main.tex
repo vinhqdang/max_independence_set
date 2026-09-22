@@ -591,6 +591,30 @@ cutoff only between search steps, so under a 60\,s budget it takes 204\,s on
 average and exceeds 90\,s on twelve of the 27 instances; it is therefore
 compared here under conditions that favour it, and is still behind.
 
+\subsection{Seed study}
+
+The solvers compared here are randomised, so we repeated a subset of ten
+instances with five seeds each. Table~\ref{tab:seeds} reports the best and mean
+size, and Figure~\ref{fig:seeds} the spread.
+
+The single-seed picture holds. On best-of-five, \textsc{Cascade} is
+significantly ahead of FastVC ($p = 0.016$), NuMVC ($p = 0.023$) and OnlineMIS
+($p = 0.008$), and indistinguishable from ReduMIS ($p = 0.81$); on the mean the
+verdicts are the same, with \textsc{Cascade} ahead of OnlineMIS on all ten
+instances.
+
+The figure also shows a limitation. On every geometric, road and web instance
+our solver's five runs collapse to a line: the spread is below $0.05\%$, and on
+several instances all five seeds return the same value. On the BHOSLIB
+instances it is the widest of any solver, reaching $2.5\%$ on
+\texttt{frb40-19-1}. This is the same degeneracy discussed in
+Section~\ref{sec:move} seen from another angle: when the region move cannot
+find traction, what remains is the restart mechanism, and outcomes then depend
+on which restart happens to land well. A practitioner running a single seed on a
+dense instance should expect variance that the other families do not show.
+
+\input{tables/seeds}
+
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{figures/seeds}
