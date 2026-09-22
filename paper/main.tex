@@ -59,12 +59,103 @@ search \sep data reduction \sep kernelization \sep combinatorial optimisation
 \end{frontmatter}
 
 \section{Introduction}
-%% TODO: motivation, applications, contributions list.
+\label{sec:intro}
+
+Given an undirected graph $G=(V,E)$, the maximum independent set problem asks
+for a largest set of pairwise non-adjacent vertices. It is equivalent to the
+minimum vertex cover problem on $G$ and to the maximum clique problem on the
+complement of $G$, and it appears as a subproblem in scheduling, wireless
+channel assignment, map labelling, computer vision and entity resolution. The
+problem is NP-hard and, unless P${}={}$NP, admits no constant-factor
+approximation, so instances of practical size are attacked heuristically.
+
+Over the last decade the practical state of the art has converged on a single
+template: apply \emph{safe data reduction rules} until none fires, then search
+whatever survives. The rules are exact, in the sense that they preserve the
+optimum, and on many real-world graphs they dissolve the instance outright.
+Solvers differ almost entirely in what they do once the rules stall. Reducing-
+peeling \cite{chang2017} performs one greedy descent and never revisits a
+decision. ReduMIS \cite{lamm2017} and OnlineMIS \cite{dahlum2016} run swap-based
+local search on the reduced graph. Branch-and-reduce \cite{akiba2016} explores
+the decisions exhaustively and is complete but exponential. Local search
+methods developed in the operations research literature, notably NuMVC
+\cite{cai2013numvc} and FastVC \cite{cai2017fastvc}, dominate small dense
+instances but, as our experiments confirm, either fail outright or lose ground
+on graphs with millions of vertices.
+
+All of these share a weakness in the same place: instances whose reduced graph,
+or \emph{kernel}, remains large. Delaunay triangulations and random geometric
+graphs are the canonical example, retaining kernels that are a large fraction of
+the input, and they are precisely where the published solvers are furthest from
+each other and from the optimum.
+
+This paper proposes a neighbourhood for that regime which is \emph{solved
+exactly rather than sampled}. Releasing a set $F$ of vertices from the incumbent
+solution makes eligible exactly those vertices whose every incumbent neighbour
+lies in $F$. We prove (Theorem~\ref{thm:region}) that the resulting region is
+separated from the rest of the incumbent, so re-optimising it is always feasible
+and, by Corollary~\ref{cor:monotone}, never degrades the solution. What makes
+this affordable is the reduction rules themselves: applied inside the move
+rather than only as preprocessing, they collapse a region of thousands of
+vertices to a kernel of a few dozen, so each move costs microseconds. With
+$|F|=1$ the move coincides with the classical $(1,2)$-swap; larger $F$ yields
+moves that no swap neighbourhood expresses.
+
+Our contributions are:
+\begin{enumerate}
+\item a neighbourhood with a proof of separation and monotonicity
+      (Section~\ref{sec:move}), together with the observation that it
+      strictly generalises the swap neighbourhoods used by existing local
+      search for this problem;
+\item an online rule for the neighbourhood size that needs no per-instance
+      tuning, driven by whether the sub-problems are being solved to proven
+      optimality;
+\item a dynamic graph with last-in-first-out undo that makes reductions and
+      branching decisions reversible in time proportional to the work undone,
+      which is what allows the reduction machinery to be used inside a search
+      loop rather than only before it;
+\item a computational study over 27 instances in five families against six
+      published solvers and an integer-programming reference, with every
+      reported solution independently verified, a paired statistical test, and
+      an ablation isolating the contribution of each component.
+\end{enumerate}
 
 \section{Related work}
-%% TODO: reduction-based solvers \cite{akiba2016,hespe2019,gellner2021};
-%% local search \cite{andrade2012,lamm2017,dahlum2016,cai2013numvc,cai2017fastvc};
-%% reduce-and-peel \cite{chang2017}; exact \cite{li2017momc,hespe2020,xiao2017}.
+\label{sec:related}
+
+\paragraph{Data reductions.} The reduction approach traces back to the
+Nemhauser--Trotter theorem \cite{nemhauser1975}, which shows that the vertex
+cover linear program is half-integral and that its integral part can be fixed.
+Exact exponential algorithms contributed the local rules now used in practice,
+including the unconfined and confining-set machinery of Xiao and Nagamochi
+\cite{xiao2017}. Akiba and Iwata \cite{akiba2016} first demonstrated that a
+branch-and-reduce algorithm carrying the full rule set is competitive with, and
+often superior to, integer programming on real instances. Hespe et al.
+\cite{hespe2019} parallelised kernelization and characterised which instance
+families reduce well. Gellner et al. \cite{gellner2021} showed that rules which
+temporarily \emph{increase} the graph can unlock further reduction.
+
+\paragraph{Local search.} Andrade et al. \cite{andrade2012} introduced the
+$(1,2)$-swap neighbourhood with an $O(m)$ test for improving moves, which
+underpins the KaMIS solvers \cite{lamm2017,dahlum2016}. In the operations
+research and artificial intelligence literature the same problem is usually
+posed as minimum vertex cover: NuMVC \cite{cai2013numvc} combines edge weighting
+with two-stage exchange and configuration checking and is extremely strong on
+dense benchmark instances, while FastVC \cite{cai2017fastvc} trades some of that
+quality for the ability to run on massive sparse graphs at all.
+
+\paragraph{Exact solvers.} Branch-and-bound on the complement with incremental
+MaxSAT reasoning \cite{li2017momc} is the strongest general approach on dense
+instances and is a component of the solver that won the PACE 2019 vertex cover
+challenge \cite{hespe2020}.
+
+\paragraph{Positioning.} Large-neighbourhood search with an exactly solved
+sub-problem is a standard metaheuristic pattern. What distinguishes the present
+work is the interaction with data reductions: the region is defined so that it
+is provably separated from the incumbent, and the reduction rules are what make
+solving it exactly cheap enough to sit in the inner loop. The neighbourhood size
+is then not a parameter but a quantity inferred at run time from the difficulty
+of the sub-problems.
 
 \section{Preliminaries}
 Let $G=(V,E)$ be a simple undirected graph. A set $S \subseteq V$ is
@@ -78,8 +169,39 @@ $\alpha(G) = \alpha(G') + c$ and a maximum independent set of $G$ can be
 reconstructed from one of $G'$.
 \end{definition}
 
-%% TODO: list the rule set used (degree-0/1, simplicial, degree-2 folding, twin,
-%% domination, unconfined, Nemhauser--Trotter \cite{nemhauser1975}).
+We use the rule set that is standard in this literature
+\cite{akiba2016,lamm2017,hespe2019}, summarised in Table~\ref{tab:rules}. A
+graph on which no rule fires is called a \emph{kernel}. Each rule records how to
+reconstruct a solution, and \emph{lifting} replays those records in reverse; for
+instance a fold of $v$ with non-adjacent neighbours $u,w$ into a new vertex $f$
+records that $u$ and $w$ are taken when $f$ ends up in the solution and $v$
+otherwise.
+
+\begin{table}[htbp]
+\centering
+\caption{The reduction rules used. All are safe in the sense above.}
+\label{tab:rules}
+\begin{tabular}{lll}
+\toprule
+Rule & Condition & Effect \\
+\midrule
+Degree-0 & $\deg(v)=0$ & take $v$ \\
+Degree-1 & $N(v)=\{u\}$ & take $v$, discard $u$ \\
+Simplicial & $N(v)$ is a clique & take $v$, discard $N(v)$ \\
+Degree-2 fold & $N(v)=\{u,w\}$, $uw \notin E$ & replace $v,u,w$ by one vertex \\
+Twin & $N(u)=N(v)$, $|N(u)|=3$ & take both, or fold \\
+Domination & $uv \in E$, $N[u] \subseteq N[v]$ & discard $v$ \\
+Unconfined \cite{xiao2017} & confining-set test fails & discard $v$ \\
+LP \cite{nemhauser1975} & half-integral LP optimum & fix the integral part \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The linear-programming rule is the only one that inspects the whole graph rather
+than a local neighbourhood, which is why it fires where the local rules have
+stalled; it is obtained from a maximum matching in the bipartite double cover
+via K\"onig's theorem. Because it must run to completion for persistency to
+hold, it is skipped rather than interrupted when the budget is short.
 
 \section{The region move}
 \label{sec:move}
@@ -131,12 +253,92 @@ larger $F$ yields moves no swap-based neighbourhood expresses.
 \end{corollary}
 
 \section{Algorithm}
-%% TODO: pseudocode, worklist sweep, self-tuning $|F|$, plateau moves,
-%% perturbation with change-log rollback, restarts keyed to dive cost.
+\label{sec:algorithm}
+
+Algorithm~\ref{alg:cascade} gives the overall structure. Kernelization runs
+once; a \emph{dive} then constructs an initial solution by repeatedly discarding
+a maximum-degree vertex and re-reducing, which reproduces reducing-peeling
+\cite{chang2017}; the remaining budget goes to region moves.
+
+\begin{algorithm}
+\caption{\textsc{Cascade}}
+\label{alg:cascade}
+\begin{algorithmic}[1]
+\State $(K,\mathit{trail}) \gets \textsc{Reduce}(G)$ \Comment{full rule set, bounded share of budget}
+\While{$K \neq \emptyset$} \Comment{dive: cheap rules only}
+  \State discard a maximum-degree vertex of $K$; re-reduce
+\EndWhile
+\State $S \gets \textsc{Maximalise}(\textsc{Lift}(\mathit{trail}))$
+\State $W \gets$ kernel vertices and their neighbours \Comment{worklist of seeds}
+\While{budget remains}
+  \State $v \gets W.\textsc{pop}()$;\; $F \gets k$ incumbent vertices around $v$
+  \State $R \gets F \cup \{u \notin S : N(u) \cap S \subseteq F\}$
+  \State $T \gets \textsc{ExactMis}(G[R])$ \Comment{branch-and-reduce, bounded}
+  \If{$|T| > |F|$} $S \gets (S \setminus R) \cup T$; push $R \cup N(R)$ onto $W$
+  \ElsIf{$|T| = |F|$ \textbf{and} $T \neq F$ \textbf{and} on a plateau} $S \gets (S \setminus R) \cup T$
+  \EndIf
+  \State adapt $k$; occasionally perturb; restart if stuck
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Where the search looks.} Every vertex decided by a reduction belongs
+to some maximum independent set, so an improving move must touch a vertex that
+survived into the kernel. Seeding the sweep from the kernel and its neighbours
+rather than from all of $V$ matters on graphs that reduce well: one of our
+instances has four million vertices and a kernel of 1781.
+
+\paragraph{Choosing the neighbourhood size.} The useful value of $k=|F|$ differs
+by three orders of magnitude across instance families, so it is inferred rather
+than set. A region that could not be solved to proven optimality within its
+budget halves $k$; a run of regions solved to optimality without finding any
+improvement doubles it. On meshes this settles at tens of released vertices; on
+dense instances it settles at one or two, where the move degenerates to a
+classical swap.
+
+\paragraph{Escaping local optima.} Because region moves never degrade the
+incumbent, the search stalls at a solution that is optimal for every region of
+the current size. Three mechanisms address this. \emph{Plateau moves} accept a
+region optimum of equal size that differs from the incumbent, once a full sweep
+has stopped producing gains; randomised tie-breaking in the sub-solver makes
+repeated solves of the same region return different optima. \emph{Perturbation}
+forces a vertex into the solution, evicts its blocking neighbours and lets
+region moves repair the damage, with a change log that rolls back only the
+touched vertices if the result is worse. \emph{Restarts} discard the incumbent
+and dive again, keeping the best solution in an archive; the trigger is idle
+time measured in multiples of the cost of one dive, since a restart must pay for
+a re-dive. This keying matters: on the smallest instances the algorithm restarts
+hundreds of times within a minute, while on the largest it never restarts.
 
 \section{Implementation}
-%% TODO: dynamic graph with LIFO undo, twin-indexed CSR, overflow lists for
-%% folded edges, solution lifting, reusable region solver.
+\label{sec:implementation}
+
+Reductions and branching decisions both mutate the graph and must be reversible,
+at every node of the sub-searches and after every region move. We use a compressed
+adjacency array in which each entry stores the position of its twin, together
+with a per-vertex pointer separating the live neighbours from the dead ones.
+Deleting a vertex $v$ swaps its entry to the end of each live neighbour's range
+and decrements that neighbour's pointer; undoing the deletion merely increments
+the pointers again. Nothing has to be swapped back, because no later operation
+touches an entry outside the live range. Both directions cost $O(\deg v)$ and
+carry no payload, and degrees remain exact throughout.
+
+Degree-2 folding introduces edges that do not fit in the static array; these go
+into per-vertex overflow lists which are append-only and undone by a pop, and
+which are allocated only for vertices that actually take part in a fold.
+
+Two engineering details matter for throughput. First, each node of a sub-search
+owns an exact list of its live vertices, built by filtering its parent's. An
+earlier version shared one list and could drop a vertex when a fold created a new
+one; the clique-cover bound then failed to cover that vertex, came out too small,
+and pruned optimal solutions while still reporting that optimality had been
+proven. Second, the sub-solver is reused across region moves instead of being
+constructed afresh, since at millions of moves per minute the set-up of the
+graph and reduction state costs more than the search itself.
+
+Correctness is checked by comparing the exact solver against exhaustive search on
+random graphs, repeating the comparison with each reduction rule disabled in
+turn, and by verifying that every reported solution is independent and maximal.
 
 \section{Computational study}
 \label{sec:experiments}
@@ -154,7 +356,24 @@ larger $F$ yields moves no swap-based neighbourhood expresses.
 %% TODO: discussion of each family; time-to-target plots; statistical tests.
 
 \section{Conclusions}
-%% TODO.
+\label{sec:conclusions}
+
+We introduced a neighbourhood for the maximum independent set problem that is
+solved exactly rather than sampled, and showed that it is separated from the rest
+of the incumbent and therefore monotone. Data reductions, normally applied once
+as preprocessing, are what make the move affordable, and the ablation confirms
+that the move is where the improvement comes from: removing it costs more than
+the entire margin over the baselines.
+
+Two limitations are worth stating plainly. On dense instances the region either
+stays empty or grows to the whole graph, so the move degenerates and specialised
+local search remains preferable. On web graphs the method is slightly behind the
+strongest baseline, and we have not identified a structural reason for this.
+
+The region definition and Theorem~\ref{thm:region} carry over verbatim to the
+weighted problem by replacing cardinality with weight, which is the natural next
+step given that recent activity in this area has concentrated on the weighted
+case.
 
 \section*{Data availability}
 Source code, instance generators and the raw per-run records are available at
