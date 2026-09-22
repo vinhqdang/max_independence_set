@@ -112,7 +112,16 @@ void Cascade::archive() {
     archive_value_ = value_;
     archive_sol_ = best_sol_;
     improved_ = true;
-    if (now_) trace_.emplace_back(now_(), archive_value_);
+    if (now_) trace_point(now_(), archive_value_);
+}
+
+// Pure instrumentation: records a point only when tracing was asked for, and
+// only when the value actually improved, so it neither allocates nor changes
+// any search state on an ordinary run.
+void Cascade::trace_point(double seconds, long long value) {
+    if (cfg_.trace_path.empty()) return;
+    if (!trace_.empty() && trace_.back().second >= value) return;
+    trace_.emplace_back(seconds, value);
 }
 
 // Throws away the current incumbent and dives again from the kernel with fresh
@@ -540,10 +549,13 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
                 value_ += lns_move(deadline, elapsed);
                 if (value_ > best_value_) best_value_ = value_;
             }
-            // Archive once per batch rather than per move: the comparison is
-            // cheap but the copy is linear in the graph, and one point per batch
-            // is resolution enough for a convergence curve.
-            archive();
+            // One trace point per batch is resolution enough for a convergence
+            // curve. This must NOT go through archive(): that sets improved_,
+            // which the perturbation block below consumes to update
+            // last_improve_, so archiving here to get a trace point would move
+            // the restart threshold and make the instrumented solver search
+            // differently from the uninstrumented one.
+            trace_point(elapsed(), best_value_);
             if (cfg_.use_perturbation && elapsed() < deadline) {
                 perturb(deadline, elapsed);
                 if (improved_) { improved_ = false; last_improve_ = elapsed(); }

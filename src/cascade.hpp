@@ -156,6 +156,7 @@ private:
     Reducer::State root_state_{};
     int root_cand_ = 0;
     void archive();
+    void trace_point(double seconds, long long value);
     std::function<double()> now_;
     std::vector<std::pair<double, long long>> trace_;
 
