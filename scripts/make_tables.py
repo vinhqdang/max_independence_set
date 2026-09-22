@@ -112,15 +112,45 @@ def ablation_table(path, out_dir):
     open(os.path.join(out_dir, "ablation.tex"), "w").write("\n".join(lines) + "\n")
 
 
+def budget_table(path, out_dir, budget=60.0):
+    """How closely each solver respects the time budget.
+
+    Wall-clock is measured around the whole process, so a solver that checks its
+    cutoff only between search steps can overshoot substantially. Reporting this
+    keeps the quality comparison honest.
+    """
+    per = collections.defaultdict(list)
+    for r in csv.DictReader(open(path)):
+        per[r["solver"]].append(float(r["seconds"]))
+    lines = [r"\begin{table}[htbp]", r"\centering",
+             r"\caption{Wall-clock time actually taken under a %g\,s budget, over all "
+             r"instances. Time is measured around the whole process, so it includes "
+             r"reading and any construction phase.}" % budget,
+             r"\label{tab:budget}", r"\begin{tabular}{lrrrr}", r"\toprule",
+             r"Algorithm & median & mean & max & runs $>1.5\times$ budget \\", r"\midrule"]
+    for key, label in SOLVERS:
+        v = sorted(per.get(key, []))
+        if not v:
+            continue
+        lines.append("%s & %.1f & %.1f & %.1f & %d \\\\"
+                     % (label, v[len(v) // 2], sum(v) / len(v), v[-1],
+                        sum(1 for x in v if x > 1.5 * budget)))
+    lines += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    open(os.path.join(out_dir, "budget.tex"), "w").write("\n".join(lines) + "\n")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default="results")
+    ap.add_argument("--main", default="heuristic.csv")
     ap.add_argument("--out", default="paper/tables")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)
-    best, meta = load(os.path.join(args.results, "heuristic.csv"))
+    main_csv = os.path.join(args.results, args.main)
+    best, meta = load(main_csv)
     quality_tables(best, meta, args.out)
     summary_table(best, meta, args.out)
+    budget_table(main_csv, args.out)
     ablation_table(os.path.join(args.results, "ablation.csv"), args.out)
     print("wrote %d tables to %s" % (len(os.listdir(args.out)), args.out))
 

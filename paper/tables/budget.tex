@@ -1,0 +1,16 @@
+\begin{table}[htbp]
+\centering
+\caption{Wall-clock time actually taken under a 60\,s budget, over all instances. Time is measured around the whole process, so it includes reading and any construction phase.}
+\label{tab:budget}
+\begin{tabular}{lrrrr}
+\toprule
+Algorithm & median & mean & max & runs $>1.5\times$ budget \\
+\midrule
+\textsc{Cascade} & 60.1 & 48.3 & 75.0 & 0 \\
+ReduMIS & 60.2 & 69.7 & 660.2 & 2 \\
+OnlineMIS & 60.0 & 44.0 & 66.8 & 0 \\
+NearLinear & 0.2 & 1.1 & 15.4 & 0 \\
+LinearTime & 0.1 & 0.3 & 2.5 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
