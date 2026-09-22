@@ -33,14 +33,29 @@ SETUP_URL = ("https://raw.githubusercontent.com/vinhqdang/max_independence_set/"
              "main/scripts/colab_setup.sh")
 
 # Cheapest first; the heavy ones are last so a lost session costs least.
-QUEUES = {
-    "rep1": ["ca-AstroPh", "ca-CondMat", "email-Enron", "frb30-15-1", "frb35-17-1",
-             "del16", "rgg16", "web-Stanford", "del20"],
-    "rep2": ["frb40-19-1", "frb45-21-1", "frb50-23-1", "com-dblp", "com-amazon",
-             "rgg18", "del18", "roadNet-PA", "rgg20"],
-    "rep3": ["frb53-24-1", "frb59-26-1", "com-youtube", "wiki-Talk", "web-BerkStan",
-             "as-skitter", "roadNet-CA"],
-}
+# Cheapest first, so that losing a VM late costs the least.
+ALL_INSTANCES = [
+    "ca-AstroPh", "ca-CondMat", "email-Enron", "frb30-15-1", "frb35-17-1",
+    "frb40-19-1", "frb45-21-1", "frb50-23-1", "frb53-24-1", "frb59-26-1",
+    "del16", "rgg16", "com-dblp", "com-amazon", "rgg18", "del18",
+    "web-Stanford", "com-youtube", "wiki-Talk", "web-BerkStan",
+    "roadNet-PA", "del20", "rgg20", "as-skitter", "roadNet-CA",
+]
+
+
+def build_queues(sessions, shard, nshards, done):
+    """Split the still-outstanding instances across this driver's VMs.
+
+    Recomputed every poll from the results file, so a second driver running a
+    different Google account under --shard picks up a disjoint half and the two
+    never duplicate work. Assigning statically would instead leave one driver
+    idle as soon as its own share finished."""
+    outstanding = [i for i in ALL_INSTANCES if i not in done]
+    mine = [i for k, i in enumerate(outstanding) if k % nshards == shard]
+    q = {s: [] for s in sessions}
+    for k, i in enumerate(mine):
+        q[sessions[k % len(sessions)]].append(i)
+    return q
 
 
 def colab(args, timeout=300):
@@ -217,7 +232,16 @@ def main():
     ap.add_argument("--out", default=os.path.join(ROOT, "results", "replication60.csv"))
     ap.add_argument("--poll", type=int, default=180)
     ap.add_argument("--max-hours", type=float, default=6.0)
+    ap.add_argument("--sessions", default="rep1,rep2,rep3",
+                    help="VM names this driver owns")
+    ap.add_argument("--shard", default="0/1",
+                    help="i/n: run only every n-th outstanding instance, "
+                         "so two drivers on two Google accounts do not "
+                         "duplicate each other's work")
     args = ap.parse_args()
+
+    sessions = [s for s in args.sessions.split(",") if s]
+    shard, nshards = (int(x) for x in args.shard.split("/"))
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     deadline = time.time() + args.max_hours * 3600
@@ -228,7 +252,7 @@ def main():
 
     while time.time() < deadline:
         done = completed(args.out)
-        outstanding = {s: [i for i in q if i not in done] for s, q in QUEUES.items()}
+        outstanding = build_queues(sessions, shard, nshards, done)
         log("poll: %d instances complete, %d outstanding"
             % (len(done), sum(len(v) for v in outstanding.values())))
         if not any(outstanding.values()):
