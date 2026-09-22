@@ -481,7 +481,9 @@ turn, and by verifying that every reported solution is independent and maximal.
 
 \subsection{Setup}
 
-All runs are performed on the same machine and are single-threaded. Every solver
+All runs are performed on the same machine and are single-threaded: an Intel
+Xeon at 2.10\,GHz with four cores and 15\,GB of memory, running Ubuntu 24.04,
+with every solver compiled by GCC 13.3 at \texttt{-O3}. Every solver
 receives the same wall-clock budget, measured around the entire process, so that
 reading the instance and any construction phase are charged to the solver that
 incurs them. This is deliberate: a solver whose construction phase cannot be
@@ -495,10 +497,22 @@ the set itself, are not counted. This matters in practice: the reference
 implementations of reducing-peeling print a size without the corresponding set,
 so their numbers are marked unverified in the raw records.
 
-Baselines are built from their authors' published sources. NuMVC and FastVC are
-taken from a library that carries the original implementations; they solve the
-minimum vertex cover formulation, and we convert their output to an independent
-set before verification.
+Baselines are built from their authors' published sources, at the revision the
+provisioning script pins, and with the authors' own build settings. ReduMIS and
+OnlineMIS come from KaMIS \cite{lamm2017,dahlum2016}; reducing-peeling and the
+near-linear kernelization from the implementation released with
+Chang et al. \cite{chang2017}; NuMVC \cite{cai2013numvc} and FastVC
+\cite{cai2017fastvc} from a library that carries the original implementations.
+The last two solve the minimum vertex cover formulation, and we convert their
+output to an independent set before verification. Each solver is given the
+instance in the format its own implementation expects, converted by a single
+tool distributed with our code, so that no solver pays a parsing penalty another
+avoids.
+
+The main tables carry no exact or integer-programming baseline. Those methods
+answer a different question, and on most of this benchmark they do not answer it
+within the budget; we report them separately in Section~\ref{sec:exact}, where
+the comparison is on their own terms.
 
 \subsection{Instances}
 
@@ -549,7 +563,9 @@ fraction of the input, so it is where the choice of what to do after
 kernelization matters most, and where a move that restructures tens of vertices
 at once has the most to work with. On the random geometric graphs the reduction
 rules are far more effective, and \textsc{Cascade} and ReduMIS reach the same
-value on all three sizes.
+value on all three sizes; for \texttt{rgg16} and \texttt{rgg18} the exact
+solvers of Section~\ref{sec:exact} prove that this common value is optimal, so
+no solver could have done better there.
 
 On road networks and on most social networks the strong solvers agree to within
 a handful of vertices, because the kernels are a small fraction of the input:
@@ -663,6 +679,53 @@ dense instance should expect variance that the other families do not show.
 each instance. Boxes show the quartiles and the median; whiskers the range.}
 \label{fig:seeds}
 \end{figure}
+
+\subsection{Exact solvers}
+\label{sec:exact}
+
+The method proposed here is a heuristic, and the question of how far its answers
+sit from optimal is separate from how they compare with other heuristics. To
+place them we ran three exact solvers and one integer-programming solver on the
+instances small enough to admit them: the branch-and-reduce solver built from
+our own components (\textsc{Cascade}-exact, the sub-solver of
+Section~\ref{sec:implementation} applied to the whole graph), VCSolver
+\cite{akiba2016}, the winner of the vertex cover track of PACE 2019
+\cite{pace2019,hespe2020}, and HiGHS on the natural
+integer program. Table~\ref{tab:exact} reports the results.
+
+Three conclusions follow, and only the first is favourable to us. On the
+instances that reduce almost completely --- \texttt{ca-AstroPh},
+\texttt{ca-CondMat}, \texttt{email-Enron} --- all four prove optimality, and our
+sub-solver is the fastest of them --- by a factor of 25 to 40 over HiGHS, three
+to five over VCSolver, and a more modest 1.1 to 1.4 over the PACE portfolio ---
+which is the property
+the region move depends on: the sub-problems it generates are of exactly this
+shape, and they must be solved in microseconds.
+
+Second, our exact solver is not competitive as an exact solver. On the BHOSLIB
+family the PACE 2019 portfolio proves the optimum of \texttt{frb30-15-1},
+\texttt{frb35-17-1} and \texttt{frb40-19-1} in under four seconds each, while
+ours returns 25, 28 and 30 against the true 30, 35 and 40 and proves nothing.
+It is built to be restarted millions of times on graphs of a few dozen vertices,
+not to prove optimality on a dense graph of a thousand, and the table shows the
+cost of that choice. Where a proof is wanted on instances of this kind, the
+portfolio approach is the right tool.
+
+Third, the integer-programming route is not a usable baseline at this scale, and
+we record its failures rather than omitting it. HiGHS matches the optimum on the
+three easy instances but exceeds the 60-second budget on most others, taking up
+to 360\,s; on \texttt{frb45-21-1} through \texttt{frb53-24-1} it returns a single
+vertex, on \texttt{rgg18} none at all, and on \texttt{del18} and
+\texttt{web-Stanford} it emits no solution we could verify. On
+\texttt{email-Enron} it reports optimality but the solution it writes has 22\,253
+vertices against the 22\,255 that the other three solvers prove optimal and that
+our verifier confirms; we therefore treat its optimality claims as unreliable
+and its numbers as a lower bound on what a tuned commercial solver would do.
+This is a statement about the formulation at this size, not about HiGHS: the
+natural model has one variable per vertex and one constraint per edge, which for
+the larger instances in the benchmark means tens of millions of constraints.
+
+\input{tables/exact}
 
 \subsection{Ablation}
 \label{sec:ablation}
