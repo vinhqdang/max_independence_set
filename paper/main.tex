@@ -641,10 +641,14 @@ verdicts are the same, with \textsc{Cascade} ahead of OnlineMIS on all ten
 instances.
 
 The figure also shows a limitation. On every geometric, road and web instance
-our solver's five runs collapse to a line: the spread is below $0.05\%$, and on
-several instances all five seeds return the same value. On the BHOSLIB
-instances it is the widest of any solver, reaching $2.5\%$ on
-\texttt{frb40-19-1}. This is the same degeneracy discussed in
+our solver's five runs collapse to a line: the spread is at most $0.024\%$, and
+on two instances all five seeds return the same value. On the BHOSLIB instances
+it widens by two orders of magnitude, to $2.5\%$ on \texttt{frb40-19-1} and
+$2.0\%$ on \texttt{frb53-24-1}. It is not the most variable solver there ---
+OnlineMIS spreads $5.1\%$ and $3.9\%$ on those two instances --- but it is
+markedly less stable than ReduMIS and FastVC, which return the same value on
+every seed of both, and on \texttt{frb40-19-1} that value is 40 against our 39
+or 40. This is the same degeneracy discussed in
 Section~\ref{sec:move} seen from another angle: when the region move cannot
 find traction, what remains is the restart mechanism, and outcomes then depend
 on which restart happens to land well. A practitioner running a single seed on a
@@ -659,6 +663,44 @@ dense instance should expect variance that the other families do not show.
 each instance. Boxes show the quartiles and the median; whiskers the range.}
 \label{fig:seeds}
 \end{figure}
+
+\subsection{Ablation}
+\label{sec:ablation}
+
+Table~\ref{tab:ablation} reports four variants on seven instances spanning the
+families: \textsc{no-lns} disables region moves entirely, leaving kernelization
+plus the greedy dive and its restarts; \textsc{dive} replaces the region move
+with the decision-space move described in Section~\ref{sec:move}; \textsc{no-pert}
+removes the perturbation step; and \textsc{no-lp} removes the
+Nemhauser--Trotter LP reduction. These are separate runs from the main study, so
+the full-solver column differs from Table~\ref{tab:quality-geometric} by a few
+vertices; the comparison is within the table.
+
+The region move is the component that carries the result. Removing it costs
+$1.2\%$ on \texttt{del18} and $1.4\%$ on \texttt{del16} --- an order of magnitude
+more than the margin the full solver holds over the strongest baseline on those
+instances --- and $32.5\%$ on \texttt{frb40-19-1}, where the fallback is reduced
+to a restarting greedy. Summed over the seven instances the loss is 1577
+vertices. Nothing else in the solver comes close to that.
+
+The other three results are negative, and we report them as such. The
+decision-space move recovers almost none of the gap: on \texttt{del18},
+\texttt{roadNet-PA} and \texttt{web-Stanford} it returns exactly the value
+obtained with no neighbourhood move at all (81\,639, 533\,385 and 163\,369), so
+on those instances it contributes nothing whatever. It is the move we designed
+first, and the ablation is what showed it to be worthless; only on the dense
+instances does it recover part of the loss. It survives in the implementation
+as an option, not as a default.
+
+Perturbation and the LP reduction are both within noise on this benchmark.
+Removing perturbation changes the summed total by $+2$ vertices, and hurts only
+\texttt{frb40-19-1}, by two. Removing the LP reduction changes it by $+8$, and
+on \texttt{frb59-26-1} the solver without it returns 57 rather than 56 --- which
+is the value ReduMIS reaches and we do not. We keep both because each is cheap
+and each is standard, and because a seven-instance ablation is too small to
+conclude that they never help; but we have no evidence from these runs that
+either pays for itself, and a reader looking to reimplement the method should
+start with the region move and add the rest only if measurement justifies it.
 
 \subsection{Replication on different hardware}
 \label{sec:replication}
