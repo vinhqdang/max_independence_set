@@ -90,7 +90,8 @@ print('SETUP_STATE=' + ('READY' if hit not in ('', '0') else 'PENDING'))
 def bench_running(session):
     rc, out = exec_py(session, """
 import subprocess
-hit = subprocess.run(['bash','-c','pgrep -f run_bench.py >/dev/null && echo y'],
+# The bracket stops the pattern matching this command's own line.
+hit = subprocess.run(['bash','-c','pgrep -f "[r]un_bench.py" >/dev/null && echo y'],
                      capture_output=True, text=True).stdout.strip()
 print('BENCH_STATE=' + ('RUNNING' if hit == 'y' else 'IDLE'))
 """, timeout=240)
@@ -174,6 +175,8 @@ def main():
     while time.time() < deadline:
         done = completed(args.out)
         outstanding = {s: [i for i in q if i not in done] for s, q in QUEUES.items()}
+        log("poll: %d instances complete, %d outstanding"
+            % (len(done), sum(len(v) for v in outstanding.values())))
         if not any(outstanding.values()):
             log("all instances complete")
             break
