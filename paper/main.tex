@@ -10,6 +10,7 @@
 \graphicspath{{./}}
 \usepackage{url}
 \usepackage{longtable}
+\usepackage{multirow}
 \usepackage{tikz}
 \usetikzlibrary{fit,backgrounds}
 
@@ -795,6 +796,46 @@ structure of the move, seen from the direction of running time rather than
 solution quality.
 
 \input{tables/longbudget}
+
+\subsection{Parameter sensitivity}
+\label{sec:sensitivity}
+
+The method exposes several tunable parameters, and a reader is entitled to ask
+whether the results depend on having found good values for them.
+Table~\ref{tab:sensitivity} varies four of them one at a time over a wide range,
+holding the rest at their defaults, on three instances from different families.
+The comparison that makes the numbers interpretable is with the seed-to-seed
+spread of Section~\ref{sec:experiments}: a parameter whose whole range moves the
+answer by less than the noise between two seeds is not a parameter the user has
+to think about.
+
+On the two large sparse instances that is what happens. Over ranges spanning a
+factor of seven to sixteen, \texttt{kernel\_share}, \texttt{lns\_start\_free}
+and \texttt{lns\_slice} move the result by at most $0.013\%$ on \texttt{del18}
+and $0.001\%$ on \texttt{web-Stanford}, against a seed spread of $0.024\%$ on
+that family. On \texttt{web-Stanford} two of them are exactly flat: every value of
+\texttt{kernel\_share} from $0.1$ to $0.7$, and every value of
+\texttt{lns\_slice} from $0.01$ to $0.2$, returns the same 163\,375.
+
+One parameter is genuinely sensitive, and we report it as such.
+\texttt{restart\_idle\_dives} moves \texttt{del18} by $0.081\%$, three times the
+seed spread, and the shape is informative: 82\,592 at 50, 82\,639 at 100, 82\,659
+at the default 200, then 82\,655 at both 400 and 800. Restarting too eagerly
+costs real quality, while restarting too lazily costs almost nothing. The
+default sits at the top of that curve rather than on its slope, but a reader
+porting this method to a new family should know that this is the one dial worth
+checking, and that the safe direction to err in is upwards.
+
+The dense instance is where this design runs out of resolution, and we say so
+rather than reading meaning into it. The spreads there are $2.5\%$ to $5\%$, but
+every value in the block is 38, 39 or 40, and the seed study already reports a
+$2.5\%$ spread on this family from seed alone. A single run per setting cannot
+separate a parameter effect from that noise. What can be said is bounded: no
+setting we tried collapses performance, and \texttt{lns\_start\_free}$=8$ returns
+40 where the default returns 39 --- which is either a better setting or a luckier
+seed, and this experiment cannot tell which.
+
+\input{tables/sensitivity}
 
 \subsection{Exact solvers}
 \label{sec:exact}

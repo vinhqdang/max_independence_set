@@ -1,0 +1,43 @@
+\begin{table}[htbp]
+\centering
+\small
+\caption{Parameter sensitivity. Each block varies one parameter over its range with the others held at their defaults; $\star$ marks the default. Cells are the size returned at a 60-second budget, HIGHER IS BETTER. The \emph{spread} line under each block is $100\,(\max-\min)/\max$ over that block, per instance, to be read against the seed-to-seed spread of Section~\ref{sec:experiments}: $0.024\%$ on the geometric family and up to $2.5\%$ on BHOSLIB.}
+\label{tab:sensitivity}
+\begin{tabular}{l r r r r }
+\toprule
+Parameter & Value & \texttt{del18} & \texttt{frb40-19-1} & \texttt{web-Stanford} \\
+\midrule
+\texttt{kernel\_share} & 0.1 & 82656 & 39 & 163375 \\
+ & 0.2 & 82655 & 39 & 163375 \\
+ & 0.3$\star$ & 82655 & 40 & 163375 \\
+ & 0.5 & 82656 & 40 & 163375 \\
+ & 0.7 & 82655 & 39 & 163375 \\
+\cmidrule(lr){3-5}
+& \emph{spread \%} & \emph{0.001} & \emph{2.500} & \emph{0.000} \\\\
+\midrule
+\texttt{lns\_start\_free} & 1 & 82648 & 39 & 163374 \\
+ & 2 & 82650 & 39 & 163375 \\
+ & 4$\star$ & 82655 & 39 & 163375 \\
+ & 8 & 82650 & 40 & 163376 \\
+ & 16 & 82659 & 38 & 163374 \\
+\cmidrule(lr){3-5}
+& \emph{spread \%} & \emph{0.013} & \emph{5.000} & \emph{0.001} \\\\
+\midrule
+\texttt{lns\_slice} & 0.01 & 82651 & 39 & 163375 \\
+ & 0.02 & 82649 & 40 & 163375 \\
+ & 0.05$\star$ & 82656 & 39 & 163375 \\
+ & 0.1 & 82656 & 39 & 163375 \\
+ & 0.2 & 82656 & 39 & 163375 \\
+\cmidrule(lr){3-5}
+& \emph{spread \%} & \emph{0.008} & \emph{2.500} & \emph{0.000} \\\\
+\midrule
+\texttt{restart\_idle\_dives} & 50 & 82592 & 39 & 163373 \\
+ & 100 & 82639 & 39 & 163375 \\
+ & 200$\star$ & 82659 & 40 & 163375 \\
+ & 400 & 82655 & 39 & 163375 \\
+ & 800 & 82655 & 40 & 163375 \\
+\cmidrule(lr){3-5}
+& \emph{spread \%} & \emph{0.081} & \emph{2.500} & \emph{0.001} \\\\
+\bottomrule
+\end{tabular}
+\end{table}
