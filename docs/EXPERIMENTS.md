@@ -181,6 +181,10 @@ last few vertices of the answer.
 ## Reproducing
 
 ```sh
+# Build the baselines from their authors' repositories, then point the harness
+# at them (it defaults to the directory containing this repository):
+export MIS_BASELINE_DIR=/path/to/baselines   # kamis/, pace-2019/, vertex_cover/,
+                                             # Near-Maximum-Independent-Set/
 python3 tools/gen_instances.py --out data/geometric --scales 16,18,20
 python3 scripts/prepare_instances.py
 bash scripts/final_bench.sh results 60

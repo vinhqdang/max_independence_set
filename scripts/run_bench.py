@@ -18,9 +18,11 @@ import sys
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-EXT = os.environ.get("MIS_BASELINE_DIR",
-                     "/tmp/claude-0/-home-user-max-independence-set/"
-                     "ab0fd628-37f5-5a8a-bda6-c8eaa0ba89dd/scratchpad")
+# Where the baseline solvers were built.  Override with MIS_BASELINE_DIR; the
+# default assumes they sit next to this repository:
+#   <parent>/kamis, <parent>/Near-Maximum-Independent-Set,
+#   <parent>/vertex_cover, <parent>/pace-2019
+EXT = os.environ.get("MIS_BASELINE_DIR", os.path.dirname(ROOT))
 VERIFY = os.path.join(ROOT, "build", "mis-verify")
 
 BIN = {
