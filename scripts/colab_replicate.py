@@ -54,6 +54,17 @@ def colab(args, timeout=300):
 
 
 def exec_py(session, code, timeout=300, exec_timeout=180):
+    # These snippets are built as Python strings inside this file, so an escape
+    # sequence in a comment (a stray \\n) silently splits a line and ships the
+    # VM a file that will not parse. The VM then prints nothing, and a caller
+    # reading the reply for a sentinel concludes "not ready" rather than
+    # "broken" -- which cost a provisioned machine an hour of idling once.
+    # Refuse to send anything that does not compile here.
+    try:
+        compile(code, "<remote:%s>" % session, "exec")
+    except SyntaxError as e:
+        return 1, "LOCAL_SYNTAX_ERROR %s" % e
+
     path = "/tmp/_colab_exec_%s.py" % session
     with open(path, "w") as f:
         f.write(code)
@@ -84,19 +95,29 @@ print('provisioning')
     return True
 
 
-def setup_done(session):
-    """The VM answers with one sentinel token, so the reply survives whatever
-    else the Colab client prints around it."""
+def setup_state(session):
+    """Returns (ready, reason).
+
+    The VM answers with one sentinel token, so the verdict survives whatever
+    else the Colab client prints around it. A reply carrying neither sentinel
+    means the probe itself failed, which is not the same as a machine that is
+    still provisioning, and is reported as its own case: read as "provisioning"
+    it leaves a ready machine idle indefinitely with nothing in the log to say
+    so."""
     rc, out = exec_py(session, """
 import subprocess
-# grep -c exits 1 on a zero count, so a '|| echo 0' fallback fires ON TOP of
-# the '0' it already printed and the reply reads '0\n0'. Use grep -q and emit
-# exactly one token, so the answer cannot be two lines.
+# grep -c exits 1 on a zero count, so a '|| echo 0' fallback fires on top of
+# the zero grep already printed and the reply comes back as two lines. grep -q
+# plus one echo keeps the answer to a single token.
 hit = subprocess.run(['bash','-c','grep -q SETUP_COMPLETE /content/setup.log 2>/dev/null && echo yes || echo no'],
                      capture_output=True, text=True).stdout.strip()
 print('SETUP_STATE=' + ('READY' if hit == 'yes' else 'PENDING'))
 """, timeout=240)
-    return "SETUP_STATE=READY" in out
+    if "SETUP_STATE=READY" in out:
+        return True, "ready"
+    if "SETUP_STATE=PENDING" in out:
+        return False, "still provisioning"
+    return False, "PROBE FAILED (no verdict returned): %s" % out.strip()[-160:]
 
 
 def bench_running(session):
@@ -203,8 +224,9 @@ def main():
                 added, total = merge(rows, args.out)
                 if added:
                     log("%s: +%d rows (%d total)" % (session, added, total))
-            if not setup_done(session):
-                log("%s: still provisioning" % session)
+            ready, why = setup_state(session)
+            if not ready:
+                log("%s: %s" % (session, why))
                 launched.discard(session)
                 continue
             if not bench_running(session):
