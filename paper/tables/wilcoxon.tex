@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{Paired Wilcoxon signed-rank test of \textsc{Cascade} against each baseline over the instances both solved, at the 60\,s budget. A verdict names the better solver when $p<0.05$.}
+\label{tab:wilcoxon}
+\begin{tabular}{lrrrrrr}
+\toprule
+Baseline & pairs & win & tie & loss & $p$ & verdict \\
+\midrule
+ReduMIS & 26 & 3 & 14 & 9 & 0.1951 & -- \\
+FastVC & 27 & 13 & 8 & 6 & 0.0300 & \textsc{Cascade} \\
+NearLinear & 27 & 20 & 6 & 1 & 0.0001 & \textsc{Cascade} \\
+NuMVC & 26 & 18 & 2 & 6 & 0.0008 & \textsc{Cascade} \\
+OnlineMIS & 27 & 23 & 4 & 0 & $<10^{-4}$ & \textsc{Cascade} \\
+LinearTime & 27 & 24 & 2 & 1 & $<10^{-4}$ & \textsc{Cascade} \\
+\bottomrule
+\end{tabular}
+\end{table}

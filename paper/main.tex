@@ -512,10 +512,61 @@ on a confidently wrong value.
 \input{tables/quality_web}
 \input{tables/quality_bhoslib}
 \input{tables/aggregate}
+\input{tables/wilcoxon}
 \input{tables/budget}
 \input{tables/ablation}
 
-%% TODO: discussion of each family; time-to-target plots; statistical tests.
+\subsection{Solution quality}
+
+Tables~\ref{tab:quality-geometric}--\ref{tab:quality-bhoslib} give the size of
+the independent set each solver returned, by family.
+
+On the geometric family \textsc{Cascade} is ahead on every instance, and the
+margin grows with size: $+10$ on \texttt{del16}, $+277$ on \texttt{del18} and
+$+5535$ on \texttt{del20}, the last being $1.7\%$ of the best value any other
+solver reached. This is the family whose kernels remain a large fraction of the
+input, so it is where the choice of what to do after kernelization matters most,
+and it is where a move that restructures tens of vertices at once has the most
+to work with. On the random geometric graphs the reduction rules are far more
+effective and several solvers reach the same value, which the exact solvers
+confirm is optimal for \texttt{rgg16} and \texttt{rgg18}.
+
+On road networks and on most social networks the strong solvers agree to within
+a handful of vertices, because the kernels are tiny: \texttt{com-lj} has four
+million vertices and a kernel of 1781. What separates the solvers there is
+robustness rather than quality. ReduMIS returned nothing on \texttt{soc-pokec}
+within eleven minutes, and NuMVC returned nothing on \texttt{com-lj} within
+sixteen; \textsc{Cascade} produced a verified solution on every instance.
+
+On web graphs \textsc{Cascade} is behind ReduMIS by 15 and 100 vertices, which
+is $0.01\%$ and $0.02\%$. On the BHOSLIB family it reaches the known optimum on
+several instances but is one vertex short on others, where NuMVC is both better
+and dramatically faster --- it attains the optimum of \texttt{frb30-15-1} in
+40\,ms, against a full budget for the reduction-based solvers. The structural
+reason is given in Section~\ref{sec:move}: on a dense graph almost every vertex
+outside the incumbent has several incumbent neighbours, so releasing a small
+$F$ unlocks nothing while releasing a large one makes the region the whole
+graph. The move degenerates, and specialised local search is the better tool.
+
+\subsection{Aggregate comparison}
+
+Counting wins is misleading here, because instances differ in scale by four
+orders of magnitude and a one-vertex loss on a 450-vertex instance is not
+comparable to a five-thousand-vertex win on a million-vertex one. We therefore
+report both the mean relative gap (Table~\ref{tab:aggregate}) and a paired
+Wilcoxon signed-rank test (Table~\ref{tab:wilcoxon}).
+
+The test finds \textsc{Cascade} significantly better than five of the six
+baselines, including both solvers from the vertex cover local search line, and
+finds no significant difference against ReduMIS ($p = 0.195$). Summed over the
+instances both solved, \textsc{Cascade} is ahead of ReduMIS by 8651 vertices and
+behind by 122: where ReduMIS wins it wins by one or two vertices, and where
+\textsc{Cascade} wins it wins by thousands.
+
+Table~\ref{tab:budget} should be read alongside these results. NuMVC checks its
+cutoff only between search steps, so under a 60\,s budget it takes 204\,s on
+average and exceeds 90\,s on twelve of the 27 instances; it is therefore
+compared here under conditions that favour it, and is still behind.
 
 \subsection{Replication on different hardware}
 \label{sec:replication}
