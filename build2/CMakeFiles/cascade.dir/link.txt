@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -march=native -funroll-loops -DNDEBUG CMakeFiles/cascade.dir/src/main.cpp.o CMakeFiles/cascade.dir/src/cascade.cpp.o -o cascade  libmisgraph.a 

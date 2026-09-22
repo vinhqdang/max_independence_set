@@ -22,6 +22,7 @@ void usage() {
             "  --sample N          candidates inspected per decision (default 32)\n"
             "  --include-prob P    probability of an include decision (default 0)\n"
             "  --kernel-only       stop after kernelization\n"
+            "  --trace FILE        log every improvement as 'seconds size'\n"
             "  --exact             prove optimality by branch-and-reduce\n"
             "  --no-lns            disable exact neighbourhood moves (ablation)\n"
             "  --no-perturb        disable perturbation and restarts (ablation)\n"
@@ -56,6 +57,7 @@ int main(int argc, char** argv) {
         else if (a == "--include-prob") cfg.include_prob = atof(next().c_str());
         else if (a == "--kernel-only") { kernel_only = true; cfg.kernel_only = true; }
         else if (a == "--no-lp") cfg.use_lp = false;
+        else if (a == "--trace") cfg.trace_path = next();
         else if (a == "--restart-idle") cfg.restart_idle_dives = atof(next().c_str());
         else if (a == "--kernel-share") cfg.kernel_share = atof(next().c_str());
         else if (a == "--exact") exact = true;
@@ -122,6 +124,14 @@ int main(int argc, char** argv) {
            st.lp_decided, st.kernel_truncated, st.first_dive_value, st.first_dive_seconds,
            st.lns_moves, st.lns_improvements, st.lns_gain, st.lns_plateau,
            st.lns_expand, st.restarts, st.perturbations, st.lns_sweeps);
+
+    if (!cfg.trace_path.empty()) {
+        FILE* tf = fopen(cfg.trace_path.c_str(), "wb");
+        if (tf) {
+            for (const auto& p : solver.trace()) fprintf(tf, "%.4f %lld\n", p.first, p.second);
+            fclose(tf);
+        }
+    }
 
     if (!out.empty()) {
         FILE* f = fopen(out.c_str(), "wb");

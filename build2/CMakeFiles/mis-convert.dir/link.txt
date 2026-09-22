@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -march=native -funroll-loops -DNDEBUG "CMakeFiles/mis-convert.dir/tools/mis_convert.cpp.o" -o mis-convert  libmisgraph.a 

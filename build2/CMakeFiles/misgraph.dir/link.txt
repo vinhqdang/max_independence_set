@@ -1,0 +1,2 @@
+/usr/bin/ar qc libmisgraph.a CMakeFiles/misgraph.dir/src/graph.cpp.o
+/usr/bin/ranlib libmisgraph.a

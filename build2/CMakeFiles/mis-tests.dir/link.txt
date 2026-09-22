@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -march=native -funroll-loops -DNDEBUG "CMakeFiles/mis-tests.dir/tests/test_correctness.cpp.o" "CMakeFiles/mis-tests.dir/src/cascade.cpp.o" -o mis-tests  libmisgraph.a 

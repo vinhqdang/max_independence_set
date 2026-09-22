@@ -112,6 +112,7 @@ void Cascade::archive() {
     archive_value_ = value_;
     archive_sol_ = best_sol_;
     improved_ = true;
+    if (now_) trace_.emplace_back(now_(), archive_value_);
 }
 
 // Throws away the current incumbent and dives again from the kernel with fresh
@@ -445,6 +446,8 @@ long long Cascade::dive(double deadline, const std::function<double()>& elapsed)
 }
 
 long long Cascade::run(double deadline, const std::function<double()>& elapsed) {
+    now_ = elapsed;
+    trace_.clear();
     setup();
 
     // Phase 1: exhaustive kernelization of the whole graph.
@@ -537,6 +540,10 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
                 value_ += lns_move(deadline, elapsed);
                 if (value_ > best_value_) best_value_ = value_;
             }
+            // Archive once per batch rather than per move: the comparison is
+            // cheap but the copy is linear in the graph, and one point per batch
+            // is resolution enough for a convergence curve.
+            archive();
             if (cfg_.use_perturbation && elapsed() < deadline) {
                 perturb(deadline, elapsed);
                 if (improved_) { improved_ = false; last_improve_ = elapsed(); }

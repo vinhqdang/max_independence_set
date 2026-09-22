@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <string>
 #include <random>
 #include <vector>
 
@@ -24,6 +25,9 @@
 
 struct CascadeConfig {
     double time_limit = 60.0;
+    // When set, every improvement of the archived solution is recorded as a
+    // (seconds, size) pair, which is what the convergence figures are drawn from.
+    std::string trace_path;
     uint64_t seed = 1;
     int sample_size = 32;       // candidates inspected per decision (BMS style)
     double include_prob = 0.0;  // probability of an include decision while diving
@@ -152,6 +156,13 @@ private:
     Reducer::State root_state_{};
     int root_cand_ = 0;
     void archive();
+    std::function<double()> now_;
+    std::vector<std::pair<double, long long>> trace_;
+
+public:
+    const std::vector<std::pair<double, long long>>& trace() const { return trace_; }
+
+private:
     void restart(double deadline, const std::function<double()>& elapsed);
     std::vector<int> tmp_;
     std::vector<char> blocked_;

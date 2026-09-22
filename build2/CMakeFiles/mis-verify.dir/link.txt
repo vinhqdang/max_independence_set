@@ -1,0 +1,1 @@
+/usr/bin/c++ -O3 -march=native -funroll-loops -DNDEBUG "CMakeFiles/mis-verify.dir/tools/mis_verify.cpp.o" -o mis-verify  libmisgraph.a 
