@@ -701,6 +701,43 @@ Source code, instance generators and the raw per-run records are available at
 
 \appendix
 
+\section{Instance provenance}
+\label{app:provenance}
+
+Table~\ref{tab:provenance} records where each instance came from, so that the
+benchmark set can be rebuilt exactly. Three points deserve emphasis, because each
+is a way in which two studies can report different numbers for what they believe
+is the same graph.
+
+First, the real-world instances are distributed as directed or multiply-listed
+edge lists. We read every file as undirected, discard self-loops and duplicate
+edges, and renumber the vertices consecutively; the $n$ and $m$ in the table are
+the values after this normalisation, and they are what our solver and every
+baseline receive. Isolated vertices are retained rather than dropped, since
+dropping them would inflate the reported independence number relative to studies
+that keep them.
+
+Second, the BHOSLIB instances are published in two forms, and the distinction is
+easy to miss. The Network Repository archive ships the \emph{clique} form, whose
+independence number is the size of a Model-RB domain rather than the advertised
+$\alpha$: on \texttt{frb30-15-1} that form has 83\,198 edges and every solver we
+tried returned exactly 15. The form used here, and the one the published
+$\alpha$ values refer to, is its complement, with 17\,827 edges and $\alpha=30$.
+Our converter takes the complement explicitly. A study that omits this step is
+not solving a hard instance at all, and its BHOSLIB numbers cannot be compared
+with anyone else's.
+
+Third, the geometric instances are generated rather than downloaded. They come
+from \texttt{tools/gen\_instances.py} at seed 1: the Delaunay instances are the
+Delaunay triangulation of $2^{k}$ uniform points in the unit square, and the
+random geometric instances connect points within the radius that gives an
+expected average degree of 8. The generator is deterministic given the seed, so
+the instances in the table are reproducible, but they are \emph{not} the DIMACS
+implementation-challenge graphs of the same names, and the two should not be
+compared.
+
+\input{tables/provenance}
+
 \section{Complete per-instance results}
 \label{app:full}
 
