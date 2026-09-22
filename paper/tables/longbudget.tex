@@ -1,17 +1,17 @@
 \begin{table}[htbp]
 \centering
 \small
-\caption{Solution size and wall-clock seconds at a 600-second budget, ten times the budget of the main study. HIGHER IS BETTER for size, lower for time; \textbf{bold} marks the best size on an instance. The comparison of interest is with Table~\ref{tab:quality-geometric} and its companions, measured at 60 seconds: outside the dense instance, the extra budget changes almost nothing.}
+\caption{Solution size and wall-clock seconds at a 600-second budget, ten times the budget of the main study. HIGHER IS BETTER for size, lower for time; \textbf{bold} marks the best size on an instance. The comparison of interest is with the 60-second tables: what the extra budget buys differs sharply by instance, and Section~\ref{sec:longbudget} reads the difference.}
 \label{tab:longbudget}
 \begin{tabular}{l r@{\,/\,}l r@{\,/\,}l r@{\,/\,}l r@{\,/\,}l}
 \toprule
 Solver & \multicolumn{2}{c}{\texttt{del20}} & \multicolumn{2}{c}{\texttt{roadNet-CA}} & \multicolumn{2}{c}{\texttt{web-BerkStan}} & \multicolumn{2}{c}{\texttt{frb59-26-1}} \\
 & size & s & size & s & size & s & size & s \\
 \midrule
-\textsc{Cascade} & \textbf{330533} & 601 & \textbf{961851} & 603 & 408380 & 602 & \multicolumn{2}{c}{---} \\
+\textsc{Cascade} & \textbf{330533} & 601 & \textbf{961851} & 603 & 408380 & 602 & 57 & 600 \\
 ReduMIS & 328983 & 602 & \textbf{961851} & 69 & \textbf{408482} & 67 & 57 & 328 \\
 NuMVC & 317648 & 671 & 915773 & 1003 & 406663 & 650 & \textbf{59} & 600 \\
-FastVC & 330192 & 604 & 960024 & 601 & \multicolumn{2}{c}{---} & 57 & 600 \\
+FastVC & 330192 & 604 & 960024 & 601 & 406349 & 601 & 57 & 600 \\
 \bottomrule
 \end{tabular}
 \end{table}

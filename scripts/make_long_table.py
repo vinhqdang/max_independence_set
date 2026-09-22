@@ -55,8 +55,8 @@ def main():
         r"\caption{Solution size and wall-clock seconds at a 600-second budget, ten "
         r"times the budget of the main study. HIGHER IS BETTER for size, lower for time; "
         r"\textbf{bold} marks the best size on an instance. The comparison of interest is "
-        r"with Table~\ref{tab:quality-geometric} and its companions, measured at 60 "
-        r"seconds: outside the dense instance, the extra budget changes almost nothing.}",
+        r"with the 60-second tables: what the extra budget buys differs sharply by "
+        r"instance, and Section~\ref{sec:longbudget} reads the difference.}",
         r"\label{tab:longbudget}",
         r"\begin{tabular}{l " + " ".join(["r@{\\,/\\,}l"] * len(present)) + r"}",
         r"\toprule",

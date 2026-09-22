@@ -53,8 +53,10 @@ families, compared against ReduMIS, OnlineMIS, NuMVC, FastVC, reducing-peeling
 and near-linear kernelization under a common 60-second budget, the method
 attains the best value of all seven solvers on every geometric instance, and is
 strictly ahead of all of them on the three Delaunay instances by a margin that
-grows with size, reaching $0.08\%$ over the strongest baseline and $2.6\%$ over
-ReduMIS at one million vertices. Over the whole benchmark it is strictly ahead
+grows with size, reaching $0.08\%$ over the strongest baseline at one million
+vertices. A run at ten times the budget shows that this margin over the best
+baseline is stable, while a much larger gap to ReduMIS at the same size is
+mostly a difference in convergence rate and closes as the budget grows. Over the whole benchmark it is strictly ahead
 on three instances, matches the best value on thirteen, and is behind on
 eleven: by at most $0.06\%$ on five large sparse graphs, and by one or two
 vertices on six BHOSLIB instances, where NuMVC and FastVC remain the stronger
@@ -577,7 +579,11 @@ baseline on each, which is ReduMIS on the first and FastVC on the other two.
 Read against ReduMIS alone the same three margins are $+7$, $+271$ and $+8500$,
 because ReduMIS degrades sharply at the largest size while FastVC does not; this
 is why we report the comparison against the per-instance best rather than
-against a single reference solver. In relative terms the margin over the
+against a single reference solver. The $+8500$ should also be read with
+Section~\ref{sec:longbudget}, which shows that it shrinks to $+1550$ when both
+solvers are given ten times the budget: on \texttt{del20} ReduMIS converges
+slowly rather than to a worse answer. The margin over the strongest baseline,
+by contrast, is unaffected by the budget. In relative terms the margin over the
 strongest baseline is small in every case --- $0.03\%$, $0.09\%$ and $0.08\%$ ---
 but it is consistent, and it is the only family in which any solver separates
 itself from the rest. This is also the family whose kernels remain a large
@@ -710,6 +716,51 @@ dense instance should expect variance that the other families do not show.
 each instance. Boxes show the quartiles and the median; whiskers the range.}
 \label{fig:seeds}
 \end{figure}
+
+\subsection{The long budget}
+\label{sec:longbudget}
+
+The main study gives every solver 60 seconds. That choice needs defending,
+because a budget short enough to favour one convergence profile over another
+would decide the comparison by itself. We therefore repeated four instances,
+one per family, at ten times the budget. Table~\ref{tab:longbudget} gives the
+result, and the comparison that matters is with the 60-second tables.
+
+On three of the four instances the extra budget buys almost nothing.
+\textsc{Cascade} and ReduMIS return \emph{exactly} the same value on
+\texttt{roadNet-CA} and on \texttt{web-BerkStan} at 600 seconds as at 60, and on
+\texttt{frb59-26-1} every solver moves by at most a single vertex. Those
+instances are converged well inside the shorter budget, and nothing in the main
+tables is an artefact of stopping early.
+
+\texttt{del20} is the exception, and it qualifies our own headline. At 60
+seconds \textsc{Cascade} leads ReduMIS there by 8500 vertices; at 600 seconds it
+leads by 1550. ReduMIS gains 7417 vertices from the extra time and NuMVC 6227,
+against 467 for \textsc{Cascade} and 390 for FastVC. The large gap to ReduMIS
+that Section~\ref{sec:experiments} reports on the largest Delaunay instance is
+therefore substantially a statement about convergence rate rather than about
+final quality: ReduMIS gets to a similar place, it simply takes an order of
+magnitude longer to do it.
+
+Two things survive that correction. \textsc{Cascade} still returns the best value
+on \texttt{del20} at the long budget, 330\,533 against FastVC's 330\,192, and its
+margin over the \emph{strongest} baseline is essentially unchanged by the extra
+time --- 264 vertices at 60 seconds, 341 at 600. The advantage that the paper
+claims over the best available alternative is robust to the budget. What is not
+robust, and what we therefore do not claim, is the much larger gap to ReduMIS
+specifically.
+
+The table also shows the other side of the same coin, and it is not in our
+favour. ReduMIS reaches its final value on \texttt{web-BerkStan} in 67 seconds
+and on \texttt{roadNet-CA} in 69, matching or beating what \textsc{Cascade}
+returns after ten times as long. On graphs whose kernel reduces to a small
+fraction of the input, a solver that finishes kernelization and stops is simply
+the better tool, and no amount of neighbourhood search recovers the difference.
+This is the same boundary that Section~\ref{sec:move} predicts from the
+structure of the move, seen from the direction of running time rather than
+solution quality.
+
+\input{tables/longbudget}
 
 \subsection{Exact solvers}
 \label{sec:exact}
