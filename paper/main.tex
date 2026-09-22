@@ -929,6 +929,22 @@ instance within the cutoff, which we report as a failure rather than excluding
 the instance. Excluding them would have removed exactly the cases that
 distinguish the solvers.
 
+\paragraph{Build differences between the two platforms.} The replication
+machines rebuilt the solver from source, and that source had by then acquired
+the tracing used for Figure~\ref{fig:convergence}, which the machine used for
+the main tables did not carry. The two builds are therefore not bit-identical,
+and the replication in Section~\ref{sec:replication} varies build as well as
+machine. We measured the size of that confound rather than assuming it away:
+running both builds on the same machine, with the same seed and budget, they
+return identical values on \texttt{del18}, \texttt{rgg16}, \texttt{web-Stanford}
+and \texttt{roadNet-PA}, and differ by five vertices out of 20\,647 on
+\texttt{del16}, which is $0.024\%$. That is the same order as the seed-to-seed
+spread we report for the geometric family, and an order of magnitude below any
+difference the replication is used to argue about. It does not affect the
+ranking, which is what that section claims; but the per-instance agreement
+counts in Table~\ref{tab:replication} should be read as bounded by it rather
+than as pure machine effects.
+
 \paragraph{How narrow the positive result is.} This is the threat we consider
 most serious, and the reader should weigh it against the aggregate tests. Our
 solver is strictly ahead of every baseline on three of 27 instances. They are
