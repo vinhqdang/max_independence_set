@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{Ablation: each row disables one component. Values in brackets are the change from the full algorithm.}
+\label{tab:ablation}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+Configuration & \texttt{del16} & \texttt{del18} & \texttt{rgg16} & \texttt{roadNet-PA} & \texttt{web-Stanford} & \texttt{frb40-19-1} & \texttt{frb59-26-1} \\
+\midrule
+full & 20648 & 82661 & 16086 & 533627 & 163375 & 40 & 56 \\
+no region moves & 20369 (-279) & 81639 (-1022) & 16085 (-1) & 533385 (-242) & 163369 (-6) & 27 (-13) & 42 (-14) \\
+no perturbation/restarts & 20656 (+8) & 82657 (-4) & 16086 (+0) & 533627 (+0) & 163375 (+0) & 38 (-2) & 56 (+0) \\
+no LP reduction & 20652 (+4) & 82666 (+5) & 16086 (+0) & 533627 (+0) & 163373 (-2) & 40 (+0) & 57 (+1) \\
+decision-space moves & 20383 (-265) & 81639 (-1022) & 16086 (+0) & 533385 (-242) & 163369 (-6) & 34 (-6) & 49 (-7) \\
+\bottomrule
+\end{tabular}
+\end{table}

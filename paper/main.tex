@@ -1,0 +1,166 @@
+%% Computers & Operations Research -- Elsevier elsarticle class.
+%% Compile with: latexmk -pdf main.tex   (or: make)
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\usepackage{url}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\journal{Computers \& Operations Research}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{Exact Large-Neighbourhood Search for the Maximum Independent Set
+       Problem on Massive Sparse Graphs}
+
+\author[buv]{Quang-Vinh Dang}
+\ead{vinh.dq4@buv.edu.vn}
+\affiliation[buv]{organization={British University Vietnam},
+                  city={Hung Yen}, country={Vietnam}}
+
+\begin{abstract}
+%% TODO: tighten once the final experiments are in.
+The maximum independent set problem is solved in practice by first applying
+safe data reduction rules and then searching whatever survives. Existing
+solvers differ only in that second step, and all of them are weak in the same
+place: instances whose reduced graph, or kernel, stays large. We propose a
+neighbourhood that is solved exactly rather than sampled. Releasing a set $F$
+of vertices from the incumbent solution makes exactly those vertices eligible
+whose every incumbent neighbour lies in $F$; we prove that the resulting region
+cannot interact with the rest of the solution, so re-solving it to optimality is
+always feasible and never degrades the incumbent. The reduction rules, normally
+used once as preprocessing, are what makes this affordable: they collapse a
+region of thousands of vertices to a kernel of a few dozen, so each move costs
+microseconds. The size of $F$ is tuned online from whether the sub-problems are
+being solved to proven optimality. On a benchmark of 27 instances in five
+families, compared against ReduMIS, OnlineMIS, reducing-peeling,
+branch-and-reduce and an integer-programming reference under a common time
+budget, the method is ahead on all Delaunay instances, with a margin that grows
+with instance size (up to 1.7\% on one million vertices), and competitive
+elsewhere. An ablation attributes the margin to the exact neighbourhood move.
+\end{abstract}
+
+\begin{keyword}
+maximum independent set \sep minimum vertex cover \sep large neighbourhood
+search \sep data reduction \sep kernelization \sep combinatorial optimisation
+\end{keyword}
+
+\end{frontmatter}
+
+\section{Introduction}
+%% TODO: motivation, applications, contributions list.
+
+\section{Related work}
+%% TODO: reduction-based solvers \cite{akiba2016,hespe2019,gellner2021};
+%% local search \cite{andrade2012,lamm2017,dahlum2016,cai2013numvc,cai2017fastvc};
+%% reduce-and-peel \cite{chang2017}; exact \cite{li2017momc,hespe2020,xiao2017}.
+
+\section{Preliminaries}
+Let $G=(V,E)$ be a simple undirected graph. A set $S \subseteq V$ is
+\emph{independent} if no edge of $G$ has both endpoints in $S$; $\alpha(G)$
+denotes the maximum size of such a set. For $v \in V$ we write $N(v)$ for its
+neighbourhood and $N[v] = N(v) \cup \{v\}$.
+
+\begin{definition}[Safe reduction]
+A rule transforming $G$ into $G'$ with an offset $c$ is \emph{safe} if
+$\alpha(G) = \alpha(G') + c$ and a maximum independent set of $G$ can be
+reconstructed from one of $G'$.
+\end{definition}
+
+%% TODO: list the rule set used (degree-0/1, simplicial, degree-2 folding, twin,
+%% domination, unconfined, Nemhauser--Trotter \cite{nemhauser1975}).
+
+\section{The region move}
+\label{sec:move}
+
+Let $S$ be an independent set of $G$ and let $F \subseteq S$. Define
+\begin{equation}
+R(F) \;=\; F \;\cup\; \{\, u \in V \setminus S \;:\; N(u) \cap S \subseteq F \,\}.
+\label{eq:region}
+\end{equation}
+
+\begin{theorem}
+\label{thm:region}
+With $S$, $F$ and $R(F)$ as above:
+\begin{enumerate}
+\item[(a)] no edge of $G$ joins $R(F)$ to $S \setminus R(F)$;
+\item[(b)] for every independent set $T$ of the induced subgraph $G[R(F)]$, the
+      set $(S \setminus R(F)) \cup T$ is independent in $G$;
+\item[(c)] $S \cap R(F) = F$, and consequently $\alpha(G[R(F)]) \ge |F|$.
+\end{enumerate}
+\end{theorem}
+
+\begin{proof}
+(a) Let $v \in R(F)$ and $w \in S \setminus R(F)$ and suppose $vw \in E$. If
+$v \in F$ then $v,w \in S$ are adjacent, contradicting independence of $S$.
+Otherwise $v \notin S$, so $w \in N(v) \cap S \subseteq F \subseteq R(F)$,
+contradicting $w \notin R(F)$.
+
+(b) $T$ is independent, $S \setminus R(F)$ is independent as a subset of $S$,
+and by (a) no edge joins the two sets.
+
+(c) $F \subseteq S \cap R(F)$ holds by construction. Conversely, an
+$x \in S \cap R(F)$ with $x \notin F$ would belong to $V \setminus S$ by
+\eqref{eq:region}, a contradiction. Hence $S \cap R(F) = F$, which is an
+independent set of $G[R(F)]$, so $\alpha(G[R(F)]) \ge |F|$.
+\end{proof}
+
+\begin{corollary}[Monotonicity]
+\label{cor:monotone}
+Let $T^\star$ be a maximum independent set of $G[R(F)]$. Then
+$S' = (S \setminus R(F)) \cup T^\star$ is independent and
+$|S'| = |S| - |F| + |T^\star| \ge |S|$.
+\end{corollary}
+
+\begin{corollary}[Relation to classical swaps]
+For $F = \{v\}$, $R(F) = \{v\} \cup \{u \notin S : N(u) \cap S = \{v\}\}$, which
+is the set examined by a $(1,2)$-swap \cite{andrade2012}. Solving $G[R(F)]$
+exactly therefore finds the best $(1,k)$-swap at $v$ for every $k$ at once, and
+larger $F$ yields moves no swap-based neighbourhood expresses.
+\end{corollary}
+
+\section{Algorithm}
+%% TODO: pseudocode, worklist sweep, self-tuning $|F|$, plateau moves,
+%% perturbation with change-log rollback, restarts keyed to dive cost.
+
+\section{Implementation}
+%% TODO: dynamic graph with LIFO undo, twin-indexed CSR, overflow lists for
+%% folded edges, solution lifting, reusable region solver.
+
+\section{Computational study}
+\label{sec:experiments}
+
+%% TODO: setup paragraph (hardware, budget, verification protocol, instances).
+
+\input{tables/quality_geometric}
+\input{tables/quality_road}
+\input{tables/quality_social}
+\input{tables/quality_web}
+\input{tables/quality_bhoslib}
+\input{tables/aggregate}
+\input{tables/ablation}
+
+%% TODO: discussion of each family; time-to-target plots; statistical tests.
+
+\section{Conclusions}
+%% TODO.
+
+\section*{Data availability}
+Source code, instance generators and the raw per-run records are available at
+\url{https://github.com/vinhqdang/max_independence_set}.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{refs}
+
+\end{document}

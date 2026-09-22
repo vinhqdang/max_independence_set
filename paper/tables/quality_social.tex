@@ -1,0 +1,17 @@
+\begin{table}[htbp]
+\centering
+\caption{Social networks: size of the independent set found within the 60\,s budget (larger is better). Best value per instance in bold.}
+\label{tab:quality-social}
+\small
+\begin{tabular}{lrrrrrrrrrr}
+\toprule
+Algorithm & \texttt{ca-AstroPh} & \texttt{ca-CondMat} & \texttt{email-Enron} & \texttt{com-dblp} & \texttt{com-amazon} & \texttt{com-youtube} & \texttt{soc-pokec-relationships} & \texttt{as-skitter} & \texttt{wiki-Talk} & \texttt{com-lj} \\
+\midrule
+\textsc{Cascade} & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & \textbf{174632} & \textbf{857945} & 788819 & 1170579 & \textbf{2338222} & \textbf{2085626} \\
+ReduMIS & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & \textbf{174632} & \textbf{857945} & -- & \textbf{1170580} & \textbf{2338222} & \textbf{2085626} \\
+OnlineMIS & \textbf{6760} & 9601 & 22227 & 152061 & 172685 & 857680 & 777605 & 1152300 & 2338207 & 2066610 \\
+NearLinear & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & 174627 & \textbf{857945} & \textbf{789161} & 1170541 & \textbf{2338222} & 2085604 \\
+LinearTime & 6759 & 9611 & \textbf{22255} & 152129 & 174612 & 857944 & 789003 & 1170410 & \textbf{2338222} & 2085353 \\
+\bottomrule
+\end{tabular}
+\end{table}
