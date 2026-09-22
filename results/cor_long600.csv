@@ -7,3 +7,4 @@ roadNet-CA,road,1965206,2766607,cascade,1,600.0,961851,603.379,1,maximal=yes
 roadNet-CA,road,1965206,2766607,redumis,1,600.0,961851,69.099,1,maximal=yes
 roadNet-CA,road,1965206,2766607,numvc,1,600.0,915773,1003.279,1,maximal=yes
 frb59-26-1,bhoslib,1534,126555,numvc,1,600.0,59,600.190,1,maximal=yes
+frb59-26-1,bhoslib,1534,126555,redumis,1,600.0,57,327.867,1,maximal=yes
