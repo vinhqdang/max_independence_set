@@ -64,3 +64,4 @@ del20,geometric,1048576,3145692,online_mis,2,60.0,311058,61.562,1,maximal=yes
 del20,geometric,1048576,3145692,online_mis,3,60.0,311150,61.612,1,maximal=yes
 del20,geometric,1048576,3145692,online_mis,4,60.0,311139,61.615,1,maximal=yes
 del20,geometric,1048576,3145692,online_mis,5,60.0,311043,61.624,1,maximal=yes
+del20,geometric,1048576,3145692,numvc,1,60.0,311393,433.682,1,maximal=yes
