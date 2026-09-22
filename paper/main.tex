@@ -517,6 +517,57 @@ on a confidently wrong value.
 
 %% TODO: discussion of each family; time-to-target plots; statistical tests.
 
+\subsection{Replication on different hardware}
+\label{sec:replication}
+
+A computational study is only as convincing as its independence from the machine
+it was run on. We therefore repeated the comparison on a second, unrelated
+platform: virtual machines with two Intel Xeon cores at 2.20\,GHz and 12\,GB of
+memory, against the four-core workstation used for the main tables. Every solver
+was rebuilt from source on that platform by the provisioning script included
+with our code, so nothing is carried over except the source.
+
+Two properties of the replication are worth stating explicitly. First, all
+solvers for a given instance were run on the same virtual machine, so each row
+of the replication table is internally consistent; only different rows may come
+from different machines, and those machines are of identical specification.
+Splitting a single instance's solvers across machines would have made the
+comparison meaningless, since the budget is a wall-clock budget and the amount
+of work that fits into it depends on the processor. Second, the two largest
+instances were excluded, because 12\,GB of memory is not enough for them; the
+replication therefore covers 25 of the 27 instances.
+
+\section{Threats to validity}
+\label{sec:threats}
+
+\paragraph{Measurement.} All timings are wall-clock and include reading the
+instance. Kernelization is bounded by a share of the budget but is not
+interruptible in the middle of a rule, so our own solver can overrun slightly;
+Table~\ref{tab:budget} reports the distribution for every solver, and the
+baseline that overruns most is the one our comparison is least favourable to.
+
+\paragraph{Unverified values.} The reference implementations of reducing-peeling
+report a solution size without emitting the corresponding set, so those values
+cannot be checked by our verifier and are taken on trust. All other values in
+this paper were re-derived from an emitted solution.
+
+\paragraph{Instance provenance.} The Delaunay and random geometric instances are
+generated rather than taken from an archive. They are reproducible from the seed
+in the generator we distribute, but they are not byte-identical to the instances
+of the same name used in earlier papers, so cross-paper comparison of absolute
+values on those families is not meaningful; comparisons within this paper are
+unaffected because every solver sees the same files.
+
+\paragraph{Randomisation.} Our solver, ReduMIS, OnlineMIS, NuMVC and FastVC are
+randomised. The main table reports a single seed per instance; the seed study
+repeats a subset with five seeds and reports both the best and the mean, and the
+statistical test is computed on per-instance aggregates.
+
+\paragraph{Failures.} Two solvers failed to return any solution on some
+instance within the cutoff, which we report as a failure rather than excluding
+the instance. Excluding them would have removed exactly the cases that
+distinguish the solvers.
+
 \section{Conclusions}
 \label{sec:conclusions}
 
