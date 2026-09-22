@@ -10,6 +10,8 @@
 \graphicspath{{./}}
 \usepackage{url}
 \usepackage{longtable}
+\usepackage{tikz}
+\usetikzlibrary{fit,backgrounds}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
@@ -354,6 +356,26 @@ Let $T^\star$ be a maximum independent set of $G[R(F)]$. Then
 $S' = (S \setminus R(F)) \cup T^\star$ is independent and
 $|S'| = |S| - |F| + |T^\star| \ge |S|$.
 \end{corollary}
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/region}}
+\caption{A region move that no swap-based neighbourhood expresses. Shaded
+vertices are in the current solution. In (i) the incumbent $S=\{a,b,c\}$ is
+maximal, so no vertex can simply be added. Releasing any \emph{single} vertex
+also achieves nothing: $R(\{a\})=\{a,u_1\}$, $R(\{b\})=\{b,u_3\}$ and
+$R(\{c\})=\{c,w\}$ each admit an independent set of size one, so every
+$(1,k)$-swap returns the incumbent. Releasing $a$ and $b$ together gives the
+region in (ii), $R(\{a,b\})=\{a,b,u_1,u_2,u_3\}$, because $u_2$ is the vertex
+whose two incumbent neighbours are exactly $a$ and $b$. That region contains the
+independent set $\{u_1,u_2,u_3\}$ of size three against the two vertices
+released, and (iii) is the result: $|S'|=4$, which is $\alpha(G)$ here. Note that
+$w$ stays outside the region --- its incumbent neighbour $c$ is not released ---
+and that the edge $u_3w$ leaves the region. Theorem~\ref{thm:region}(a) forbids
+edges from $R(F)$ to $S \setminus R(F)$ only, which is what makes the
+substitution safe; edges to the rest of $V$ are unconstrained.}
+\label{fig:region}
+\end{figure}
 
 The region is cheap to construct if the number of incumbent neighbours is
 maintained.

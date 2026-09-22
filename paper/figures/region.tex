@@ -1,0 +1,50 @@
+\begin{tikzpicture}[
+  every node/.style={font=\small},
+  vtx/.style={circle,draw,minimum size=6.5mm,inner sep=0pt,fill=white},
+  ins/.style={vtx,fill=black!15,very thick},
+  ed/.style={draw,black!65},
+  x=12mm,y=12mm]
+
+% ---- panel (i): the incumbent ----
+\begin{scope}
+  \node[ins] (a)  at (0,1.15)  {$a$};
+  \node[ins] (b)  at (1.2,1.15){$b$};
+  \node[ins] (c)  at (2.6,1.15){$c$};
+  \node[vtx] (u1) at (-0.6,0) {$u_1$};
+  \node[vtx] (u2) at (0.6,0)  {$u_2$};
+  \node[vtx] (u3) at (1.8,0)  {$u_3$};
+  \node[vtx] (w)  at (3.0,0)  {$w$};
+  \foreach \s/\t in {a/u1,a/u2,b/u2,b/u3,c/w,u3/w} \draw[ed] (\s)--(\t);
+  \node at (1.2,-1.0) {(i) $S=\{a,b,c\}$};
+\end{scope}
+
+% ---- panel (ii): the region ----
+\begin{scope}[xshift=6.1cm]
+  \node[ins] (a2)  at (0,1.15)  {$a$};
+  \node[ins] (b2)  at (1.2,1.15){$b$};
+  \node[ins] (c2)  at (2.6,1.15){$c$};
+  \node[vtx] (u12) at (-0.6,0) {$u_1$};
+  \node[vtx] (u22) at (0.6,0)  {$u_2$};
+  \node[vtx] (u32) at (1.8,0)  {$u_3$};
+  \node[vtx] (w2)  at (3.0,0)  {$w$};
+  \begin{scope}[on background layer]
+    \draw[rounded corners=6pt,fill=black!8,draw=black!55,thick,densely dashed]
+      (-1.05,-0.45) rectangle (2.28,1.6);
+  \end{scope}
+  \foreach \s/\t in {a2/u12,a2/u22,b2/u22,b2/u32,c2/w2,u32/w2} \draw[ed] (\s)--(\t);
+  \node at (1.2,-1.0) {(ii) release $F=\{a,b\}$};
+\end{scope}
+
+% ---- panel (iii): after the move ----
+\begin{scope}[xshift=12.2cm]
+  \node[vtx] (a3)  at (0,1.15)  {$a$};
+  \node[vtx] (b3)  at (1.2,1.15){$b$};
+  \node[ins] (c3)  at (2.6,1.15){$c$};
+  \node[ins] (u13) at (-0.6,0) {$u_1$};
+  \node[ins] (u23) at (0.6,0)  {$u_2$};
+  \node[ins] (u33) at (1.8,0)  {$u_3$};
+  \node[vtx] (w3)  at (3.0,0)  {$w$};
+  \foreach \s/\t in {a3/u13,a3/u23,b3/u23,b3/u33,c3/w3,u33/w3} \draw[ed] (\s)--(\t);
+  \node at (1.2,-1.0) {(iii) $|S'|=4$};
+\end{scope}
+\end{tikzpicture}
