@@ -1,0 +1,5 @@
+instance,family,n,m,solver,seed,time_limit,size,seconds,verified,note
+del16,geometric,65536,196583,cascade,1,60.0,20647,60.061,1,maximal=yes
+del16,geometric,65536,196583,cascade,2,60.0,20645,60.058,1,maximal=yes
+del16,geometric,65536,196583,cascade,3,60.0,20642,60.062,1,maximal=yes
+del16,geometric,65536,196583,cascade,4,60.0,20645,60.056,1,maximal=yes
