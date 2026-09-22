@@ -12,3 +12,4 @@ web-BerkStan,web,685230,6649470,numvc,1,600.0,406663,649.912,1,maximal=yes
 web-BerkStan,web,685230,6649470,cascade,1,600.0,408380,601.760,1,maximal=yes
 roadNet-CA,road,1965206,2766607,fastvc,1,600.0,960024,600.695,1,maximal=yes
 web-BerkStan,web,685230,6649470,redumis,1,600.0,408482,66.898,1,maximal=yes
+frb59-26-1,bhoslib,1534,126555,fastvc,1,600.0,57,600.021,1,maximal=yes
