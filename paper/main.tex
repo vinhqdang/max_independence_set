@@ -65,10 +65,23 @@ search \sep data reduction \sep kernelization \sep combinatorial optimisation
 Given an undirected graph $G=(V,E)$, the maximum independent set problem asks
 for a largest set of pairwise non-adjacent vertices. It is equivalent to the
 minimum vertex cover problem on $G$ and to the maximum clique problem on the
-complement of $G$, and it appears as a subproblem in scheduling, wireless
-channel assignment, map labelling, computer vision and entity resolution. The
-problem is NP-hard and, unless P${}={}$NP, admits no constant-factor
-approximation, so instances of practical size are attacked heuristically.
+complement of $G$. The problem is NP-hard and, unless P${}={}$NP, admits no
+constant-factor approximation, so instances of practical size are attacked
+heuristically.
+
+The formulation is a natural model wherever a largest mutually compatible
+selection is wanted and incompatibility is pairwise. In scheduling, vertices are
+tasks and edges record conflicting resource demands, so an independent set is a
+largest set of jobs that can run together. In wireless networks, vertices are
+transmitters and edges record interference, and an independent set is a largest
+simultaneously active subset. In map labelling and in computer vision,
+candidate placements or detections that overlap are joined by an edge, and the
+largest consistent selection is again an independent set. In entity resolution
+and de-duplication over large record collections, edges express that two records
+cannot both be kept as distinct entities. What these share is scale and
+sparsity: the conflict graphs arising from real data routinely have millions of
+vertices and average degree in the low tens, which is the regime this paper
+addresses.
 
 Over the last decade the practical state of the art has converged on a single
 template: apply \emph{safe data reduction rules} until none fires, then search
@@ -454,7 +467,44 @@ turn, and by verifying that every reported solution is independent and maximal.
 \section{Computational study}
 \label{sec:experiments}
 
-%% TODO: setup paragraph (hardware, budget, verification protocol, instances).
+\subsection{Setup}
+
+All runs are performed on the same machine and are single-threaded. Every solver
+receives the same wall-clock budget, measured around the entire process, so that
+reading the instance and any construction phase are charged to the solver that
+incurs them. This is deliberate: a solver whose construction phase cannot be
+interrupted is genuinely less useful under a deadline, and
+Table~\ref{tab:budget} reports how closely each solver keeps to the budget.
+
+Every reported value is verified independently. A separate program re-reads the
+original instance, confirms that the returned set contains no edge, and reports
+its size; values that fail this check, or that a solver reports without emitting
+the set itself, are not counted. This matters in practice: the reference
+implementations of reducing-peeling print a size without the corresponding set,
+so their numbers are marked unverified in the raw records.
+
+Baselines are built from their authors' published sources. NuMVC and FastVC are
+taken from a library that carries the original implementations; they solve the
+minimum vertex cover formulation, and we convert their output to an independent
+set before verification.
+
+\subsection{Instances}
+
+The benchmark comprises 27 instances in five families: Delaunay triangulations
+and random geometric graphs, road networks, social networks, web graphs, and the
+BHOSLIB \texttt{frb} collection generated from Model RB \cite{xu2007}. The first
+family is generated with a fixed seed by a script included with the source; the
+remainder are public.
+
+One instance-preparation issue is worth recording, because it silently produces
+wrong answers. The BHOSLIB instances are distributed in \emph{clique} form, and
+the copies in common repositories are the dense clique graphs: \texttt{frb30-15-1}
+there has 450 vertices and 83,198 edges. A maximum independent set of that file
+has size 15, the domain size of the underlying construction, and every solver we
+tested returns exactly 15 on it. The instance relevant to the present problem is
+the complement, with 17,827 edges and independence number 30, and that is what
+we use. Benchmarking the distributed file directly would have every solver agree
+on a confidently wrong value.
 
 \input{tables/quality_geometric}
 \input{tables/quality_road}
