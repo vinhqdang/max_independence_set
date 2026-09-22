@@ -12,6 +12,7 @@
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
 \theoremstyle{definition}
 \newtheorem{definition}[theorem]{Definition}
 
@@ -125,37 +126,67 @@ Our contributions are:
 
 \paragraph{Data reductions.} The reduction approach traces back to the
 Nemhauser--Trotter theorem \cite{nemhauser1975}, which shows that the vertex
-cover linear program is half-integral and that its integral part can be fixed.
-Exact exponential algorithms contributed the local rules now used in practice,
-including the unconfined and confining-set machinery of Xiao and Nagamochi
-\cite{xiao2017}. Akiba and Iwata \cite{akiba2016} first demonstrated that a
-branch-and-reduce algorithm carrying the full rule set is competitive with, and
-often superior to, integer programming on real instances. Hespe et al.
-\cite{hespe2019} parallelised kernelization and characterised which instance
-families reduce well. Gellner et al. \cite{gellner2021} showed that rules which
-temporarily \emph{increase} the graph can unlock further reduction.
+cover linear program is half-integral and that its integral part may be fixed
+without losing an optimum. Parameterized complexity supplied the combinatorial
+counterpart: vertex cover admits a kernel with at most $2k$ vertices, obtained
+either from that linear program or from crown decompositions
+\cite{chen2001,abukhzam2007}. In parallel, the line of exact exponential
+algorithms that began with Tarjan and Trojanowski \cite{tarjan1977} and was
+sharpened by measure-and-conquer analysis \cite{fomin2009} produced most of the
+local rules now used in practice, including the confining-set machinery behind
+the unconfined rule \cite{xiao2013,xiao2017}.
+
+Akiba and Iwata \cite{akiba2016} first demonstrated that a branch-and-reduce
+algorithm carrying the full rule set is competitive with, and often superior to,
+integer programming on real instances, and established the rule ordering that
+subsequent solvers reuse. Hespe et al. \cite{hespe2019} parallelised
+kernelization, introduced dependency checking to avoid re-testing rules that
+cannot fire, and characterised which instance families reduce well; their
+measurements are the source of the observation that success is essentially
+determined by whether the kernel becomes small. Gellner et al.
+\cite{gellner2021} showed that transformations which temporarily \emph{increase}
+the graph can unlock further reduction, and Figiel et al. \cite{figiel2022}
+that \emph{undoing} a rule can enable others, yielding a smaller final kernel.
+Branching itself can be aimed at provoking reductions \cite{hespe2021}, and
+reduction-based solvers have been combined with SAT solving
+\cite{plachetta2021}. The weighted variant has attracted most of the recent
+activity \cite{lamm2019,xiaowww2021,grossmann2023,langedal2022}.
 
 \paragraph{Local search.} Andrade et al. \cite{andrade2012} introduced the
 $(1,2)$-swap neighbourhood with an $O(m)$ test for improving moves, which
 underpins the KaMIS solvers \cite{lamm2017,dahlum2016}. In the operations
 research and artificial intelligence literature the same problem is usually
-posed as minimum vertex cover: NuMVC \cite{cai2013numvc} combines edge weighting
-with two-stage exchange and configuration checking and is extremely strong on
-dense benchmark instances, while FastVC \cite{cai2017fastvc} trades some of that
-quality for the ability to run on massive sparse graphs at all.
+posed as minimum vertex cover. NuMVC \cite{cai2013numvc} combines edge weighting
+with a two-stage exchange step and configuration checking with forgetting, and
+is extremely strong on the dense structured instances of the DIMACS and BHOSLIB
+collections. Its cost per step, however, makes it unsuitable for massive graphs,
+which motivated FastVC \cite{cai2015,cai2017fastvc}: a cheaper construction
+together with best-from-multiple-selection, trading some quality for the ability
+to run on such graphs at all. Our experiments reproduce both halves of this
+picture, including instances on which NuMVC returns no solution.
 
 \paragraph{Exact solvers.} Branch-and-bound on the complement with incremental
 MaxSAT reasoning \cite{li2017momc} is the strongest general approach on dense
-instances and is a component of the solver that won the PACE 2019 vertex cover
-challenge \cite{hespe2020}.
+instances. The solver that won the vertex cover track of the PACE 2019
+challenge \cite{pace2019} is a portfolio combining aggressive kernelization,
+iterated local search, branch-and-reduce and two calls to such a clique solver
+\cite{hespe2020}; it is among our baselines, and remains far stronger than our
+own exact mode on dense instances for exactly this reason.
 
 \paragraph{Positioning.} Large-neighbourhood search with an exactly solved
-sub-problem is a standard metaheuristic pattern. What distinguishes the present
-work is the interaction with data reductions: the region is defined so that it
-is provably separated from the incumbent, and the reduction rules are what make
-solving it exactly cheap enough to sit in the inner loop. The neighbourhood size
-is then not a parameter but a quantity inferred at run time from the difficulty
-of the sub-problems.
+sub-problem is a standard metaheuristic pattern, and swap neighbourhoods for
+this problem are long established \cite{andrade2012}. Three things distinguish
+the present work. First, the region is defined from the incumbent rather than
+from graph distance, and is provably separated from it, so the move is
+unconditionally admissible and monotone; no acceptance criterion, tabu list or
+repair step is required. Second, the data reduction rules are used \emph{inside}
+the move rather than only before the search, and this is what makes an exact
+sub-solve cheap enough for an inner loop; our ablation shows that the move
+carries essentially the entire improvement over the baselines. Third, the
+neighbourhood size is not a parameter but a quantity inferred at run time from
+whether the sub-problems are being solved to proven optimality, which is what
+allows one configuration to cover instance families whose appropriate
+neighbourhood sizes differ by three orders of magnitude.
 
 \section{Preliminaries}
 Let $G=(V,E)$ be a simple undirected graph. A set $S \subseteq V$ is
@@ -203,6 +234,62 @@ stalled; it is obtained from a maximum matching in the bipartite double cover
 via K\"onig's theorem. Because it must run to completion for persistency to
 hold, it is skipped rather than interrupted when the budget is short.
 
+For completeness we record why the two rules that are least obvious are safe.
+
+\begin{lemma}[Simplicial vertices]
+\label{lem:simplicial}
+If $N(v)$ induces a clique then some maximum independent set contains $v$.
+\end{lemma}
+
+\begin{proof}
+Let $S$ be a maximum independent set with $v \notin S$. Since $N(v)$ is a
+clique, $|S \cap N(v)| \le 1$. If $S \cap N(v) = \emptyset$ then $S \cup \{v\}$
+is independent and larger, contradicting maximality. Otherwise
+$S \cap N(v) = \{u\}$ for a single $u$, and $(S \setminus \{u\}) \cup \{v\}$ is
+independent, of the same size, and contains $v$.
+\end{proof}
+
+Degree-0 and degree-1 vertices are the special cases $|N(v)| \in \{0,1\}$.
+
+\begin{lemma}[Domination]
+\label{lem:domination}
+If $uv \in E$ and $N[u] \subseteq N[v]$ then some maximum independent set
+excludes $v$.
+\end{lemma}
+
+\begin{proof}
+Let $S$ be a maximum independent set containing $v$. Then $u \notin S$, because
+$u$ and $v$ are adjacent. Consider $S' = (S \setminus \{v\}) \cup \{u\}$. Any
+neighbour of $u$ lies in $N[u] \subseteq N[v]$, that is, it is either $v$, which
+has been removed, or a neighbour of $v$, which is not in $S$ because $v \in S$.
+Hence $S'$ is independent, has the same size as $S$, and excludes $v$.
+\end{proof}
+
+\begin{lemma}[Degree-2 folding]
+\label{lem:fold}
+Let $N(v) = \{u,w\}$ with $uw \notin E$, and let $G'$ be obtained from $G$ by
+deleting $v,u,w$ and adding a vertex $f$ adjacent to
+$(N(u) \cup N(w)) \setminus \{v,u,w\}$. Then $\alpha(G) = \alpha(G') + 1$.
+\end{lemma}
+
+\begin{proof}
+($\ge$) Let $T$ be a maximum independent set of $G'$. If $f \notin T$ then
+$T \cup \{v\}$ is independent in $G$, since $v$'s only neighbours are $u$ and
+$w$, neither of which is in $T$. If $f \in T$ then $(T \setminus \{f\}) \cup
+\{u,w\}$ is independent in $G$: $u$ and $w$ are non-adjacent by assumption, and
+any other neighbour of $u$ or $w$ is adjacent to $f$ and hence outside $T$.
+Either way we obtain an independent set of size $|T| + 1$.
+
+($\le$) Let $S$ be a maximum independent set of $G$. By
+Lemma~\ref{lem:simplicial} applied to the case $|N(v)| = 2$ we may assume $S$
+contains $v$, or contains both $u$ and $w$; if it contained exactly one of
+$u,w$, exchanging that vertex for $v$ keeps the size. In the first case
+$S \setminus \{v\}$ is independent in $G'$ and avoids $f$. In the second,
+$(S \setminus \{u,w\}) \cup \{f\}$ is independent in $G'$, because no neighbour
+of $f$ other than through $u$ or $w$ exists. Either way we obtain an independent
+set of $G'$ of size $|S| - 1$.
+\end{proof}
+
 \section{The region move}
 \label{sec:move}
 
@@ -244,6 +331,30 @@ Let $T^\star$ be a maximum independent set of $G[R(F)]$. Then
 $S' = (S \setminus R(F)) \cup T^\star$ is independent and
 $|S'| = |S| - |F| + |T^\star| \ge |S|$.
 \end{corollary}
+
+The region is cheap to construct if the number of incumbent neighbours is
+maintained.
+
+\begin{proposition}[Cost of a move]
+\label{prop:cost}
+Let $t(u) = |N(u) \cap S|$ be maintained incrementally. Then $R(F)$ can be
+constructed in time $O\!\left(\sum_{v \in F} \deg v\right)$, and the induced
+subgraph $G[R(F)]$ in time $O\!\left(\sum_{v \in R(F)} \deg v\right)$.
+\end{proposition}
+
+\begin{proof}
+Scanning the neighbourhoods of the vertices of $F$ and counting, for each
+vertex $u$ outside $S$, how many of its neighbours lie in $F$, costs
+$\sum_{v \in F} \deg v$. A vertex $u$ satisfies $N(u) \cap S \subseteq F$
+exactly when that count equals $t(u)$, so membership in $R(F)$ is decided in
+constant time per candidate, and only vertices adjacent to $F$ are candidates.
+Maintaining $t$ costs $O(\deg v)$ whenever a vertex $v$ enters or leaves $S$,
+which is charged to the move that changes it.
+\end{proof}
+
+The cost of the move is therefore dominated not by the size of the graph but by
+the total degree of the region, and the exact sub-solve is performed on the
+kernel of $G[R(F)]$ rather than on $G[R(F)]$ itself.
 
 \begin{corollary}[Relation to classical swaps]
 For $F = \{v\}$, $R(F) = \{v\} \cup \{u \notin S : N(u) \cap S = \{v\}\}$, which
