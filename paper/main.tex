@@ -7,6 +7,7 @@
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage{graphicx}
+\graphicspath{{./}}
 \usepackage{url}
 
 \newtheorem{theorem}{Theorem}
@@ -548,6 +549,20 @@ outside the incumbent has several incumbent neighbours, so releasing a small
 $F$ unlocks nothing while releasing a large one makes the region the whole
 graph. The move degenerates, and specialised local search is the better tool.
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.78\textwidth]{figures/profile}
+\caption{Performance profile on solution quality. For each instance the ratio is
+the best value any solver found divided by the value this solver returned, so
+$\tau = 1$ means it matched the best. A curve that never reaches $1.0$ had a run
+that returned no solution at all: ReduMIS on \texttt{soc-pokec} and NuMVC on
+\texttt{com-lj}. Note that the profile is a \emph{relative} measure and
+therefore weights the small dense instances heavily, where losing a single
+vertex is already a $2$--$3\%$ ratio; Table~\ref{tab:aggregate} and the absolute
+margins below give the complementary view.}
+\label{fig:profile}
+\end{figure}
+
 \subsection{Aggregate comparison}
 
 Counting wins is misleading here, because instances differ in scale by four
@@ -563,10 +578,26 @@ instances both solved, \textsc{Cascade} is ahead of ReduMIS by 8651 vertices and
 behind by 122: where ReduMIS wins it wins by one or two vertices, and where
 \textsc{Cascade} wins it wins by thousands.
 
+Figure~\ref{fig:profile} shows the same data as a performance profile.
+\textsc{Cascade} matches the best value on the largest share of instances among
+the solvers that never fail, and it is one of only three that reach every
+instance at all. Its curve is flat between $\tau \approx 1.001$ and
+$\tau \approx 1.017$, which is the BHOSLIB family: a one-vertex shortfall on a
+35-vertex optimum is a $2.9\%$ ratio, so those instances sit far to the right
+even though the absolute loss is one vertex each.
+
 Table~\ref{tab:budget} should be read alongside these results. NuMVC checks its
 cutoff only between search steps, so under a 60\,s budget it takes 204\,s on
 average and exceeds 90\,s on twelve of the 27 instances; it is therefore
 compared here under conditions that favour it, and is still behind.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/seeds}
+\caption{Spread over five seeds, as a percentage of the best value reached on
+each instance. Boxes show the quartiles and the median; whiskers the range.}
+\label{fig:seeds}
+\end{figure}
 
 \subsection{Replication on different hardware}
 \label{sec:replication}

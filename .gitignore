@@ -231,3 +231,4 @@ paper/*.log
 paper/*.out
 paper/*.pdf
 paper/*.spl
+paper/figures/*.png
