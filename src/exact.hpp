@@ -26,6 +26,11 @@ struct ExactConfig {
     long long node_budget = -1;   // -1 for unlimited
     long long lower_bound = 0;    // prune against a solution already in hand
     bool need_solution = true;
+    // Compute a greedy incumbent before branching.  Worth it for a stand-alone
+    // solve, where the search may never reach a leaf inside the budget and
+    // would otherwise return nothing; the neighbourhood search already supplies
+    // a bound, so it leaves this off.
+    bool seed_greedy = false;
     uint64_t seed = 0;  // randomises tie-breaking so repeated solves of the same
                         // region can return different optima of equal size
 };
@@ -70,6 +75,7 @@ private:
         red_.push_all();
         red_.reduce();
         size_t clo = push_live_range(lo, hi, fold_mark);
+        if (cfg_.seed_greedy) seed_greedy_incumbent(clo, arena_.size());
         bool complete = branch(clo, arena_.size());
         ExactResult r;
         r.size = best_;
@@ -78,6 +84,29 @@ private:
         r.solution = best_sol_;
         r.solution.resize(n0_);
         return r;
+    }
+
+    // Takes a greedy independent set of the residual, lowest degree first, and
+    // keeps it if it beats the incoming bound.  This guarantees a usable answer
+    // even when the search is cut off before reaching any leaf.
+    void seed_greedy_incumbent(size_t lo, size_t hi) {
+        greedy_order_.assign(arena_.begin() + lo, arena_.begin() + hi);
+        std::sort(greedy_order_.begin(), greedy_order_.end(),
+                  [&](int a, int b) { return dg_.deg(a) < dg_.deg(b); });
+        blocked_.assign(dg_.capacity(), 0);
+        sol_buf_.assign(dg_.capacity(), 0);
+        long long taken = 0;
+        for (int v : greedy_order_) {
+            if (blocked_[v]) continue;
+            sol_buf_[v] = 1;
+            ++taken;
+            dg_.for_each_nbr(v, [&](int u) { blocked_[u] = 1; });
+        }
+        long long total = red_.offset() + taken;
+        if (total <= best_) return;
+        best_ = total;
+        red_.lift(sol_buf_);
+        best_sol_ = sol_buf_;
     }
 
     // Returns the highest-degree vertex of the node's live range, breaking ties
@@ -209,7 +238,8 @@ private:
     bool out_of_budget_ = false;
     std::vector<char> best_sol_;
     std::vector<int> arena_, cand_;
-    std::vector<char> sol_buf_;
+    std::vector<char> sol_buf_, blocked_;
+    std::vector<int> greedy_order_;
     std::vector<int> cover_mark_, nbr_mark_;
     int cover_stamp_ = 0, nbr_stamp_ = 0;
     uint64_t rng_ = 0x9e3779b97f4a7c15ULL;

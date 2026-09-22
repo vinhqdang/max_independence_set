@@ -24,6 +24,7 @@ void usage() {
             "  --kernel-only       stop after kernelization\n"
             "  --exact             prove optimality by branch-and-reduce\n"
             "  --no-lns            disable exact neighbourhood moves (ablation)\n"
+            "  --no-perturb        disable perturbation and restarts (ablation)\n"
             "  --no-dive-moves     disable decision-space local search (ablation)\n"
             "  --no-reductions X   disable rules: fold2,twin,dom,unconf,degree\n");
 }
@@ -59,6 +60,7 @@ int main(int argc, char** argv) {
         else if (a == "--kernel-share") cfg.kernel_share = atof(next().c_str());
         else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
+        else if (a == "--no-perturb") cfg.use_perturbation = false;
         else if (a == "--no-dive-moves") cfg.use_dive_moves = false;
         else if (a == "--dive-moves") cfg.use_dive_moves = true;
         else if (a == "--lns-free") cfg.lns_start_free = atoi(next().c_str());
@@ -86,6 +88,7 @@ int main(int argc, char** argv) {
     if (exact) {
         ExactConfig ec;
         ec.red = cfg.red;
+        ec.seed_greedy = true;
         ExactResult r = solve_exact(g, ec, cfg.time_limit, elapsed);
         printf("instance=%s n=%d m=%lld size=%lld time=%.3f read_time=%.3f "
                "nodes=%lld proved_optimal=%d\n",

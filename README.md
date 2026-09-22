@@ -49,6 +49,24 @@ Useful options:
 | `--kernel-only` | stop after kernelization and report the kernel |
 | `--no-lns`, `--dive-moves` | ablation switches |
 
+## Results
+
+Against the published solvers under a common 60 second budget, on 27 instances
+across five families, with every solution independently verified
+(`docs/EXPERIMENTS.md` has the full tables and the caveats):
+
+| family | outcome |
+| --- | --- |
+| Delaunay triangulations | ahead on all three, by +10, +277 and +5535 (1.7% on `del20`) |
+| random geometric | level with ReduMIS; `rgg16` and `rgg18` are provably optimal |
+| road networks | level |
+| social | level on 8 of 10; behind on `as-skitter` by 1 and `soc-pokec` by 342 |
+| web | behind by 15 and 100 |
+| BHOSLIB `frb` | level on 5 of 7 over three seeds, behind by 1 on the other two |
+
+The margin comes from the neighbourhood move: removing it costs 1022 vertices on
+`del18` and 242 on `roadNet-PA`, more than the entire margin over the baselines.
+
 ## Evaluation
 
 `scripts/` holds the benchmark pipeline: instance preparation, a runner that

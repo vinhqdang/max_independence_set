@@ -41,6 +41,10 @@ SOLVERS = {
     "vcsolver":    ("Akiba & Iwata, TCS 2016", True),
     "pace":        ("Hespe et al., PACE 2019 winner", True),
     "cascade":     ("this work", False),
+    "cascade-nolns":  ("this work, no neighbourhood moves", False),
+    "cascade-nolp":   ("this work, no LP reduction", False),
+    "cascade-nopert": ("this work, no perturbation or restarts", False),
+    "cascade-dive":   ("this work, decision-space moves instead", False),
     "cascade-exact": ("this work", True),
     "highs":       ("HiGHS MIP", True),
 }
@@ -131,6 +135,14 @@ def invoke(solver, inst, tl, seed, tmp):
                "--time-limit", "%g" % tl, "--lns-free", "4"]
         if solver == "cascade-exact":
             cmd.append("--exact")
+        elif solver == "cascade-nolns":
+            cmd.append("--no-lns")
+        elif solver == "cascade-nolp":
+            cmd.append("--no-lp")
+        elif solver == "cascade-nopert":
+            cmd += ["--no-perturb"]
+        elif solver == "cascade-dive":
+            cmd += ["--no-lns", "--dive-moves"]
         el, res, to = run(cmd, timeout=tl + 600)
         size, note = verify(path, sol)
         proved = res is not None and "proved_optimal=1" in (res.stdout or "")

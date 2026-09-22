@@ -24,9 +24,11 @@ python3 scripts/run_bench.py \
   --time-limit "$TL" --max-n 300000 --out "$OUT/exact.csv"
 
 echo "== ablation: which component earns its place =="
-python3 scripts/run_bench.py --solvers cascade --time-limit "$TL" \
+python3 scripts/run_bench.py \
+  --solvers cascade,cascade-nolns,cascade-nopert,cascade-nolp,cascade-dive \
+  --time-limit "$TL" \
   --instances del16,del18,rgg16,web-Stanford,roadNet-PA,frb40-19-1,frb59-26-1 \
-  --out "$OUT/ablation_full.csv"
+  --out "$OUT/ablation.csv"
 
 python3 scripts/summarize.py "$OUT/heuristic.csv" --markdown > "$OUT/summary.md"
 cat "$OUT/summary.md"

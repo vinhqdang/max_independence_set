@@ -86,9 +86,32 @@ A worklist drives the sweep: only vertices whose neighbourhood changed are
 re-examined, so a sweep converges to a solution that is optimal for *every*
 region of the current size before the size grows.
 
+## Where the search spends its time
+
+Three scheduling decisions matter as much as the move itself, and each follows
+from a measurement rather than a constant.
+
+**Kernelization gets a share of the budget, not all of it.**  Reductions are
+optional, so stopping early only leaves a larger kernel.  Without a bound,
+soc-pokec spent 222 seconds kernelizing against a 60 second budget.  It now
+stops at 30% of the budget and hands what it has to the search.
+
+**Diving uses a cheaper rule set than kernelization.**  The full suite runs once,
+up front.  A dive re-runs reductions after *every* decision, and there the
+quadratic unconfined test costs far more per decision than the vertices it saves
+are worth: on soc-pokec the first dive did not finish inside the budget at all.
+Dropping that one rule from the dive took the same instance from 738 704 to
+788 857.
+
+**The sweep seeds only from the kernel and its neighbours.**  Every vertex the
+reductions decided belongs to some maximum independent set, so an improving move
+has to touch a vertex that survived into the kernel.  com-lj has 4M vertices and
+a 1781-vertex kernel; seeding from all of them wasted the entire budget on
+settled ground.
+
 ## Escaping a local optimum
 
-Two mechanisms:
+Three mechanisms:
 
 * **Plateau moves.**  A region optimum of equal size that differs from the
   incumbent is accepted once a full sweep has stopped finding real gains.
@@ -101,6 +124,15 @@ Two mechanisms:
   change goes through a change log, so a perturbation that ends up worse is
   rolled back by rewriting only the touched vertices — never the whole solution,
   which matters at millions of vertices.
+* **Restarts.**  When nothing has improved for 200 times what one dive costs,
+  the incumbent is thrown away and the search dives again from the kernel with
+  fresh randomness, keeping the best solution in an archive so a restart can
+  cost time but never quality.  Keying the threshold to the dive cost is what
+  makes it safe: a restart has to pay for a re-dive, so BHOSLIB instances (dives
+  in milliseconds) restart hundreds of times inside a 60 second budget while
+  del20 (a 7 second dive) never restarts at all.  An earlier version used a
+  fixed share of the budget instead; it lifted frb30-15-1 to its known optimum
+  but cost 2000 vertices on del20.
 
 ## The reduction engine
 
@@ -142,3 +174,19 @@ reported "proved optimal".  Each node now owns its live range, built by
 filtering the parent's.  `tests/test_correctness.cpp` checks the exact solver
 against brute force on 300 random graphs, with each reduction rule disabled in
 turn, which is what catches this class of bug.
+
+## Things that were tried and did not work
+
+Recorded because the negative results are part of the design rationale.
+
+* **A bitset fast path for small regions.**  Regions of at most 64 vertices were
+  enumerated directly with word-sized adjacency, on the theory that setting up
+  the reduction engine dominates the cost of a tiny search.  It lost at every
+  threshold tested, because the reductions collapse such regions outright and
+  are simply faster than enumerating them.  Removed.
+* **Larger per-region budgets on dense instances.**  Giving each region a full
+  second and a million nodes did not beat the adaptive default; the search wants
+  many cheap exact moves, not a few expensive ones.
+* **Spending more of the budget on kernelization.**  Raising the kernelization
+  share from 30% to 50% on soc-pokec made the kernel smaller and the final
+  answer worse: the time was worth more to the search.
