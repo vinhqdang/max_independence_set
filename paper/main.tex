@@ -632,12 +632,17 @@ edge on web graphs. That is exactly what a non-significant $p$-value over
 twenty-six paired observations should be taken to mean.
 
 Figure~\ref{fig:profile} shows the same data as a performance profile.
-\textsc{Cascade} matches the best value on the largest share of instances among
-the solvers that never fail, and it is one of only three that reach every
-instance at all. Its curve is flat between $\tau \approx 1.001$ and
-$\tau \approx 1.017$, which is the BHOSLIB family: a one-vertex shortfall on a
-35-vertex optimum is a $2.9\%$ ratio, so those instances sit far to the right
-even though the absolute loss is one vertex each.
+\textsc{Cascade} matches the best value on 16 of the 27 instances, reaches
+within $0.07\%$ of it on a further five, and returns a solution on every
+instance, which ReduMIS and NuMVC do not. Its curve is then flat from
+$\tau \approx 1.0006$ to $\tau \approx 1.026$, and the six instances beyond that
+break are the whole of the rest of the BHOSLIB family. The break is an artefact
+of scale rather than of behaviour: a one-vertex shortfall on a 35-vertex optimum
+is a $2.9\%$ ratio, and a two-vertex shortfall on a 45-vertex optimum is
+$4.7\%$, so instances whose absolute loss is one or two vertices sit further to
+the right than instances whose absolute loss is a hundred. This is the
+complementary weakness of the profile to the one noted for the absolute margins,
+and the two views should be read together.
 
 Table~\ref{tab:budget} should be read alongside these results. NuMVC checks its
 cutoff only between search steps, so under a 60\,s budget it takes 204\,s on
