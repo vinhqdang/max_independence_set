@@ -163,29 +163,66 @@ def seed_boxplot(path, out):
     return out
 
 
-def convergence(path, out, instances):
+def convergence(path, out, instances, budget=60.0):
     """Solution quality against wall-clock time, one panel per instance."""
     series = collections.defaultdict(lambda: collections.defaultdict(list))
     for r in csv.DictReader(open(path)):
         series[r["instance"]][r["solver"]].append((float(r["seconds"]), int(r["size"])))
     shown = [i for i in instances if i in series]
+    missing = [i for i in instances if i not in series]
+    if missing:
+        print("  convergence: no traces for %s" % ", ".join(missing))
     if not shown:
+        print("  convergence: NOTHING to plot -- none of %s is in %s"
+              % (", ".join(instances), path))
         return None
-    fig, axes = plt.subplots(1, len(shown), figsize=(2.3 * len(shown), 2.4), squeeze=False)
-    for ax, inst in zip(axes[0], shown):
-        for s in ORDER:
+    # Each panel carries its own y scale, and those tick labels are wide (six
+    # digits on the road and web instances), so the panels need real space
+    # between them: packed tightly, one panel's labels land inside its
+    # neighbour's axes.
+    # Two columns rather than one row: four panels side by side make a strip
+    # 12 inches wide, which LaTeX then scales to the 6.5-inch text width and
+    # halves every label with it.
+    ncol = 2 if len(shown) > 2 else len(shown)
+    nrow = (len(shown) + ncol - 1) // ncol
+    fig, axes = plt.subplots(nrow, ncol, figsize=(3.2 * ncol, 2.4 * nrow),
+                             squeeze=False, constrained_layout=True)
+    flat = [a for row in axes for a in row]
+    for extra in flat[len(shown):]:
+        extra.set_visible(False)
+    handles, labels_seen = [], []
+    for ax, inst in zip(flat, shown):
+        # Our own curve is drawn last and slightly heavier: it sits at the top
+        # of the range on most instances, where it is otherwise overdrawn by
+        # whichever baseline gets closest.
+        for s in [x for x in ORDER if x != "cascade"] + ["cascade"]:
             pts = sorted(series[inst].get(s, []))
             if not pts:
                 continue
-            t = [p[0] for p in pts]
-            v = [p[1] for p in pts]
+            # A trace ends at the last improvement, not at the deadline. Drawn
+            # as recorded, every curve stops early and reads as a solver that
+            # gave up; the incumbent in fact stays at that value until the
+            # budget runs out, so hold each series flat to the deadline.
+            if pts[-1][0] < budget:
+                pts = pts + [(budget, pts[-1][1])]
             c, ls, mk, _ = STYLE[s]
-            ax.plot(t, v, color=c, linestyle=ls, label=label(s))
-        ax.set_title(inst)
+            line, = ax.plot([p[0] for p in pts], [p[1] for p in pts],
+                            color=c, linestyle=ls,
+                            linewidth=1.8 if s == "cascade" else 1.1,
+                            zorder=3 if s == "cascade" else 2)
+            if label(s) not in labels_seen:
+                handles.append(line)
+                labels_seen.append(label(s))
+        ax.set_title(inst, fontsize=9)
         ax.set_xlabel("seconds")
         ax.set_xscale("symlog", linthresh=1.0)
-    axes[0][0].set_ylabel("independent set size")
-    axes[0][-1].legend(loc="lower right", frameon=False)
+        ax.tick_params(labelsize=8)
+        ax.margins(y=0.08)
+    for r in range(nrow):
+        axes[r][0].set_ylabel("independent set size")
+    # Below the panels, so it cannot sit on top of any series.
+    fig.legend(handles, labels_seen, loc="outside lower center",
+               ncol=len(labels_seen), frameon=False)
     fig.savefig(out)
     plt.close(fig)
     return out
@@ -198,7 +235,12 @@ def main():
     ap.add_argument("--main", default="cor_main60.csv")
     ap.add_argument("--seeds", default="cor_seeds60.csv")
     ap.add_argument("--traces", default="traces.csv")
-    ap.add_argument("--convergence-instances", default="del20,web-BerkStan,frb59-26-1")
+    ap.add_argument("--budget", type=float, default=60.0,
+                    help="the wall-clock budget the traces were collected under")
+    ap.add_argument("--convergence-instances",
+                    default="del18,roadNet-PA,web-Stanford,frb40-19-1",
+                    help="must match what collect_traces.py gathered; instances "
+                         "absent from the trace file are silently skipped")
     args = ap.parse_args()
 
     setup()
@@ -213,7 +255,7 @@ def main():
     tr = os.path.join(args.results, args.traces)
     if os.path.exists(tr):
         m = convergence(tr, os.path.join(args.out, "convergence.pdf"),
-                        args.convergence_instances.split(","))
+                        args.convergence_instances.split(","), args.budget)
         if m:
             made.append(m)
     for m in made:

@@ -717,6 +717,40 @@ each instance. Boxes show the quartiles and the median; whiskers the range.}
 \label{fig:seeds}
 \end{figure}
 
+\subsection{Convergence}
+\label{sec:convergence}
+
+Table~\ref{tab:longbudget} shows what each solver reaches by the end of its
+budget; Figure~\ref{fig:convergence} shows how it gets there. Four instances
+were re-run with every improvement of the incumbent recorded against the wall
+clock. Only the three solvers that report improvements as they happen are
+plotted; the reduction-only baselines produce a single point.
+
+The shapes differ more than the endpoints do. On \texttt{del18} and
+\texttt{roadNet-PA} our solver reaches a value the others need most of the
+budget to approach, and then flattens: the kernelization and the first dive do
+most of the work, and the region moves refine it. On \texttt{web-Stanford} it
+converges almost immediately and improves six times in sixty seconds, which is
+the same observation the long-budget run makes from the other direction --- there
+is very little left to find once the graph has been reduced. The dense instance
+inverts the picture. All three solvers finish on the same value of 40, but NuMVC
+reaches it after $0.2$ seconds and FastVC after $0.8$, where we need $6.6$: on a
+graph this dense the region move has to work its way to what a specialised local
+search finds almost at once, and the tie at the deadline hides a large
+difference in how quickly it was reached.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/convergence}
+\caption{Incumbent size against wall-clock time at a 60-second budget, on a
+symmetric-log time axis so the first second is legible. Note that the solvers
+report at different granularities: ours records one point per search batch
+(between 6 and 586 points here) while NuMVC and FastVC report every individual
+improvement (up to 33\,000), so the apparent smoothness of a curve reflects how
+often a solver reports, not how often it improves.}
+\label{fig:convergence}
+\end{figure}
+
 \subsection{The long budget}
 \label{sec:longbudget}
 
