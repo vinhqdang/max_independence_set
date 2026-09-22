@@ -27,3 +27,15 @@ web-Stanford,lns_start_free,--lns-free,4,1,163375,60.000
 web-Stanford,restart_idle_dives,--restart-idle,800,0,163375,60.003
 del18,lns_start_free,--lns-free,16,0,82659,60.000
 del18,lns_start_free,--lns-free,1,0,82648,60.000
+web-Stanford,lns_slice,--lns-slice,0.02,0,163375,60.004
+web-Stanford,lns_slice,--lns-slice,0.2,0,163375,60.004
+web-Stanford,kernel_share,--kernel-share,0.1,0,163375,60.152
+del18,lns_slice,--lns-slice,0.02,0,82649,60.015
+web-Stanford,lns_slice,--lns-slice,0.05,1,163375,60.006
+web-Stanford,restart_idle_dives,--restart-idle,400,0,163375,60.001
+del18,kernel_share,--kernel-share,0.2,0,82655,60.000
+del18,lns_slice,--lns-slice,0.1,0,82656,60.010
+web-Stanford,lns_start_free,--lns-free,1,0,163374,60.005
+web-Stanford,lns_slice,--lns-slice,0.1,0,163375,60.001
+del18,restart_idle_dives,--restart-idle,400,0,82655,60.001
+web-Stanford,lns_start_free,--lns-free,2,0,163375,60.005

@@ -13,6 +13,7 @@
 set -u
 cd "$(dirname "$0")/.."
 OUT=results/sensitivity.csv
+CATALOGUE=${CATALOGUE:-/home/user/data/instances/catalogue.json}
 BIN=build/cascade
 TL=60
 INSTANCES="del18 web-Stanford frb40-19-1"
@@ -50,8 +51,15 @@ while IFS= read -r row; do
   set -- $row
   i=$1; name=$2; flag=$3; def=$4; v=$5
   grep -q "^$i,$name,$flag,$v," "$OUT" && continue
-  p=/home/user/data/instances/$i.txt
-  [ -f "$p" ] || continue
+  # Resolve through the catalogue, never by guessing an extension. The BHOSLIB
+  # instances live in prepared/ as .el because they are the complement of the
+  # archived clique form; a hardcoded .txt silently skipped all twenty of their
+  # runs, which is the same trap the instance-provenance appendix warns about.
+  p=$(python3 -c "import json;print(json.load(open('$CATALOGUE'))['$i']['path'])")
+  if [ ! -f "$p" ]; then
+    echo "    MISSING INSTANCE FILE for $i: $p" >&2
+    continue
+  fi
   echo "=== $i $name=$v (default $def) ==="
   out=$(timeout $((TL + 240)) "$BIN" "$p" --time-limit $TL --seed 1 "$flag" "$v" 2>/dev/null)
   size=$(echo "$out" | grep -o 'size=[0-9]*' | head -1 | cut -d= -f2)
