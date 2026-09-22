@@ -9,6 +9,7 @@
 \usepackage{graphicx}
 \graphicspath{{./}}
 \usepackage{url}
+\usepackage{longtable}
 
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
@@ -697,6 +698,17 @@ case.
 \section*{Data availability}
 Source code, instance generators and the raw per-run records are available at
 \url{https://github.com/vinhqdang/max_independence_set}.
+
+\appendix
+
+\section{Complete per-instance results}
+\label{app:full}
+
+Table~\ref{tab:appendix} lists every run behind the summary tables, so that the
+aggregates can be checked against the individual measurements. The raw records,
+including the seed study and the replication, are distributed with the source.
+
+\input{tables/appendix}
 
 \bibliographystyle{elsarticle-num}
 \bibliography{refs}
