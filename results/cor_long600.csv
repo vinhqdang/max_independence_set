@@ -3,3 +3,5 @@ del20,geometric,1048576,3145692,cascade,1,600.0,330533,601.119,1,maximal=yes
 del20,geometric,1048576,3145692,redumis,1,600.0,328983,602.049,1,maximal=yes
 del20,geometric,1048576,3145692,numvc,1,600.0,317648,670.601,1,maximal=yes
 del20,geometric,1048576,3145692,fastvc,1,600.0,330192,604.044,1,maximal=yes
+roadNet-CA,road,1965206,2766607,cascade,1,600.0,961851,603.379,1,maximal=yes
+roadNet-CA,road,1965206,2766607,redumis,1,600.0,961851,69.099,1,maximal=yes

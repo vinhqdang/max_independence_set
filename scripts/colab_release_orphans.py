@@ -23,10 +23,41 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true",
                     help="list what would be released without releasing it")
+    ap.add_argument("--config", default=None,
+                    help="session state file to judge against; must be the one "
+                         "the driver uses, or every assignment looks named")
+    ap.add_argument("--include-unreachable", action="store_true",
+                    help="also release assignments whose session is named "
+                         "locally but no longer answers (Colab reclaimed it)")
     args = ap.parse_args()
 
     st = State()
-    known = {s.endpoint for s in st.store.list().values()}
+    if args.config:
+        st.config_path = args.config
+    sessions = st.store.list()
+    known = {v.endpoint for v in sessions.values()}
+
+    if args.include_unreachable:
+        # A reclaimed VM keeps its assignment, and so keeps its slot, while no
+        # longer answering. It is still named locally, so it does not look
+        # orphaned; only probing tells the difference.
+        import subprocess, tempfile, os as _os
+        probe = _os.path.join(tempfile.gettempdir(), "_reach_probe.py")
+        with open(probe, "w") as f:
+            f.write("print('REACH_OK')\n")
+        for name, v in list(sessions.items()):
+            cmd = ["/home/user/colabenv/bin/colab"]
+            if args.config:
+                cmd += ["--config", args.config]
+            cmd += ["exec", "-s", name, "-f", probe, "--timeout", "60"]
+            try:
+                r = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+                alive = "REACH_OK" in (r.stdout or "") + (r.stderr or "")
+            except subprocess.TimeoutExpired:
+                alive = False
+            if not alive:
+                print("unreachable, will release:", name, v.endpoint)
+                known.discard(v.endpoint)
 
     assignments = st.client.list_assignments()
     orphans = [a.endpoint for a in assignments if a.endpoint not in known]

@@ -76,12 +76,33 @@ def session_alive(session):
     return "SESSION_STATE=ALIVE" in out
 
 
+def release_stale(log):
+    """Colab reclaims a VM without releasing its assignment, so the slot stays
+    taken by a machine that no longer answers. Nothing can then be created, and
+    the driver would otherwise spin on that forever."""
+    py = sys.executable if "colabenv" in sys.executable \
+        else "/home/user/colabenv/bin/python"
+    try:
+        res = subprocess.run(
+            [py, os.path.join(ROOT, "scripts", "colab_release_orphans.py"),
+             "--config", COLAB_STATE, "--include-unreachable"],
+            capture_output=True, text=True, timeout=900)
+    except subprocess.TimeoutExpired:
+        log("  releasing stale assignments timed out")
+        return False
+    freed = [l for l in (res.stdout or "").splitlines() if l.startswith("released")]
+    log("  released %d stale assignment(s)" % len(freed))
+    return bool(freed)
+
+
 def ensure_session(session, log):
     if session_alive(session):
         return True
     log("session %s not reachable; creating" % session)
     colab(["stop", "-s", session], timeout=120)
     rc, out = colab(["new", "-s", session], timeout=600)
+    if "TooManyAssignments" in out and release_stale(log):
+        rc, out = colab(["new", "-s", session], timeout=600)
     if not session_alive(session):
         log("  could not create %s: %s" % (session, out.strip()[:120]))
         return False
