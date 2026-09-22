@@ -20,6 +20,13 @@ import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COLAB = os.environ.get("COLAB_BIN", "/home/user/colabenv/bin/colab")
+# The CLI keeps its name -> session mapping under ~/.config, which this
+# container does not reliably preserve across a restart. Losing it strands the
+# VMs: they keep running and keep holding the concurrent-assignment quota, but
+# can no longer be addressed by name. Keeping the file beside the repository,
+# which does survive, lets a restarted driver pick the same VMs back up.
+COLAB_STATE = os.environ.get(
+    "COLAB_STATE", os.path.join(ROOT, ".colab", "sessions.json"))
 SOLVERS = "cascade,redumis,online_mis,numvc,fastvc,nearlinear,lineartime"
 N_SOLVERS = len(SOLVERS.split(","))
 SETUP_URL = ("https://raw.githubusercontent.com/vinhqdang/max_independence_set/"
@@ -37,8 +44,10 @@ QUEUES = {
 
 
 def colab(args, timeout=300):
+    os.makedirs(os.path.dirname(COLAB_STATE), exist_ok=True)
     try:
-        r = subprocess.run([COLAB] + args, capture_output=True, text=True, timeout=timeout)
+        r = subprocess.run([COLAB, "--config", COLAB_STATE] + args,
+                           capture_output=True, text=True, timeout=timeout)
         return r.returncode, (r.stdout or "") + (r.stderr or "")
     except subprocess.TimeoutExpired:
         return 1, "TIMEOUT"
