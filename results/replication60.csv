@@ -166,3 +166,7 @@ rgg18,geometric,262011,1046301,lineartime,1,60.0,61282,0.126,0,kernel=254318
 roadNet-CA,road,1965206,2766607,cascade,1,60.0,961852,62.877,1,maximal=yes
 roadNet-CA,road,1965206,2766607,redumis,1,60.0,961850,63.600,1,maximal=yes
 roadNet-CA,road,1965206,2766607,online_mis,1,60.0,923655,63.789,1,maximal=yes
+rgg20,geometric,1048171,4188702,numvc,1,60.0,239138,364.117,1,maximal=yes
+rgg20,geometric,1048171,4188702,fastvc,1,60.0,256450,61.056,1,maximal=yes
+rgg20,geometric,1048171,4188702,nearlinear,1,60.0,256277,3.472,0,kernel=161404
+rgg20,geometric,1048171,4188702,lineartime,1,60.0,244769,0.647,0,kernel=1018429
