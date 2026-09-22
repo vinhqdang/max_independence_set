@@ -47,11 +47,19 @@ used once as preprocessing, are what makes this affordable: they collapse a
 region of thousands of vertices to a kernel of a few dozen, so each move costs
 microseconds. The size of $F$ is tuned online from whether the sub-problems are
 being solved to proven optimality. On a benchmark of 27 instances in five
-families, compared against ReduMIS, OnlineMIS, reducing-peeling,
-branch-and-reduce and an integer-programming reference under a common time
-budget, the method is ahead on all Delaunay instances, with a margin that grows
-with instance size (up to 1.7\% on one million vertices), and competitive
-elsewhere. An ablation attributes the margin to the exact neighbourhood move.
+families, compared against ReduMIS, OnlineMIS, NuMVC, FastVC, reducing-peeling
+and near-linear kernelization under a common 60-second budget, the method
+attains the best value of all seven solvers on every geometric instance, and is
+strictly ahead of all of them on the three Delaunay instances by a margin that
+grows with size, reaching $0.08\%$ over the strongest baseline and $2.6\%$ over
+ReduMIS at one million vertices. Over the whole benchmark it is strictly ahead
+on three instances, matches the best value on thirteen, and is behind on
+eleven: by at most $0.06\%$ on five large sparse graphs, and by one or two
+vertices on six BHOSLIB instances, where NuMVC and FastVC remain the stronger
+solvers. A paired
+Wilcoxon test over relative gaps places it ahead of five of the six baselines
+and finds no significant difference from ReduMIS. An ablation attributes the
+geometric margin to the exact neighbourhood move.
 \end{abstract}
 
 \begin{keyword}
@@ -411,8 +419,10 @@ a maximum-degree vertex and re-reducing, which reproduces reducing-peeling
 \paragraph{Where the search looks.} Every vertex decided by a reduction belongs
 to some maximum independent set, so an improving move must touch a vertex that
 survived into the kernel. Seeding the sweep from the kernel and its neighbours
-rather than from all of $V$ matters on graphs that reduce well: one of our
-instances has four million vertices and a kernel of 1781.
+rather than from all of $V$ matters on graphs that reduce well: \texttt{com-lj}
+has four million vertices and reduces to a kernel more than two orders of
+magnitude smaller. The kernel size measured for every instance is in the run
+records distributed with the source.
 
 \paragraph{Choosing the neighbourhood size.} The useful value of $k=|F|$ differs
 by three orders of magnitude across instance families, so it is inferred rather
@@ -523,28 +533,44 @@ on a confidently wrong value.
 Tables~\ref{tab:quality-geometric}--\ref{tab:quality-bhoslib} give the size of
 the independent set each solver returned, by family.
 
-On the geometric family \textsc{Cascade} is ahead on every instance, and the
-margin grows with size: $+10$ on \texttt{del16}, $+277$ on \texttt{del18} and
-$+5535$ on \texttt{del20}, the last being $1.7\%$ of the best value any other
-solver reached. This is the family whose kernels remain a large fraction of the
-input, so it is where the choice of what to do after kernelization matters most,
-and it is where a move that restructures tens of vertices at once has the most
-to work with. On the random geometric graphs the reduction rules are far more
-effective and several solvers reach the same value, which the exact solvers
-confirm is optimal for \texttt{rgg16} and \texttt{rgg18}.
+On the geometric family \textsc{Cascade} attains the best value of the seven
+solvers on every instance. On the three Delaunay instances it is strictly ahead
+of all of them, and the margin grows with size: $+7$ on \texttt{del16}, $+77$ on
+\texttt{del18} and $+264$ on \texttt{del20}, measured against the strongest
+baseline on each, which is ReduMIS on the first and FastVC on the other two.
+Read against ReduMIS alone the same three margins are $+7$, $+271$ and $+8500$,
+because ReduMIS degrades sharply at the largest size while FastVC does not; this
+is why we report the comparison against the per-instance best rather than
+against a single reference solver. In relative terms the margin over the
+strongest baseline is small in every case --- $0.03\%$, $0.09\%$ and $0.08\%$ ---
+but it is consistent, and it is the only family in which any solver separates
+itself from the rest. This is also the family whose kernels remain a large
+fraction of the input, so it is where the choice of what to do after
+kernelization matters most, and where a move that restructures tens of vertices
+at once has the most to work with. On the random geometric graphs the reduction
+rules are far more effective, and \textsc{Cascade} and ReduMIS reach the same
+value on all three sizes.
 
 On road networks and on most social networks the strong solvers agree to within
-a handful of vertices, because the kernels are tiny: \texttt{com-lj} has four
-million vertices and a kernel of 1781. What separates the solvers there is
-robustness rather than quality. ReduMIS returned nothing on \texttt{soc-pokec}
-within eleven minutes, and NuMVC returned nothing on \texttt{com-lj} within
-sixteen; \textsc{Cascade} produced a verified solution on every instance.
+a handful of vertices, because the kernels are a small fraction of the input:
+\texttt{com-lj} has four million vertices and near-linear kernelization leaves
+9780 of them. What separates the solvers there is robustness rather than
+quality, and the differences that remain run in both directions. \textsc{Cascade}
+ties ReduMIS exactly on \texttt{com-lj} and is four vertices behind it on
+\texttt{as-skitter} out of $1.17$ million; on \texttt{soc-pokec} it is $0.06\%$
+behind FastVC, the best value there. Robustness is where the gap is visible:
+ReduMIS returned nothing on \texttt{soc-pokec} within eleven minutes, and NuMVC
+returned nothing on \texttt{com-lj} within sixteen, while \textsc{Cascade}
+produced a verified solution on every instance in the benchmark.
 
-On web graphs \textsc{Cascade} is behind ReduMIS by 15 and 100 vertices, which
-is $0.01\%$ and $0.02\%$. On the BHOSLIB family it reaches the known optimum on
-several instances but is one vertex short on others, where NuMVC is both better
-and dramatically faster --- it attains the optimum of \texttt{frb30-15-1} in
-40\,ms, against a full budget for the reduction-based solvers. The structural
+On web graphs \textsc{Cascade} is behind ReduMIS by 15 and 102 vertices, which
+is $0.009\%$ and $0.025\%$. On the BHOSLIB family it is the weaker tool. It
+reaches the known optimum of \texttt{frb30-15-1}, as do ReduMIS, NuMVC and
+FastVC, but on the other six instances it is one or two vertices short of the
+best value, and that best value is NuMVC's or FastVC's on every one of them ---
+45 against our 43 on \texttt{frb45-21-1}, 58 against our 56 on
+\texttt{frb59-26-1}. Because these optima are small, a two-vertex shortfall is a
+$4.4\%$ relative gap, the largest we record anywhere. The structural
 reason is given in Section~\ref{sec:move}: on a dense graph almost every vertex
 outside the incumbent has several incumbent neighbours, so releasing a small
 $F$ unlocks nothing while releasing a large one makes the region the whole
@@ -564,6 +590,8 @@ margins below give the complementary view.}
 \label{fig:profile}
 \end{figure}
 
+\input{tables/whence}
+
 \subsection{Aggregate comparison}
 
 Counting wins is misleading here, because instances differ in scale by four
@@ -574,10 +602,18 @@ Wilcoxon signed-rank test (Table~\ref{tab:wilcoxon}).
 
 The test finds \textsc{Cascade} significantly better than five of the six
 baselines, including both solvers from the vertex cover local search line, and
-finds no significant difference against ReduMIS ($p = 0.195$). Summed over the
-instances both solved, \textsc{Cascade} is ahead of ReduMIS by 8651 vertices and
-behind by 122: where ReduMIS wins it wins by one or two vertices, and where
-\textsc{Cascade} wins it wins by thousands.
+finds no significant difference against ReduMIS ($p = 0.195$). The comparison
+against ReduMIS deserves to be unpacked, because a single aggregate hides its
+shape. Table~\ref{tab:whence} decomposes it by family. Over the 26 instances
+both solved, \textsc{Cascade} is ahead on three and behind on nine, and ties on
+the remaining fourteen; summed over all of them it is ahead by 8778 vertices and
+behind by 127, for a net of $+8651$. Nearly all of that net comes from one
+instance, \texttt{del20}, and the deficit is concentrated in the two web graphs.
+The honest reading is not that \textsc{Cascade} dominates ReduMIS but that the
+two are equal on most of this benchmark, that \textsc{Cascade} degrades far more
+gracefully on the largest geometric instance, and that ReduMIS holds a small
+edge on web graphs. That is exactly what a non-significant $p$-value over
+twenty-six paired observations should be taken to mean.
 
 Figure~\ref{fig:profile} shows the same data as a performance profile.
 \textsc{Cascade} matches the best value on the largest share of instances among

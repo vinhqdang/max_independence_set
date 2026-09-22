@@ -1,0 +1,17 @@
+instance,family,n,m,solver,seed,time_limit,size,seconds,verified,note
+ca-AstroPh,social,18772,198050,cascade,1,60.0,6760,0.436,1,maximal=yes
+ca-AstroPh,social,18772,198050,redumis,1,60.0,6760,0.793,1,maximal=yes
+ca-AstroPh,social,18772,198050,online_mis,1,60.0,6760,60.153,1,maximal=yes
+ca-AstroPh,social,18772,198050,numvc,1,60.0,6760,60.614,1,maximal=yes
+ca-AstroPh,social,18772,198050,fastvc,1,60.0,6760,60.041,1,maximal=yes
+ca-AstroPh,social,18772,198050,nearlinear,1,60.0,6760,0.057,0,kernel=0
+ca-AstroPh,social,18772,198050,lineartime,1,60.0,6759,0.009,0,kernel=7843
+ca-CondMat,social,23133,93439,cascade,1,60.0,9612,0.077,1,maximal=yes
+ca-CondMat,social,23133,93439,redumis,1,60.0,9612,0.121,1,maximal=yes
+ca-CondMat,social,23133,93439,online_mis,1,60.0,9601,0.051,1,maximal=yes
+frb40-19-1,bhoslib,760,41314,cascade,1,60.0,40,60.021,1,maximal=yes
+frb40-19-1,bhoslib,760,41314,redumis,1,60.0,40,61.274,1,maximal=yes
+frb40-19-1,bhoslib,760,41314,online_mis,1,60.0,39,60.022,1,maximal=yes
+frb53-24-1,bhoslib,1272,94227,cascade,1,60.0,50,60.043,1,maximal=yes
+frb53-24-1,bhoslib,1272,94227,redumis,1,60.0,51,61.381,1,maximal=yes
+frb53-24-1,bhoslib,1272,94227,online_mis,1,60.0,49,60.052,1,maximal=yes
