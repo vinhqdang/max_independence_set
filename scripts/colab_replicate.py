@@ -52,8 +52,8 @@ def exec_py(session, code, timeout=300, exec_timeout=180):
 
 
 def session_alive(session):
-    rc, out = exec_py(session, "print('ALIVE')", timeout=180, exec_timeout=60)
-    return "ALIVE" in out
+    rc, out = exec_py(session, "print('SESSION_STATE=ALIVE')", timeout=180, exec_timeout=60)
+    return "SESSION_STATE=ALIVE" in out
 
 
 def ensure_session(session, log):
@@ -76,21 +76,25 @@ print('provisioning')
 
 
 def setup_done(session):
+    """The VM answers with one sentinel token, so the reply survives whatever
+    else the Colab client prints around it."""
     rc, out = exec_py(session, """
 import subprocess
-print(subprocess.run(['bash','-c','grep -c SETUP_COMPLETE /content/setup.log 2>/dev/null || echo 0'],
-                     capture_output=True,text=True).stdout.strip())
+hit = subprocess.run(['bash','-c','grep -c SETUP_COMPLETE /content/setup.log 2>/dev/null || echo 0'],
+                     capture_output=True, text=True).stdout.strip()
+print('SETUP_STATE=' + ('READY' if hit not in ('', '0') else 'PENDING'))
 """, timeout=240)
-    return "1" in out.split("\n")[-2:][0] if out else False
+    return "SETUP_STATE=READY" in out
 
 
 def bench_running(session):
     rc, out = exec_py(session, """
 import subprocess
-print('RUNNING' if subprocess.run(['bash','-c','pgrep -f run_bench.py >/dev/null && echo y'],
-      capture_output=True,text=True).stdout.strip()=='y' else 'IDLE')
+hit = subprocess.run(['bash','-c','pgrep -f run_bench.py >/dev/null && echo y'],
+                     capture_output=True, text=True).stdout.strip()
+print('BENCH_STATE=' + ('RUNNING' if hit == 'y' else 'IDLE'))
 """, timeout=240)
-    return "RUNNING" in out
+    return "BENCH_STATE=RUNNING" in out
 
 
 def launch(session, instances, log):
