@@ -114,3 +114,6 @@ rgg16,geometric,65501,260438,redumis,1,60.0,16086,14.841,1,maximal=yes
 rgg16,geometric,65501,260438,online_mis,1,60.0,16077,60.244,1,maximal=yes
 rgg16,geometric,65501,260438,numvc,1,60.0,15901,62.229,1,maximal=yes
 rgg18,geometric,262011,1046301,online_mis,1,60.0,63684,60.778,1,maximal=yes
+del18,geometric,262144,786401,cascade,1,60.0,82653,60.428,1,maximal=yes
+del18,geometric,262144,786401,redumis,1,60.0,81779,60.930,1,maximal=yes
+del18,geometric,262144,786401,online_mis,1,60.0,81593,60.821,1,maximal=yes
