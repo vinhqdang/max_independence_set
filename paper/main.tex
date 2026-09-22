@@ -619,12 +619,16 @@ graph. The move degenerates, and specialised local search is the better tool.
 \includegraphics[width=0.78\textwidth]{figures/profile}
 \caption{Performance profile on solution quality. For each instance the ratio is
 the best value any solver found divided by the value this solver returned, so
-$\tau = 1$ means it matched the best. A curve that never reaches $1.0$ had a run
-that returned no solution at all: ReduMIS on \texttt{soc-pokec} and NuMVC on
-\texttt{com-lj}. Note that the profile is a \emph{relative} measure and
-therefore weights the small dense instances heavily, where losing a single
-vertex is already a $2$--$3\%$ ratio; Table~\ref{tab:aggregate} and the absolute
-margins below give the complementary view.}
+$\tau = 1$ means it matched the best. The axis is truncated to keep the region
+where the curves separate legible: an arrow marks a curve that continues beyond
+it, which here is reducing-peeling and near-linear kernelization, whose worst
+ratios are $1.52$ and $1.48$. Below $1.0$ at the right-hand edge without an
+arrow means a run that returned no solution at all, namely ReduMIS on
+\texttt{soc-pokec} and NuMVC on \texttt{com-lj}. Note that the profile is a
+\emph{relative} measure and therefore weights the small dense instances heavily,
+where losing a single vertex is already a $2$--$3\%$ ratio;
+Table~\ref{tab:aggregate} and the absolute margins below give the complementary
+view.}
 \label{fig:profile}
 \end{figure}
 

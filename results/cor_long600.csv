@@ -1,3 +1,4 @@
 instance,family,n,m,solver,seed,time_limit,size,seconds,verified,note
 del20,geometric,1048576,3145692,cascade,1,600.0,330533,601.119,1,maximal=yes
 del20,geometric,1048576,3145692,redumis,1,600.0,328983,602.049,1,maximal=yes
+del20,geometric,1048576,3145692,numvc,1,600.0,317648,670.601,1,maximal=yes

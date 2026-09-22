@@ -14,10 +14,18 @@ import os
 
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.patches as mpatches
 import matplotlib.pyplot as plt
 import numpy as np
 
 # Fixed slot order from the validated categorical palette.
+# Hatches give each solver a second, colour-independent identity, which is what
+# the box plots rely on once the paper is printed in greyscale.
+HATCH = {
+    "cascade": "", "redumis": "///", "fastvc": "\\\\\\", "numvc": "...",
+    "online_mis": "xxx", "nearlinear": "---", "lineartime": "|||",
+}
+
 STYLE = {
     "cascade":    ("#2a78d6", "-",  "o", r"\textsc{Cascade}"),
     "redumis":    ("#eb6834", "--", "s", "ReduMIS"),
@@ -76,23 +84,36 @@ def performance_profile(path, out):
             ratios[s].append(top / v if v else np.inf)
 
     fig, ax = plt.subplots(figsize=(5.2, 3.2))
-    # Curves separate in the first few percent; a wider range wastes the axis.
-    finite = [r for s in solvers for r in ratios[s] if np.isfinite(r)]
-    hi = float(np.clip(np.percentile(finite, 85), 1.04, 1.12))
+    # Curves separate in the first few percent, so the axis stays zoomed; but it
+    # must be wide enough that a solver which reached every instance is SEEN to
+    # reach 1.0, otherwise truncation reads as failure. We therefore cover the
+    # worst ratio of the majority of solvers and mark whoever is still cut off.
+    worst = {s: max((r for r in ratios[s] if np.isfinite(r)), default=1.0)
+             for s in solvers}
+    hi = float(np.clip(np.percentile(list(worst.values()), 70), 1.04, 1.12))
+    hi = round(hi + 0.002, 4)
     grid = np.linspace(1.0, hi, 400)
+    truncated = []
     for s in solvers:
         r = np.array(ratios[s], dtype=float)
         frac = [(r <= t).sum() / len(r) for t in grid]
         c, ls, mk, _ = STYLE[s]
         ax.step(grid, frac, where="post", color=c, linestyle=ls, label=label(s))
+        if worst[s] > hi:
+            truncated.append(s)
+            # An arrow at the axis edge says the curve continues off-plot.
+            ax.annotate("", xy=(hi, frac[-1]), xytext=(hi - 0.006, frac[-1]),
+                        arrowprops=dict(arrowstyle="->", color=c, lw=1.2))
     ax.set_xlabel(r"factor $\tau$ of the best value found by any solver")
     ax.set_ylabel("fraction of instances within $\\tau$")
     ax.set_xlim(1.0, hi)
     ax.set_ylim(0, 1.02)
-    # A curve that never reaches 1.0 had a run that returned no solution at all.
     ax.legend(loc="lower right", frameon=False, ncol=2)
     fig.savefig(out)
     plt.close(fig)
+    if truncated:
+        print("  profile: curves continuing past the axis: %s"
+              % ", ".join(truncated))
     return out
 
 
@@ -105,7 +126,7 @@ def seed_boxplot(path, out):
             runs[r["instance"]][r["solver"]].append(int(r["size"]))
     insts = sorted(runs)
     solvers = [s for s in ORDER if any(s in runs[i] for i in insts)]
-    data, positions, colors = [], [], []
+    data, positions, colors, hatches = [], [], [], []
     width = 0.8 / max(1, len(solvers))
     for xi, i in enumerate(insts):
         top = max(max(v) for v in runs[i].values())
@@ -116,20 +137,24 @@ def seed_boxplot(path, out):
             data.append([100.0 * (v - top) / top for v in vals])
             positions.append(xi + (si - (len(solvers) - 1) / 2) * width)
             colors.append(STYLE[s][0])
+            hatches.append(HATCH.get(s, ""))
     fig, ax = plt.subplots(figsize=(6.6, 3.2))
     bp = ax.boxplot(data, positions=positions, widths=width * 0.85,
                     patch_artist=True, medianprops=dict(color="#0b0b0b", linewidth=1.0),
                     flierprops=dict(marker=".", markersize=2, alpha=0.6))
-    for patch, c in zip(bp["boxes"], colors):
+    for patch, c, h in zip(bp["boxes"], colors, hatches):
         patch.set_facecolor(c)
         patch.set_alpha(0.55)
         patch.set_linewidth(0.6)
+        patch.set_edgecolor("#2b2b2b")
+        patch.set_hatch(h)
     ax.set_xticks(range(len(insts)))
     ax.set_xticklabels(insts, rotation=20, ha="center")
     ax.tick_params(axis="x", pad=6)
     ax.set_ylabel("gap to best on the instance (\\%)")
     # The legend goes above the axes: inside it would sit on top of the boxes.
-    handles = [plt.Line2D([], [], color=STYLE[s][0], linewidth=5, alpha=0.55, label=label(s))
+    handles = [mpatches.Patch(facecolor=STYLE[s][0], alpha=0.55, hatch=HATCH.get(s, ""),
+                              edgecolor="#2b2b2b", linewidth=0.6, label=label(s))
                for s in solvers]
     ax.legend(handles=handles, loc="lower left", bbox_to_anchor=(0, 1.01),
               frameon=False, ncol=len(solvers), borderaxespad=0)
