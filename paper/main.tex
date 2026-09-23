@@ -506,6 +506,18 @@ $0.69$\,s, $0.03$\,s and 96\,842 moves at $605$\,$\mu$s each. Those rates are
 what the reuse of the sub-solver and the payload-free undo buy; the throughput,
 not the asymptotics, is what makes an exactly-solved neighbourhood practical.
 
+A third detail is worth reporting because its value is not obvious and grows
+with scale. The reduction queue is seeded in increasing order of degree, so that
+the cheap rules fire on the vertices most likely to trigger cascades before any
+expensive test is attempted on a hub. Against the same solver seeding the queue
+in plain vertex order, kernelization takes $0.84$\,s rather than $1.05$\,s on
+\texttt{web-Stanford}, $4.87$ rather than $7.39$ on \texttt{as-skitter}, and
+$13.98$ rather than $48.84$ on \texttt{com-lj}. The gain is a factor of $1.25$ at
+282\,000 vertices and $3.5$ at four million: the ordering matters more the larger
+the graph, because a rule applied in the wrong order does work that a later
+deletion would have made unnecessary, and the number of such wasted applications
+grows faster than the graph does. It is one line of counting sort.
+
 Correctness is checked by comparing the exact solver against exhaustive search on
 random graphs, repeating the comparison with each reduction rule disabled in
 turn, and by verifying that every reported solution is independent and maximal.
