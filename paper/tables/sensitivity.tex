@@ -3,6 +3,7 @@
 \small
 \caption{Parameter sensitivity. Each block varies one parameter over its range with the others held at their defaults; $\star$ marks the default. Cells are the size returned at a 60-second budget, HIGHER IS BETTER. The \emph{spread} line under each block is $100\,(\max-\min)/\max$ over that block, per instance, to be read against the seed-to-seed spread of Section~\ref{sec:experiments}: $0.024\%$ on the geometric family and up to $2.5\%$ on BHOSLIB.}
 \label{tab:sensitivity}
+\fittable{
 \begin{tabular}{l r r r r }
 \toprule
 Parameter & Value & \texttt{del18} & \texttt{frb40-19-1} & \texttt{web-Stanford} \\
@@ -40,4 +41,5 @@ Parameter & Value & \texttt{del18} & \texttt{frb40-19-1} & \texttt{web-Stanford}
 & \emph{spread \%} & \emph{0.081} & \emph{2.500} & \emph{0.001} \\\\
 \bottomrule
 \end{tabular}
+}
 \end{table}

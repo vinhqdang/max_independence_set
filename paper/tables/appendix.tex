@@ -1,225 +1,207 @@
-\begin{longtable}{llrr rr}
-\caption{Complete per-instance results at the 60\,s budget: size found and wall-clock seconds. A dash means the solver returned no solution within the cutoff.}\label{tab:appendix}\\
+\footnotesize
+\begin{longtable}{l l r r}
+\caption{Complete per-instance results at the 60\,s budget. A dash means the solver returned no solution within the cutoff. Vertex and edge counts are in Table~\ref{tab:provenance}.}\label{tab:appendix}\\
 \toprule
-Instance & Solver & $n$ & $m$ & size & seconds \\
+Instance & Solver & Size & Seconds \\
 \midrule
 \endfirsthead
-\toprule Instance & Solver & $n$ & $m$ & size & seconds \\ \midrule \endhead
-\bottomrule \endfoot
-\texttt{rgg16} & \textsc{Cascade} & 65,501 & 260,438 & 16086 & 60.1 \\
- & ReduMIS &  &  & 16086 & 9.5 \\
- & OnlineMIS &  &  & 16082 & 60.1 \\
- & NuMVC &  &  & 15905 & 60.3 \\
- & FastVC &  &  & 16085 & 60.0 \\
- & NearLinear &  &  & 16035 & 0.1 \\
- & LinearTime &  &  & 15321 & 0.0 \\
-\addlinespace
-\texttt{del16} & \textsc{Cascade} & 65,536 & 196,583 & 20647 & 60.1 \\
- & ReduMIS &  &  & 20640 & 60.2 \\
- & OnlineMIS &  &  & 20630 & 60.1 \\
- & NuMVC &  &  & 20180 & 60.3 \\
- & FastVC &  &  & 20638 & 60.0 \\
- & NearLinear &  &  & 20284 & 0.1 \\
- & LinearTime &  &  & 20213 & 0.0 \\
-\addlinespace
-\texttt{rgg18} & \textsc{Cascade} & 262,011 & 1,046,301 & 64278 & 60.3 \\
- & ReduMIS &  &  & 64278 & 12.6 \\
- & OnlineMIS &  &  & 63912 & 60.5 \\
- & NuMVC &  &  & 62548 & 87.2 \\
- & FastVC &  &  & 64242 & 60.2 \\
- & NearLinear &  &  & 64094 & 0.3 \\
- & LinearTime &  &  & 61282 & 0.1 \\
-\addlinespace
-\texttt{del18} & \textsc{Cascade} & 262,144 & 786,401 & 82656 & 60.2 \\
- & ReduMIS &  &  & 82385 & 60.7 \\
- & OnlineMIS &  &  & 82019 & 60.4 \\
- & NuMVC &  &  & 80695 & 120.7 \\
- & FastVC &  &  & 82579 & 60.1 \\
- & NearLinear &  &  & 81211 & 0.7 \\
- & LinearTime &  &  & 80881 & 0.1 \\
-\addlinespace
-\texttt{rgg20} & \textsc{Cascade} & 1,048,171 & 4,188,702 & 256994 & 61.3 \\
- & ReduMIS &  &  & 256994 & 23.4 \\
- & OnlineMIS &  &  & 242366 & 61.7 \\
- & NuMVC &  &  & 239118 & 490.2 \\
- & FastVC &  &  & 256680 & 60.8 \\
- & NearLinear &  &  & 256277 & 1.8 \\
- & LinearTime &  &  & 244769 & 0.5 \\
-\addlinespace
-\texttt{del20} & \textsc{Cascade} & 1,048,576 & 3,145,692 & 330066 & 61.1 \\
- & ReduMIS &  &  & 321566 & 258.2 \\
- & OnlineMIS &  &  & 311146 & 61.7 \\
- & NuMVC &  &  & 311421 & 428.9 \\
- & FastVC &  &  & 329802 & 60.6 \\
- & NearLinear &  &  & 324619 & 4.7 \\
- & LinearTime &  &  & 323438 & 0.4 \\
-\addlinespace
-\texttt{roadNet-PA} & \textsc{Cascade} & 1,088,092 & 1,541,898 & 533627 & 60.8 \\
- & ReduMIS &  &  & 533628 & 37.2 \\
- & OnlineMIS &  &  & 515876 & 61.2 \\
- & NuMVC &  &  & 513067 & 451.1 \\
- & FastVC &  &  & 532571 & 60.3 \\
- & NearLinear &  &  & 531184 & 0.6 \\
- & LinearTime &  &  & 530910 & 0.1 \\
-\addlinespace
-\texttt{roadNet-CA} & \textsc{Cascade} & 1,965,206 & 2,766,607 & 961851 & 61.5 \\
- & ReduMIS &  &  & 961851 & 62.1 \\
- & OnlineMIS &  &  & 924236 & 62.2 \\
- & NuMVC &  &  & 915797 & 911.9 \\
- & FastVC &  &  & 959909 & 60.6 \\
- & NearLinear &  &  & 957199 & 1.8 \\
- & LinearTime &  &  & 956573 & 0.3 \\
-\addlinespace
-\texttt{ca-AstroPh} & \textsc{Cascade} & 18,772 & 198,050 & 6760 & 0.1 \\
- & ReduMIS &  &  & 6760 & 0.2 \\
- & OnlineMIS &  &  & 6760 & 60.1 \\
- & NuMVC &  &  & 6760 & 61.3 \\
- & FastVC &  &  & 6760 & 60.0 \\
- & NearLinear &  &  & 6760 & 0.0 \\
- & LinearTime &  &  & 6759 & 0.0 \\
-\addlinespace
-\texttt{ca-CondMat} & \textsc{Cascade} & 23,133 & 93,439 & 9612 & 0.1 \\
- & ReduMIS &  &  & 9612 & 0.1 \\
- & OnlineMIS &  &  & 9601 & 0.0 \\
- & NuMVC &  &  & 9611 & 60.5 \\
- & FastVC &  &  & 9612 & 60.0 \\
- & NearLinear &  &  & 9612 & 0.0 \\
- & LinearTime &  &  & 9611 & 0.0 \\
-\addlinespace
-\texttt{email-Enron} & \textsc{Cascade} & 36,692 & 183,831 & 22255 & 0.1 \\
- & ReduMIS &  &  & 22255 & 0.2 \\
- & OnlineMIS &  &  & 22227 & 0.1 \\
- & NuMVC &  &  & 22253 & 60.2 \\
- & FastVC &  &  & 22255 & 60.0 \\
- & NearLinear &  &  & 22255 & 0.0 \\
- & LinearTime &  &  & 22255 & 0.0 \\
-\addlinespace
-\texttt{com-dblp} & \textsc{Cascade} & 317,080 & 1,049,866 & 152131 & 0.4 \\
- & ReduMIS &  &  & 152131 & 0.6 \\
- & OnlineMIS &  &  & 152061 & 0.6 \\
- & NuMVC &  &  & 152112 & 85.9 \\
- & FastVC &  &  & 152131 & 60.2 \\
- & NearLinear &  &  & 152131 & 0.1 \\
- & LinearTime &  &  & 152129 & 0.1 \\
-\addlinespace
-\texttt{com-amazon} & \textsc{Cascade} & 334,863 & 925,872 & 174632 & 60.3 \\
- & ReduMIS &  &  & 174632 & 10.1 \\
- & OnlineMIS &  &  & 172685 & 0.6 \\
- & NuMVC &  &  & 174510 & 114.1 \\
- & FastVC &  &  & 174605 & 60.2 \\
- & NearLinear &  &  & 174627 & 0.1 \\
- & LinearTime &  &  & 174612 & 0.1 \\
-\addlinespace
-\texttt{com-youtube} & \textsc{Cascade} & 1,134,890 & 2,987,624 & 857945 & 1.3 \\
- & ReduMIS &  &  & 857945 & 1.8 \\
- & OnlineMIS &  &  & 857680 & 1.7 \\
- & NuMVC &  &  & 857708 & 143.2 \\
- & FastVC &  &  & 857945 & 60.6 \\
- & NearLinear &  &  & 857945 & 0.2 \\
- & LinearTime &  &  & 857944 & 0.2 \\
-\addlinespace
-\texttt{soc-pokec-relationships} & \textsc{Cascade} & 1,632,803 & 22,301,964 & 788866 & 72.9 \\
- & ReduMIS &  &  & -- & 660.2 \\
- & OnlineMIS &  &  & 776663 & 66.8 \\
- & NuMVC &  &  & 787320 & 444.4 \\
- & FastVC &  &  & 789352 & 64.0 \\
- & NearLinear &  &  & 789161 & 15.4 \\
- & LinearTime &  &  & 789003 & 1.6 \\
-\addlinespace
-\texttt{as-skitter} & \textsc{Cascade} & 1,696,415 & 11,095,298 & 1170576 & 64.5 \\
- & ReduMIS &  &  & 1170580 & 64.7 \\
- & OnlineMIS &  &  & 1152300 & 6.3 \\
- & NuMVC &  &  & 1168352 & 266.2 \\
- & FastVC &  &  & 1168417 & 61.9 \\
- & NearLinear &  &  & 1170541 & 0.7 \\
- & LinearTime &  &  & 1170410 & 0.5 \\
-\addlinespace
-\texttt{wiki-Talk} & \textsc{Cascade} & 2,394,385 & 4,659,565 & 2338222 & 2.5 \\
- & ReduMIS &  &  & 2338222 & 34.0 \\
- & OnlineMIS &  &  & 2338207 & 3.1 \\
- & NuMVC &  &  & 2338220 & 66.0 \\
- & FastVC &  &  & 2338222 & 61.1 \\
- & NearLinear &  &  & 2338222 & 0.3 \\
- & LinearTime &  &  & 2338222 & 0.3 \\
-\addlinespace
-\texttt{com-lj} & \textsc{Cascade} & 3,997,962 & 34,681,189 & 2085626 & 75.0 \\
- & ReduMIS &  &  & 2085626 & 68.8 \\
- & OnlineMIS &  &  & 2066610 & 16.9 \\
- & NuMVC &  &  & -- & 960.0 \\
- & FastVC &  &  & 2085169 & 67.5 \\
- & NearLinear &  &  & 2085604 & 2.2 \\
- & LinearTime &  &  & 2085353 & 2.5 \\
-\addlinespace
-\texttt{web-Stanford} & \textsc{Cascade} & 281,903 & 1,992,636 & 163375 & 60.7 \\
- & ReduMIS &  &  & 163390 & 31.3 \\
- & OnlineMIS &  &  & 162453 & 60.7 \\
- & NuMVC &  &  & 162453 & 92.3 \\
- & FastVC &  &  & 162953 & 60.3 \\
- & NearLinear &  &  & 163198 & 0.3 \\
- & LinearTime &  &  & 163121 & 0.1 \\
-\addlinespace
-\texttt{web-BerkStan} & \textsc{Cascade} & 685,230 & 6,649,470 & 408380 & 61.7 \\
- & ReduMIS &  &  & 408482 & 59.8 \\
- & OnlineMIS &  &  & 406062 & 61.9 \\
- & NuMVC &  &  & 405003 & 131.2 \\
- & FastVC &  &  & 406323 & 60.9 \\
- & NearLinear &  &  & 408054 & 0.7 \\
- & LinearTime &  &  & 407716 & 0.2 \\
-\addlinespace
-\texttt{frb30-15-1} & \textsc{Cascade} & 450 & 17,827 & 30 & 60.0 \\
- & ReduMIS &  &  & 30 & 60.4 \\
- & OnlineMIS &  &  & 29 & 60.0 \\
- & NuMVC &  &  & 30 & 60.0 \\
- & FastVC &  &  & 30 & 60.0 \\
- & NearLinear &  &  & 24 & 0.0 \\
- & LinearTime &  &  & 22 & 0.0 \\
-\addlinespace
-\texttt{frb35-17-1} & \textsc{Cascade} & 595 & 27,856 & 34 & 60.0 \\
- & ReduMIS &  &  & 35 & 60.5 \\
- & OnlineMIS &  &  & 33 & 60.0 \\
- & NuMVC &  &  & 35 & 60.0 \\
- & FastVC &  &  & 35 & 60.0 \\
- & NearLinear &  &  & 27 & 0.0 \\
- & LinearTime &  &  & 25 & 0.0 \\
-\addlinespace
-\texttt{frb40-19-1} & \textsc{Cascade} & 760 & 41,314 & 39 & 60.0 \\
- & ReduMIS &  &  & 40 & 61.2 \\
- & OnlineMIS &  &  & 39 & 60.0 \\
- & NuMVC &  &  & 40 & 60.0 \\
- & FastVC &  &  & 40 & 60.0 \\
- & NearLinear &  &  & 27 & 0.1 \\
- & LinearTime &  &  & 29 & 0.0 \\
-\addlinespace
-\texttt{frb45-21-1} & \textsc{Cascade} & 945 & 59,186 & 43 & 60.0 \\
- & ReduMIS &  &  & 43 & 60.6 \\
- & OnlineMIS &  &  & 42 & 60.0 \\
- & NuMVC &  &  & 45 & 60.1 \\
- & FastVC &  &  & 45 & 60.0 \\
- & NearLinear &  &  & 33 & 0.1 \\
- & LinearTime &  &  & 32 & 0.0 \\
-\addlinespace
-\texttt{frb50-23-1} & \textsc{Cascade} & 1,150 & 80,072 & 48 & 60.0 \\
- & ReduMIS &  &  & 49 & 61.1 \\
- & OnlineMIS &  &  & 48 & 60.0 \\
- & NuMVC &  &  & 50 & 60.1 \\
- & FastVC &  &  & 49 & 60.0 \\
- & NearLinear &  &  & 35 & 0.1 \\
- & LinearTime &  &  & 33 & 0.0 \\
-\addlinespace
-\texttt{frb53-24-1} & \textsc{Cascade} & 1,272 & 94,227 & 50 & 60.0 \\
- & ReduMIS &  &  & 51 & 60.6 \\
- & OnlineMIS &  &  & 49 & 60.0 \\
- & NuMVC &  &  & 52 & 60.1 \\
- & FastVC &  &  & 51 & 60.0 \\
- & NearLinear &  &  & 38 & 0.2 \\
- & LinearTime &  &  & 40 & 0.0 \\
-\addlinespace
-\texttt{frb59-26-1} & \textsc{Cascade} & 1,534 & 126,555 & 56 & 60.0 \\
- & ReduMIS &  &  & 57 & 62.1 \\
- & OnlineMIS &  &  & 56 & 60.0 \\
- & NuMVC &  &  & 58 & 60.2 \\
- & FastVC &  &  & 56 & 60.0 \\
- & NearLinear &  &  & 43 & 0.2 \\
- & LinearTime &  &  & 43 & 0.0 \\
-\addlinespace
+\multicolumn{4}{l}{\itshape Table~\ref{tab:appendix}, continued}\\
+\toprule
+Instance & Solver & Size & Seconds \\
+\midrule
+\endhead
+\midrule \multicolumn{4}{r}{\itshape continued on next page}\\
+\endfoot
+\bottomrule
+\endlastfoot
+\texttt{as-skitter} & cascade & 1170576 & 64.5 \\
+\texttt{as-skitter} & fastvc & 1168417 & 61.9 \\
+\texttt{as-skitter} & lineartime & 1170410 & 0.5 \\
+\texttt{as-skitter} & nearlinear & 1170541 & 0.7 \\
+\texttt{as-skitter} & numvc & 1168352 & 266.2 \\
+\texttt{as-skitter} & online\_mis & 1152300 & 6.3 \\
+\texttt{as-skitter} & redumis & 1170580 & 64.7 \\
+\texttt{ca-AstroPh} & cascade & 6760 & 0.1 \\
+\texttt{ca-AstroPh} & fastvc & 6760 & 60.0 \\
+\texttt{ca-AstroPh} & lineartime & 6759 & 0.0 \\
+\texttt{ca-AstroPh} & nearlinear & 6760 & 0.0 \\
+\texttt{ca-AstroPh} & numvc & 6760 & 61.3 \\
+\texttt{ca-AstroPh} & online\_mis & 6760 & 60.1 \\
+\texttt{ca-AstroPh} & redumis & 6760 & 0.2 \\
+\texttt{ca-CondMat} & cascade & 9612 & 0.1 \\
+\texttt{ca-CondMat} & fastvc & 9612 & 60.0 \\
+\texttt{ca-CondMat} & lineartime & 9611 & 0.0 \\
+\texttt{ca-CondMat} & nearlinear & 9612 & 0.0 \\
+\texttt{ca-CondMat} & numvc & 9611 & 60.5 \\
+\texttt{ca-CondMat} & online\_mis & 9601 & 0.0 \\
+\texttt{ca-CondMat} & redumis & 9612 & 0.1 \\
+\texttt{com-amazon} & cascade & 174632 & 60.3 \\
+\texttt{com-amazon} & fastvc & 174605 & 60.2 \\
+\texttt{com-amazon} & lineartime & 174612 & 0.1 \\
+\texttt{com-amazon} & nearlinear & 174627 & 0.1 \\
+\texttt{com-amazon} & numvc & 174510 & 114.1 \\
+\texttt{com-amazon} & online\_mis & 172685 & 0.6 \\
+\texttt{com-amazon} & redumis & 174632 & 10.1 \\
+\texttt{com-dblp} & cascade & 152131 & 0.4 \\
+\texttt{com-dblp} & fastvc & 152131 & 60.2 \\
+\texttt{com-dblp} & lineartime & 152129 & 0.1 \\
+\texttt{com-dblp} & nearlinear & 152131 & 0.1 \\
+\texttt{com-dblp} & numvc & 152112 & 85.9 \\
+\texttt{com-dblp} & online\_mis & 152061 & 0.6 \\
+\texttt{com-dblp} & redumis & 152131 & 0.6 \\
+\texttt{com-lj} & cascade & 2085626 & 75.0 \\
+\texttt{com-lj} & fastvc & 2085169 & 67.5 \\
+\texttt{com-lj} & lineartime & 2085353 & 2.5 \\
+\texttt{com-lj} & nearlinear & 2085604 & 2.2 \\
+\texttt{com-lj} & numvc & --- & 960.0 \\
+\texttt{com-lj} & online\_mis & 2066610 & 16.9 \\
+\texttt{com-lj} & redumis & 2085626 & 68.8 \\
+\texttt{com-youtube} & cascade & 857945 & 1.3 \\
+\texttt{com-youtube} & fastvc & 857945 & 60.6 \\
+\texttt{com-youtube} & lineartime & 857944 & 0.2 \\
+\texttt{com-youtube} & nearlinear & 857945 & 0.2 \\
+\texttt{com-youtube} & numvc & 857708 & 143.2 \\
+\texttt{com-youtube} & online\_mis & 857680 & 1.7 \\
+\texttt{com-youtube} & redumis & 857945 & 1.8 \\
+\texttt{del16} & cascade & 20647 & 60.1 \\
+\texttt{del16} & fastvc & 20638 & 60.0 \\
+\texttt{del16} & lineartime & 20213 & 0.0 \\
+\texttt{del16} & nearlinear & 20284 & 0.1 \\
+\texttt{del16} & numvc & 20180 & 60.3 \\
+\texttt{del16} & online\_mis & 20630 & 60.1 \\
+\texttt{del16} & redumis & 20640 & 60.2 \\
+\texttt{del18} & cascade & 82656 & 60.2 \\
+\texttt{del18} & fastvc & 82579 & 60.1 \\
+\texttt{del18} & lineartime & 80881 & 0.1 \\
+\texttt{del18} & nearlinear & 81211 & 0.7 \\
+\texttt{del18} & numvc & 80695 & 120.7 \\
+\texttt{del18} & online\_mis & 82019 & 60.4 \\
+\texttt{del18} & redumis & 82385 & 60.7 \\
+\texttt{del20} & cascade & 330066 & 61.1 \\
+\texttt{del20} & fastvc & 329802 & 60.6 \\
+\texttt{del20} & lineartime & 323438 & 0.4 \\
+\texttt{del20} & nearlinear & 324619 & 4.7 \\
+\texttt{del20} & numvc & 311421 & 428.9 \\
+\texttt{del20} & online\_mis & 311146 & 61.7 \\
+\texttt{del20} & redumis & 321566 & 258.2 \\
+\texttt{email-Enron} & cascade & 22255 & 0.1 \\
+\texttt{email-Enron} & fastvc & 22255 & 60.0 \\
+\texttt{email-Enron} & lineartime & 22255 & 0.0 \\
+\texttt{email-Enron} & nearlinear & 22255 & 0.0 \\
+\texttt{email-Enron} & numvc & 22253 & 60.2 \\
+\texttt{email-Enron} & online\_mis & 22227 & 0.1 \\
+\texttt{email-Enron} & redumis & 22255 & 0.2 \\
+\texttt{frb30-15-1} & cascade & 30 & 60.0 \\
+\texttt{frb30-15-1} & fastvc & 30 & 60.0 \\
+\texttt{frb30-15-1} & lineartime & 22 & 0.0 \\
+\texttt{frb30-15-1} & nearlinear & 24 & 0.0 \\
+\texttt{frb30-15-1} & numvc & 30 & 60.0 \\
+\texttt{frb30-15-1} & online\_mis & 29 & 60.0 \\
+\texttt{frb30-15-1} & redumis & 30 & 60.4 \\
+\texttt{frb35-17-1} & cascade & 34 & 60.0 \\
+\texttt{frb35-17-1} & fastvc & 35 & 60.0 \\
+\texttt{frb35-17-1} & lineartime & 25 & 0.0 \\
+\texttt{frb35-17-1} & nearlinear & 27 & 0.0 \\
+\texttt{frb35-17-1} & numvc & 35 & 60.0 \\
+\texttt{frb35-17-1} & online\_mis & 33 & 60.0 \\
+\texttt{frb35-17-1} & redumis & 35 & 60.5 \\
+\texttt{frb40-19-1} & cascade & 39 & 60.0 \\
+\texttt{frb40-19-1} & fastvc & 40 & 60.0 \\
+\texttt{frb40-19-1} & lineartime & 29 & 0.0 \\
+\texttt{frb40-19-1} & nearlinear & 27 & 0.1 \\
+\texttt{frb40-19-1} & numvc & 40 & 60.0 \\
+\texttt{frb40-19-1} & online\_mis & 39 & 60.0 \\
+\texttt{frb40-19-1} & redumis & 40 & 61.2 \\
+\texttt{frb45-21-1} & cascade & 43 & 60.0 \\
+\texttt{frb45-21-1} & fastvc & 45 & 60.0 \\
+\texttt{frb45-21-1} & lineartime & 32 & 0.0 \\
+\texttt{frb45-21-1} & nearlinear & 33 & 0.1 \\
+\texttt{frb45-21-1} & numvc & 45 & 60.1 \\
+\texttt{frb45-21-1} & online\_mis & 42 & 60.0 \\
+\texttt{frb45-21-1} & redumis & 43 & 60.6 \\
+\texttt{frb50-23-1} & cascade & 48 & 60.0 \\
+\texttt{frb50-23-1} & fastvc & 49 & 60.0 \\
+\texttt{frb50-23-1} & lineartime & 33 & 0.0 \\
+\texttt{frb50-23-1} & nearlinear & 35 & 0.1 \\
+\texttt{frb50-23-1} & numvc & 50 & 60.1 \\
+\texttt{frb50-23-1} & online\_mis & 48 & 60.0 \\
+\texttt{frb50-23-1} & redumis & 49 & 61.1 \\
+\texttt{frb53-24-1} & cascade & 50 & 60.0 \\
+\texttt{frb53-24-1} & fastvc & 51 & 60.0 \\
+\texttt{frb53-24-1} & lineartime & 40 & 0.0 \\
+\texttt{frb53-24-1} & nearlinear & 38 & 0.2 \\
+\texttt{frb53-24-1} & numvc & 52 & 60.1 \\
+\texttt{frb53-24-1} & online\_mis & 49 & 60.0 \\
+\texttt{frb53-24-1} & redumis & 51 & 60.6 \\
+\texttt{frb59-26-1} & cascade & 56 & 60.0 \\
+\texttt{frb59-26-1} & fastvc & 56 & 60.0 \\
+\texttt{frb59-26-1} & lineartime & 43 & 0.0 \\
+\texttt{frb59-26-1} & nearlinear & 43 & 0.2 \\
+\texttt{frb59-26-1} & numvc & 58 & 60.2 \\
+\texttt{frb59-26-1} & online\_mis & 56 & 60.0 \\
+\texttt{frb59-26-1} & redumis & 57 & 62.1 \\
+\texttt{rgg16} & cascade & 16086 & 60.1 \\
+\texttt{rgg16} & fastvc & 16085 & 60.0 \\
+\texttt{rgg16} & lineartime & 15321 & 0.0 \\
+\texttt{rgg16} & nearlinear & 16035 & 0.1 \\
+\texttt{rgg16} & numvc & 15905 & 60.3 \\
+\texttt{rgg16} & online\_mis & 16082 & 60.1 \\
+\texttt{rgg16} & redumis & 16086 & 9.5 \\
+\texttt{rgg18} & cascade & 64278 & 60.3 \\
+\texttt{rgg18} & fastvc & 64242 & 60.2 \\
+\texttt{rgg18} & lineartime & 61282 & 0.1 \\
+\texttt{rgg18} & nearlinear & 64094 & 0.3 \\
+\texttt{rgg18} & numvc & 62548 & 87.2 \\
+\texttt{rgg18} & online\_mis & 63912 & 60.5 \\
+\texttt{rgg18} & redumis & 64278 & 12.6 \\
+\texttt{rgg20} & cascade & 256994 & 61.3 \\
+\texttt{rgg20} & fastvc & 256680 & 60.8 \\
+\texttt{rgg20} & lineartime & 244769 & 0.5 \\
+\texttt{rgg20} & nearlinear & 256277 & 1.8 \\
+\texttt{rgg20} & numvc & 239118 & 490.2 \\
+\texttt{rgg20} & online\_mis & 242366 & 61.7 \\
+\texttt{rgg20} & redumis & 256994 & 23.4 \\
+\texttt{roadNet-CA} & cascade & 961851 & 61.5 \\
+\texttt{roadNet-CA} & fastvc & 959909 & 60.6 \\
+\texttt{roadNet-CA} & lineartime & 956573 & 0.3 \\
+\texttt{roadNet-CA} & nearlinear & 957199 & 1.8 \\
+\texttt{roadNet-CA} & numvc & 915797 & 911.9 \\
+\texttt{roadNet-CA} & online\_mis & 924236 & 62.2 \\
+\texttt{roadNet-CA} & redumis & 961851 & 62.1 \\
+\texttt{roadNet-PA} & cascade & 533627 & 60.8 \\
+\texttt{roadNet-PA} & fastvc & 532571 & 60.3 \\
+\texttt{roadNet-PA} & lineartime & 530910 & 0.1 \\
+\texttt{roadNet-PA} & nearlinear & 531184 & 0.6 \\
+\texttt{roadNet-PA} & numvc & 513067 & 451.1 \\
+\texttt{roadNet-PA} & online\_mis & 515876 & 61.2 \\
+\texttt{roadNet-PA} & redumis & 533628 & 37.2 \\
+\texttt{soc-pokec-relationships} & cascade & 788866 & 72.9 \\
+\texttt{soc-pokec-relationships} & fastvc & 789352 & 64.0 \\
+\texttt{soc-pokec-relationships} & lineartime & 789003 & 1.6 \\
+\texttt{soc-pokec-relationships} & nearlinear & 789161 & 15.4 \\
+\texttt{soc-pokec-relationships} & numvc & 787320 & 444.4 \\
+\texttt{soc-pokec-relationships} & online\_mis & 776663 & 66.8 \\
+\texttt{soc-pokec-relationships} & redumis & --- & 660.2 \\
+\texttt{web-BerkStan} & cascade & 408380 & 61.7 \\
+\texttt{web-BerkStan} & fastvc & 406323 & 60.9 \\
+\texttt{web-BerkStan} & lineartime & 407716 & 0.2 \\
+\texttt{web-BerkStan} & nearlinear & 408054 & 0.7 \\
+\texttt{web-BerkStan} & numvc & 405003 & 131.2 \\
+\texttt{web-BerkStan} & online\_mis & 406062 & 61.9 \\
+\texttt{web-BerkStan} & redumis & 408482 & 59.8 \\
+\texttt{web-Stanford} & cascade & 163375 & 60.7 \\
+\texttt{web-Stanford} & fastvc & 162953 & 60.3 \\
+\texttt{web-Stanford} & lineartime & 163121 & 0.1 \\
+\texttt{web-Stanford} & nearlinear & 163198 & 0.3 \\
+\texttt{web-Stanford} & numvc & 162453 & 92.3 \\
+\texttt{web-Stanford} & online\_mis & 162453 & 60.7 \\
+\texttt{web-Stanford} & redumis & 163390 & 31.3 \\
+\texttt{wiki-Talk} & cascade & 2338222 & 2.5 \\
+\texttt{wiki-Talk} & fastvc & 2338222 & 61.1 \\
+\texttt{wiki-Talk} & lineartime & 2338222 & 0.3 \\
+\texttt{wiki-Talk} & nearlinear & 2338222 & 0.3 \\
+\texttt{wiki-Talk} & numvc & 2338220 & 66.0 \\
+\texttt{wiki-Talk} & online\_mis & 2338207 & 3.1 \\
+\texttt{wiki-Talk} & redumis & 2338222 & 34.0 \\
 \end{longtable}
+\normalsize

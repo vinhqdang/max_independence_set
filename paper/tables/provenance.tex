@@ -1,43 +1,47 @@
+\footnotesize
+\setlength{\tabcolsep}{3pt}
 \begin{longtable}{l l r r r r l}
-\caption{Provenance and basic statistics of the 27 benchmark instances. $\bar{d}$ is the average degree and $\Delta$ the maximum degree.}\label{tab:provenance}\\
+\caption{Provenance and basic statistics of the 27 benchmark instances. $\bar{d}$ is the average degree and $\Delta$ the maximum degree. Sources: SNAP is \texttt{snap.stanford.edu/data}, where each instance is the file of its own name; $^{\dagger}$ Network Repository \texttt{bhoslib}, used in complement as Section~\ref{sec:experiments} explains; $^{\ddagger}$ produced by \texttt{tools/gen\_instances.py} at seed 1.}\label{tab:provenance}\\
 \toprule
 Instance & Family & $n$ & $m$ & $\bar{d}$ & $\Delta$ & Source \\
 \midrule
 \endfirsthead
-\multicolumn{7}{l}{\small\itshape Table~\ref{tab:provenance}, continued}\\
+\multicolumn{7}{l}{\itshape Table~\ref{tab:provenance}, continued}\\
 \toprule
 Instance & Family & $n$ & $m$ & $\bar{d}$ & $\Delta$ & Source \\
 \midrule
 \endhead
-\midrule \multicolumn{7}{r}{\small\itshape continued on next page}\\
+\midrule \multicolumn{7}{r}{\itshape continued on next page}\\
 \endfoot
 \bottomrule
 \endlastfoot
-\texttt{rgg16} & geometric & 65,501 & 260,438 & 7.95 & 24 & generated, seed 1$^{\ddagger}$ \\
-\texttt{del16} & geometric & 65,536 & 196,583 & 6.00 & 20 & generated, seed 1$^{\ddagger}$ \\
-\texttt{rgg18} & geometric & 262,011 & 1,046,301 & 7.99 & 23 & generated, seed 1$^{\ddagger}$ \\
-\texttt{del18} & geometric & 262,144 & 786,401 & 6.00 & 21 & generated, seed 1$^{\ddagger}$ \\
-\texttt{rgg20} & geometric & 1,048,171 & 4,188,702 & 7.99 & 24 & generated, seed 1$^{\ddagger}$ \\
-\texttt{del20} & geometric & 1,048,576 & 3,145,692 & 6.00 & 22 & generated, seed 1$^{\ddagger}$ \\
-\texttt{roadNet-PA} & road & 1,088,092 & 1,541,898 & 2.83 & 9 & SNAP \texttt{roadNet-PA.txt.gz} \\
-\texttt{roadNet-CA} & road & 1,965,206 & 2,766,607 & 2.82 & 12 & SNAP \texttt{roadNet-CA.txt.gz} \\
-\texttt{web-Stanford} & web & 281,903 & 1,992,636 & 14.14 & 38,625 & SNAP \texttt{web-Stanford.txt.gz} \\
-\texttt{web-BerkStan} & web & 685,230 & 6,649,470 & 19.41 & 84,230 & SNAP \texttt{web-BerkStan.txt.gz} \\
-\texttt{ca-AstroPh} & social & 18,772 & 198,050 & 21.10 & 504 & SNAP \texttt{ca-AstroPh.txt.gz} \\
-\texttt{ca-CondMat} & social & 23,133 & 93,439 & 8.08 & 279 & SNAP \texttt{ca-CondMat.txt.gz} \\
-\texttt{email-Enron} & social & 36,692 & 183,831 & 10.02 & 1,383 & SNAP \texttt{email-Enron.txt.gz} \\
-\texttt{com-dblp} & social & 317,080 & 1,049,866 & 6.62 & 343 & SNAP \texttt{com-dblp.ungraph.txt.gz} \\
-\texttt{com-amazon} & social & 334,863 & 925,872 & 5.53 & 549 & SNAP \texttt{com-amazon.ungraph.txt.gz} \\
-\texttt{com-youtube} & social & 1,134,890 & 2,987,624 & 5.26 & 28,754 & SNAP \texttt{com-youtube.ungraph.txt.gz} \\
-\texttt{soc-pokec-relationships} & social & 1,632,803 & 22,301,964 & 27.32 & 14,854 & generated, seed 1$^{\ddagger}$ \\
-\texttt{as-skitter} & social & 1,696,415 & 11,095,298 & 13.08 & 35,455 & SNAP \texttt{as-skitter.txt.gz} \\
-\texttt{wiki-Talk} & social & 2,394,385 & 4,659,565 & 3.89 & 100,029 & SNAP \texttt{wiki-Talk.txt.gz} \\
-\texttt{com-lj} & social & 3,997,962 & 34,681,189 & 17.35 & 14,815 & generated, seed 1$^{\ddagger}$ \\
-\texttt{frb30-15-1} & bhoslib & 450 & 17,827 & 79.23 & 122 & Network Repository \texttt{bhoslib/frb30-15-1}$^{\dagger}$ \\
-\texttt{frb35-17-1} & bhoslib & 595 & 27,856 & 93.63 & 132 & Network Repository \texttt{bhoslib/frb35-17-1}$^{\dagger}$ \\
-\texttt{frb40-19-1} & bhoslib & 760 & 41,314 & 108.72 & 178 & Network Repository \texttt{bhoslib/frb40-19-1}$^{\dagger}$ \\
-\texttt{frb45-21-1} & bhoslib & 945 & 59,186 & 125.26 & 188 & Network Repository \texttt{bhoslib/frb45-21-1}$^{\dagger}$ \\
-\texttt{frb50-23-1} & bhoslib & 1,150 & 80,072 & 139.26 & 208 & Network Repository \texttt{bhoslib/frb50-23-1}$^{\dagger}$ \\
-\texttt{frb53-24-1} & bhoslib & 1,272 & 94,227 & 148.16 & 232 & Network Repository \texttt{bhoslib/frb53-24-1}$^{\dagger}$ \\
-\texttt{frb59-26-1} & bhoslib & 1,534 & 126,555 & 165.00 & 277 & Network Repository \texttt{bhoslib/frb59-26-1}$^{\dagger}$ \\
+\texttt{rgg16} & geometric & 65,501 & 260,438 & 8.0 & 24 & generated$^{\ddagger}$ \\
+\texttt{del16} & geometric & 65,536 & 196,583 & 6.0 & 20 & generated$^{\ddagger}$ \\
+\texttt{rgg18} & geometric & 262,011 & 1,046,301 & 8.0 & 23 & generated$^{\ddagger}$ \\
+\texttt{del18} & geometric & 262,144 & 786,401 & 6.0 & 21 & generated$^{\ddagger}$ \\
+\texttt{rgg20} & geometric & 1,048,171 & 4,188,702 & 8.0 & 24 & generated$^{\ddagger}$ \\
+\texttt{del20} & geometric & 1,048,576 & 3,145,692 & 6.0 & 22 & generated$^{\ddagger}$ \\
+\texttt{roadNet-PA} & road & 1,088,092 & 1,541,898 & 2.8 & 9 & SNAP \\
+\texttt{roadNet-CA} & road & 1,965,206 & 2,766,607 & 2.8 & 12 & SNAP \\
+\texttt{web-Stanford} & web & 281,903 & 1,992,636 & 14.1 & 38,625 & SNAP \\
+\texttt{web-BerkStan} & web & 685,230 & 6,649,470 & 19.4 & 84,230 & SNAP \\
+\texttt{ca-AstroPh} & social & 18,772 & 198,050 & 21.1 & 504 & SNAP \\
+\texttt{ca-CondMat} & social & 23,133 & 93,439 & 8.1 & 279 & SNAP \\
+\texttt{email-Enron} & social & 36,692 & 183,831 & 10.0 & 1,383 & SNAP \\
+\texttt{com-dblp} & social & 317,080 & 1,049,866 & 6.6 & 343 & SNAP \\
+\texttt{com-amazon} & social & 334,863 & 925,872 & 5.5 & 549 & SNAP \\
+\texttt{com-youtube} & social & 1,134,890 & 2,987,624 & 5.3 & 28,754 & SNAP \\
+\texttt{soc-pokec-relationships} & social & 1,632,803 & 22,301,964 & 27.3 & 14,854 & generated$^{\ddagger}$ \\
+\texttt{as-skitter} & social & 1,696,415 & 11,095,298 & 13.1 & 35,455 & SNAP \\
+\texttt{wiki-Talk} & social & 2,394,385 & 4,659,565 & 3.9 & 100,029 & SNAP \\
+\texttt{com-lj} & social & 3,997,962 & 34,681,189 & 17.3 & 14,815 & generated$^{\ddagger}$ \\
+\texttt{frb30-15-1} & bhoslib & 450 & 17,827 & 79.2 & 122 & NetRep$^{\dagger}$ \\
+\texttt{frb35-17-1} & bhoslib & 595 & 27,856 & 93.6 & 132 & NetRep$^{\dagger}$ \\
+\texttt{frb40-19-1} & bhoslib & 760 & 41,314 & 108.7 & 178 & NetRep$^{\dagger}$ \\
+\texttt{frb45-21-1} & bhoslib & 945 & 59,186 & 125.3 & 188 & NetRep$^{\dagger}$ \\
+\texttt{frb50-23-1} & bhoslib & 1,150 & 80,072 & 139.3 & 208 & NetRep$^{\dagger}$ \\
+\texttt{frb53-24-1} & bhoslib & 1,272 & 94,227 & 148.2 & 232 & NetRep$^{\dagger}$ \\
+\texttt{frb59-26-1} & bhoslib & 1,534 & 126,555 & 165.0 & 277 & NetRep$^{\dagger}$ \\
 \end{longtable}
+\setlength{\tabcolsep}{6pt}
+\normalsize

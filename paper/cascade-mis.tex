@@ -11,6 +11,15 @@
 \usepackage{url}
 \usepackage{longtable}
 \usepackage{multirow}
+% Parameter and instance names are set in a monospaced face, which TeX will
+% not hyphenate by default, so a long one pushes its line into the margin.
+\usepackage[htt]{hyphenat}
+% A table with one column per instance is naturally wide. This shrinks a
+% table only when it would otherwise run into the margin, and leaves one
+% that already fits at its natural size, so the type size stays uniform
+% across the tables that do fit.
+\newcommand{\fittable}[1]{%
+  \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}
 \usepackage{tikz}
 \usetikzlibrary{fit,backgrounds}
 

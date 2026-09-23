@@ -3,6 +3,7 @@
 \small
 \caption{Solution size and wall-clock seconds at a 600-second budget, ten times the budget of the main study. HIGHER IS BETTER for size, lower for time; \textbf{bold} marks the best size on an instance. The comparison of interest is with the 60-second tables: what the extra budget buys differs sharply by instance, and Section~\ref{sec:longbudget} reads the difference.}
 \label{tab:longbudget}
+\fittable{
 \begin{tabular}{l r@{\,/\,}l r@{\,/\,}l r@{\,/\,}l r@{\,/\,}l}
 \toprule
 Solver & \multicolumn{2}{c}{\texttt{del20}} & \multicolumn{2}{c}{\texttt{roadNet-CA}} & \multicolumn{2}{c}{\texttt{web-BerkStan}} & \multicolumn{2}{c}{\texttt{frb59-26-1}} \\
@@ -14,4 +15,5 @@ NuMVC & 317648 & 671 & 915773 & 1003 & 406663 & 650 & \textbf{59} & 600 \\
 FastVC & 330192 & 604 & 960024 & 601 & 406349 & 601 & 57 & 600 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}

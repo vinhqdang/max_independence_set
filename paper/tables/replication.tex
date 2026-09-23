@@ -3,6 +3,7 @@
 \small
 \caption{Replication on a second platform. Each cell is the mean, over the instances of that family, of $100\,|s_2-s_1|/s_1$ where $s_1$ is the size the solver returned on the machine used for the main tables and $s_2$ the size it returned on the replication machine. LOWER IS BETTER: zero means the solver returned the same value on both machines. \emph{Same} counts the instances on which it did so exactly, over the instances where the solver returned a value on both machines; that denominator is 25 except for NuMVC, which exceeded the cutoff on \texttt{roadNet-CA} on the replication machine. \emph{Max} is the largest single relative difference.}
 \label{tab:replication}
+\fittable{
 \begin{tabular}{l r r r r r r r}
 \toprule
 Solver & Geometric & Road & Web & Social & Bhoslib & Same & Max \\
@@ -16,4 +17,5 @@ NearLinear & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 & 25/25 & 0.00 \\
 LinearTime & 0.000 & 0.000 & 0.000 & 0.000 & 0.000 & 25/25 & 0.00 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}

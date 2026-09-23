@@ -3,6 +3,7 @@
 \caption{Ablation: each row disables one component. Values in brackets are the change from the full algorithm.}
 \label{tab:ablation}
 \small
+\fittable{
 \begin{tabular}{lrrrrrrr}
 \toprule
 Configuration & \texttt{del16} & \texttt{del18} & \texttt{rgg16} & \texttt{roadNet-PA} & \texttt{web-Stanford} & \texttt{frb40-19-1} & \texttt{frb59-26-1} \\
@@ -14,4 +15,5 @@ no LP reduction & 20652 (+4) & 82666 (+5) & 16086 (+0) & 533627 (+0) & 163373 (-
 decision-space moves & 20383 (-265) & 81639 (-1022) & 16086 (+0) & 533385 (-242) & 163369 (-6) & 34 (-6) & 49 (-7) \\
 \bottomrule
 \end{tabular}
+}
 \end{table}

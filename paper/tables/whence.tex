@@ -2,6 +2,7 @@
 \centering
 \caption{Where the advantage over \textsc{ReduMIS} comes from, per instance family, at the 60-second budget. \emph{Net} is the sum over the family of $|S_{\textsc{cascade}}|-|S_{\textsc{ReduMIS}}|$; higher is better. The one instance on which \textsc{ReduMIS} returned nothing within the budget is excluded from its family's counts.}
 \label{tab:whence}
+\fittable{
 \begin{tabular}{l r r r r r}
 \toprule
 Family & Instances & Ahead & Tied & Behind & Net \\
@@ -15,5 +16,6 @@ bhoslib & 7 & 0 & 2 & 5 & -5 \\
 \textbf{All} & 27 & 3 & 14 & 9 & +8651 \\
 \bottomrule
 \end{tabular}
+}
 \\[2pt]\footnotesize $^{*}$ one instance excluded: \textsc{ReduMIS} exceeded the budget.
 \end{table}

@@ -2,6 +2,7 @@
 \centering
 \caption{Paired Wilcoxon signed-rank test of \textsc{Cascade} against each baseline over the instances both solved, at the 60\,s budget. A verdict names the better solver when $p<0.05$.}
 \label{tab:wilcoxon}
+\fittable{
 \begin{tabular}{lrrrrrr}
 \toprule
 Baseline & pairs & win & tie & loss & $p$ & verdict \\
@@ -14,4 +15,5 @@ OnlineMIS & 27 & 23 & 4 & 0 & $<10^{-4}$ & \textsc{Cascade} \\
 LinearTime & 27 & 24 & 2 & 1 & $<10^{-4}$ & \textsc{Cascade} \\
 \bottomrule
 \end{tabular}
+}
 \end{table}

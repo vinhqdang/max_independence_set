@@ -3,6 +3,7 @@
 \small
 \caption{Exact and integer-programming solvers under a 60-second budget, on the instances where any of them terminates. Each pair of columns gives the size returned and the wall-clock seconds; \textbf{bold} marks a value the solver proved optimal, and \textit{t/o} that it returned no solution within the budget. Higher is better for size, lower for time.}
 \label{tab:exact}
+\fittable{
 \begin{tabular}{l l r r r r r r r r }
 \toprule
 & & \multicolumn{2}{c}{\textsc{Cascade}-exact} & \multicolumn{2}{c}{VCSolver} & \multicolumn{2}{c}{PACE 2019} & \multicolumn{2}{c}{HiGHS} \\
@@ -26,4 +27,5 @@ Instance & Family & size & s & size & s & size & s & size & s \\
 \texttt{frb59-26-1} & bhoslib & 42 & 60.1 & \textit{---} & \textit{t/o} & \textit{---} & \textit{t/o} & 30 & 60.3 \\
 \bottomrule
 \end{tabular}
+}
 \end{table}
