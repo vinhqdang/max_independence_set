@@ -47,18 +47,17 @@
 
 \begin{abstract}
 The maximum independent set problem is solved in practice by applying safe data
-reduction rules and then searching whatever survives. Solvers differ only in
+reduction rules, then searching whatever survives. Solvers differ only in
 that second step, and all are weak where the reduced graph, or kernel, stays
 large. We study a neighbourhood that is solved exactly rather than sampled.
 Releasing a set $F$ from an incumbent solution makes eligible exactly those
 vertices whose every incumbent neighbour lies in $F$. We prove that the
 resulting region is separated from the rest of the solution, so re-solving it
 never degrades the incumbent, and that acceptance needs only a region solution
-no smaller than the set released. Applying the reduction rules inside the move,
-not only before the search, collapses a region of thousands of vertices to a
-kernel of a few dozen, making an exact sub-solve affordable in an inner loop;
+no smaller than the set released. Applying the reduction rules inside the move
+collapses a region of thousands of vertices to a kernel of a few dozen, making an exact sub-solve affordable in an inner loop;
 the size of $F$ is inferred at run time from whether sub-problems reach proven
-optimality. On 27 instances in five families, against six baselines at a common
+optimality. On 27 instances in five families, against six baselines at a
 60-second budget, the method attains the best value of all seven solvers on
 every geometric instance, and is strictly ahead on the three Delaunay instances,
 by $0.08\%$ at one million vertices. Over the whole benchmark it is strictly
@@ -104,12 +103,12 @@ template: apply \emph{safe data reduction rules} until none fires, then search
 whatever survives. The rules are exact, in the sense that they preserve the
 optimum, and on many real-world graphs they dissolve the instance outright.
 Solvers differ almost entirely in what they do once the rules stall. Reducing-
-peeling \cite{chang2017} performs one greedy descent and never revisits a
-decision. ReduMIS \cite{lamm2017} and OnlineMIS \cite{dahlum2016} run swap-based
-local search on the reduced graph. Branch-and-reduce \cite{akiba2016} explores
+peeling \citep{chang2017} performs one greedy descent and never revisits a
+decision. ReduMIS \citep{lamm2017} and OnlineMIS \citep{dahlum2016} run swap-based
+local search on the reduced graph. Branch-and-reduce \citep{akiba2016} explores
 the decisions exhaustively and is complete but exponential. Local search
 methods developed in the operations research literature, notably NuMVC
-\cite{cai2013numvc} and FastVC \cite{cai2017fastvc}, dominate small dense
+\citep{cai2013numvc} and FastVC \citep{cai2017fastvc}, dominate small dense
 instances but, as our experiments confirm, either fail outright or lose ground
 on graphs with millions of vertices.
 
@@ -154,57 +153,56 @@ Our contributions are:
 \label{sec:related}
 
 \paragraph{Data reductions} The reduction approach traces back to the
-Nemhauser--Trotter theorem \cite{nemhauser1975}, which shows that the vertex
+Nemhauser--Trotter theorem \citep{nemhauser1975}, which shows that the vertex
 cover linear program is half-integral and that its integral part may be fixed
 without losing an optimum. Parameterized complexity supplied the combinatorial
 counterpart: vertex cover admits a kernel with at most $2k$ vertices, obtained
 either from that linear program or from crown decompositions
-\cite{chen2001,abukhzam2007}. In parallel, the line of exact exponential
-algorithms that began with Tarjan and Trojanowski \cite{tarjan1977} and was
-sharpened by measure-and-conquer analysis \cite{fomin2009} produced most of the
+\citep{chen2001,abukhzam2007}. In parallel, the line of exact exponential
+algorithms that began with \citet{tarjan1977} and was
+sharpened by measure-and-conquer analysis \citep{fomin2009} produced most of the
 local rules now used in practice, including the confining-set machinery behind
-the unconfined rule \cite{xiao2013,xiao2017}.
+the unconfined rule \citep{xiao2013,xiao2017}.
 
-Akiba and Iwata \cite{akiba2016} first demonstrated that a branch-and-reduce
+\citet{akiba2016} first demonstrated that a branch-and-reduce
 algorithm carrying the full rule set is competitive with, and often superior to,
 integer programming on real instances, and established the rule ordering that
-subsequent solvers reuse. Hespe et al. \cite{hespe2019} parallelised
+subsequent solvers reuse. \citet{hespe2019} parallelised
 kernelization, introduced dependency checking to avoid re-testing rules that
 cannot fire, and characterised which instance families reduce well; their
 measurements are the source of the observation that success is essentially
-determined by whether the kernel becomes small. Gellner et al.
-\cite{gellner2021} showed that transformations which temporarily \emph{increase}
-the graph can unlock further reduction, and Figiel et al. \cite{figiel2022}
+determined by whether the kernel becomes small. \citet{gellner2021} showed that transformations which temporarily \emph{increase}
+the graph can unlock further reduction, and \citet{figiel2022}
 that \emph{undoing} a rule can enable others, yielding a smaller final kernel.
-Branching itself can be aimed at provoking reductions \cite{hespe2021}, and
+Branching itself can be aimed at provoking reductions \citep{hespe2021}, and
 reduction-based solvers have been combined with SAT solving
-\cite{plachetta2021}. The weighted variant has attracted most of the recent
-activity \cite{lamm2019,xiaowww2021,grossmann2023,langedal2022}.
+\citep{plachetta2021}. The weighted variant has attracted most of the recent
+activity \citep{lamm2019,xiaowww2021,grossmann2023,langedal2022}.
 
-\paragraph{Local search} Andrade et al. \cite{andrade2012} introduced the
+\paragraph{Local search} \citet{andrade2012} introduced the
 $(1,2)$-swap neighbourhood with an $O(m)$ test for improving moves, which
-underpins the KaMIS solvers \cite{lamm2017,dahlum2016}. In the operations
+underpins the KaMIS solvers \citep{lamm2017,dahlum2016}. In the operations
 research and artificial intelligence literature the same problem is usually
-posed as minimum vertex cover. NuMVC \cite{cai2013numvc} combines edge weighting
+posed as minimum vertex cover. NuMVC \citep{cai2013numvc} combines edge weighting
 with a two-stage exchange step and configuration checking with forgetting, and
 is extremely strong on the dense structured instances of the DIMACS and BHOSLIB
 collections. Its cost per step, however, makes it unsuitable for massive graphs,
-which motivated FastVC \cite{cai2015,cai2017fastvc}: a cheaper construction
+which motivated FastVC \citep{cai2015,cai2017fastvc}: a cheaper construction
 together with best-from-multiple-selection, trading some quality for the ability
 to run on such graphs at all. Our experiments reproduce both halves of this
 picture, including instances on which NuMVC returns no solution.
 
 \paragraph{Exact solvers} Branch-and-bound on the complement with incremental
-MaxSAT reasoning \cite{li2017momc} is the strongest general approach on dense
+MaxSAT reasoning \citep{li2017momc} is the strongest general approach on dense
 instances. The solver that won the vertex cover track of the PACE 2019
-challenge \cite{pace2019} is a portfolio combining aggressive kernelization,
+challenge \citep{pace2019} is a portfolio combining aggressive kernelization,
 iterated local search, branch-and-reduce and two calls to such a clique solver
-\cite{hespe2020}; it is among our baselines, and remains far stronger than our
+\citep{hespe2020}; it is among our baselines, and remains far stronger than our
 own exact mode on dense instances for exactly this reason.
 
 \paragraph{Positioning} Large-neighbourhood search with an exactly solved
 sub-problem is a standard metaheuristic pattern, and swap neighbourhoods for
-this problem are long established \cite{andrade2012}. Three things distinguish
+this problem are long established \citep{andrade2012}. Three things distinguish
 the present work. First, the region is defined from the incumbent rather than
 from graph distance, and is provably separated from it, so the move is
 unconditionally admissible and monotone provided a region solution smaller than
@@ -234,7 +232,7 @@ reconstructed from one of $G'$.
 \end{definition}
 
 We use the rule set that is standard in this literature
-\cite{akiba2016,lamm2017,hespe2019}, summarised in Table~\ref{tab:rules}. A
+\citep{akiba2016,lamm2017,hespe2019}, summarised in Table~\ref{tab:rules}. A
 graph on which no rule fires is called a \emph{kernel}. Each rule records how to
 reconstruct a solution, and \emph{lifting} replays those records in reverse; for
 instance a fold of $v$ with non-adjacent neighbours $u,w$ into a new vertex $f$
@@ -487,7 +485,7 @@ kernel of $G[R(F)]$ rather than on $G[R(F)]$ itself.
 \begin{corollary}[Relation to classical swaps]
 \label{cor:swaps}
 For $F = \{v\}$, $R(F) = \{v\} \cup \{u \notin S : N(u) \cap S = \{v\}\}$, which
-is the set examined by a $(1,2)$-swap \cite{andrade2012}. Solving $G[R(F)]$
+is the set examined by a $(1,2)$-swap \citep{andrade2012}. Solving $G[R(F)]$
 therefore finds the best $(1,k)$-swap at $v$ for every $k$ at once.
 \end{corollary}
 
@@ -495,7 +493,7 @@ More generally, a region move that releases $|F| = j$ vertices and writes back a
 independent set of size $k$ removes $j$ solution vertices and inserts $k$, so it
 \emph{is} a $(j,k)$-swap. The neighbourhood is thus not a new class of move:
 $(j,k)$-swaps are the generalisation of the classical two-improvement introduced
-by Andrade et al.\ \cite{andrade2012}, and the present construction should not be
+by \citet{andrade2012}, and the present construction should not be
 read as reaching outside that class. What Theorem~\ref{thm:region} supplies is
 not a larger class but a way to search it: because $R(F)$ is separated from
 $S \setminus R(F)$, the best $(j,k)$-swap at $F$ over all $k$ is obtained by
@@ -512,7 +510,7 @@ Figure~\ref{fig:pipeline} shows the shape of the method and
 Algorithm~\ref{alg:cascade} gives the overall structure. Kernelization runs
 once; a \emph{dive} then constructs an initial solution by repeatedly discarding
 a maximum-degree vertex and re-reducing, which reproduces reducing-peeling
-\cite{chang2017}; the remaining budget goes to region moves.
+\citep{chang2017}; the remaining budget goes to region moves.
 
 \begin{figure}[htbp]
 \centering
@@ -677,10 +675,10 @@ so their numbers are marked unverified in the raw records.
 
 Baselines are built from their authors' published sources, at the revision the
 provisioning script pins, and with the authors' own build settings. ReduMIS and
-OnlineMIS come from KaMIS \cite{lamm2017,dahlum2016}; reducing-peeling and the
+OnlineMIS come from KaMIS \citep{lamm2017,dahlum2016}; reducing-peeling and the
 near-linear kernelization from the implementation released with
-Chang et al. \cite{chang2017}; NuMVC \cite{cai2013numvc} and FastVC
-\cite{cai2017fastvc} from a library that carries the original implementations.
+\citet{chang2017}; NuMVC \citep{cai2013numvc} and FastVC
+\citep{cai2017fastvc} from a library that carries the original implementations.
 The last two solve the minimum vertex cover formulation, and we convert their
 output to an independent set before verification. Each solver is given the
 instance in the format its own implementation expects, converted by a single
@@ -696,7 +694,7 @@ the comparison is on their own terms.
 
 The benchmark comprises 27 instances in five families: Delaunay triangulations
 and random geometric graphs, road networks, social networks, web graphs, and the
-BHOSLIB \texttt{frb} collection generated from Model RB \cite{xu2007}. The first
+BHOSLIB \texttt{frb} collection generated from Model RB \citep{xu2007}. The first
 family is generated with a fixed seed by a script included with the source; the
 remainder are public.
 
@@ -999,8 +997,8 @@ place them we ran three exact solvers and one integer-programming solver on the
 instances small enough to admit them: the branch-and-reduce solver built from
 our own components (\textsc{Cascade}-exact, the sub-solver of
 Section~\ref{sec:implementation} applied to the whole graph), VCSolver
-\cite{akiba2016}, the winner of the vertex cover track of PACE 2019
-\cite{pace2019,hespe2020}, and HiGHS on the natural
+\citep{akiba2016}, the winner of the vertex cover track of PACE 2019
+\citep{pace2019,hespe2020}, and HiGHS on the natural
 integer program. Table~\ref{tab:exact} reports the results.
 
 Three conclusions follow, and only the first is favourable to us. On the
@@ -1239,7 +1237,7 @@ case.
 The source code, the instance generators and the raw per-run records behind
 every table and figure in this paper are available at
 \url{https://github.com/vinhqdang/max_independence_set}. The publicly archived
-instances are identified in Appendix~\ref{app:provenance} by the name under
+instances are identified in \ref{app:provenance} by the name under
 which their repository distributes them, and the generated instances are
 reproduced by the generator in that repository at the seed recorded there.
 
@@ -1256,6 +1254,13 @@ paper.
 \section*{Funding}
 This research did not receive any specific grant from funding agencies in the
 public, commercial, or not-for-profit sectors.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the
+manuscript preparation process}
+During the preparation of this work the author used generative AI tools in order
+to assist with drafting and language editing of the manuscript. After using
+these tools, the author reviewed and edited the content as needed and takes full
+responsibility for the content of the published article.
 
 \appendix
 \setcounter{table}{0}
