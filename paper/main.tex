@@ -495,8 +495,8 @@ earlier version shared one list and could drop a vertex when a fold created a ne
 one; the clique-cover bound then failed to cover that vertex, came out too small,
 and pruned optimal solutions while still reporting that optimality had been
 proven. Second, the sub-solver is reused across region moves instead of being
-constructed afresh, since at millions of moves per minute the set-up of the
-graph and reduction state costs more than the search itself.
+constructed afresh, since at a hundred thousand moves per minute the set-up of
+the graph and reduction state costs more than the search itself.
 
 To give these choices a number: on \texttt{del18}, 262\,144 vertices, the solver
 kernelizes the whole graph in $1.16$\,s, completes its first dive $0.37$\,s
