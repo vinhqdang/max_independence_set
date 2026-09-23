@@ -47,8 +47,9 @@ whose every incumbent neighbour lies in $F$; we prove that the resulting region
 cannot interact with the rest of the solution, so re-solving it to optimality is
 always feasible and never degrades the incumbent. The reduction rules, normally
 used once as preprocessing, are what makes this affordable: they collapse a
-region of thousands of vertices to a kernel of a few dozen, so each move costs
-microseconds. The size of $F$ is tuned online from whether the sub-problems are
+region of thousands of vertices to a kernel of a few dozen, so a move costs
+about half a millisecond and the solver performs some 1800 of them per second.
+The size of $F$ is tuned online from whether the sub-problems are
 being solved to proven optimality. On a benchmark of 27 instances in five
 families, compared against ReduMIS, OnlineMIS, NuMVC, FastVC, reducing-peeling
 and near-linear kernelization under a common 60-second budget, the method
@@ -126,8 +127,8 @@ separated from the rest of the incumbent, so re-optimising it is always feasible
 and, by Corollary~\ref{cor:monotone}, never degrades the solution. What makes
 this affordable is the reduction rules themselves: applied inside the move
 rather than only as preprocessing, they collapse a region of thousands of
-vertices to a kernel of a few dozen, so each move costs microseconds. With
-$|F|=1$ the move coincides with the classical $(1,2)$-swap; larger $F$ yields
+vertices to a kernel of a few dozen, so a move costs well under a millisecond.
+With $|F|=1$ the move coincides with the classical $(1,2)$-swap; larger $F$ yields
 moves that no swap neighbourhood expresses.
 
 Our contributions are:
@@ -497,6 +498,14 @@ proven. Second, the sub-solver is reused across region moves instead of being
 constructed afresh, since at millions of moves per minute the set-up of the
 graph and reduction state costs more than the search itself.
 
+To give these choices a number: on \texttt{del18}, 262\,144 vertices, the solver
+kernelizes the whole graph in $1.16$\,s, completes its first dive $0.37$\,s
+later, and then performs 107\,238 region moves in the remaining 58\,s, or one
+every $543$\,$\mu$s. On \texttt{web-Stanford} the corresponding figures are
+$0.69$\,s, $0.03$\,s and 96\,842 moves at $605$\,$\mu$s each. Those rates are
+what the reuse of the sub-solver and the payload-free undo buy; the throughput,
+not the asymptotics, is what makes an exactly-solved neighbourhood practical.
+
 Correctness is checked by comparing the exact solver against exhaustive search on
 random graphs, repeating the comparison with each reduction rule disabled in
 turn, and by verifying that every reported solution is independent and maximal.
@@ -857,7 +866,8 @@ sub-solver is the fastest of them --- by a factor of 25 to 40 over HiGHS, three
 to five over VCSolver, and a more modest 1.1 to 1.4 over the PACE portfolio ---
 which is the property
 the region move depends on: the sub-problems it generates are of exactly this
-shape, and they must be solved in microseconds.
+shape, and at some 1800 moves per second they must each be solved in a fraction
+of a millisecond.
 
 Second, our exact solver is not competitive as an exact solver. On the BHOSLIB
 family the PACE 2019 portfolio proves the optimum of \texttt{frb30-15-1},
