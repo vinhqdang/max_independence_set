@@ -1004,6 +1004,31 @@ instance within the cutoff, which we report as a failure rather than excluding
 the instance. Excluding them would have removed exactly the cases that
 distinguish the solvers.
 
+\paragraph{Implementation maturity.} The baselines are mature codebases. NuMVC
+and FastVC have been refined by their authors and others since 2013 and 2015
+respectively, and the KaMIS solvers likewise; ours is a research implementation
+written for this paper. A comparison of wall-clock results under a fixed budget
+cannot separate the merit of an algorithm from the quality of the code that runs
+it, and the reader should not read our numbers as though it could.
+
+We nevertheless report the comparison as measured, for three reasons. The
+strongest baseline on this benchmark, ReduMIS, is as heavily engineered as the
+vertex cover solvers, and it is the one against which we claim the least: no
+test in this paper separates us from it. Excluding the mature implementations
+would remove exactly the solvers a practitioner would otherwise choose. And the
+bias runs against us where we win and for us where we lose, which is the less
+convenient direction: our margins over NuMVC on the large sparse instances ---
+46\,054 vertices on \texttt{roadNet-CA}, 18\,645 on \texttt{del20} --- would only
+be larger if implementation quality were equalised, while our one- and two-vertex
+deficits on BHOSLIB might narrow.
+
+We do not, therefore, attribute the BHOSLIB result to implementation maturity.
+Section~\ref{sec:move} gives a structural reason for it --- on a dense graph the
+region is either empty or the whole graph, so the move degenerates --- and the
+convergence traces support that reading: NuMVC reaches the final value there in
+$0.2$ seconds, which is not the signature of a better-tuned inner loop but of a
+search whose neighbourhood suits the instance.
+
 \paragraph{Build differences between the two platforms.} The replication
 machines rebuilt the solver from source, and that source had by then acquired
 the tracing used for Figure~\ref{fig:convergence}, which the machine used for
