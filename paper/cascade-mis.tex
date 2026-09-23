@@ -216,8 +216,12 @@ sub-problem is a standard metaheuristic pattern, and swap neighbourhoods for
 this problem are long established \cite{andrade2012}. Three things distinguish
 the present work. First, the region is defined from the incumbent rather than
 from graph distance, and is provably separated from it, so the move is
-unconditionally admissible and monotone; no acceptance criterion, tabu list or
-repair step is required. Second, the data reduction rules are used \emph{inside}
+unconditionally admissible and monotone provided a region solution smaller than
+the set released is never accepted (Proposition~\ref{prop:bounded}); no
+acceptance criterion over worsening solutions and no tabu list are required. A
+repair step is needed only where a truncated sub-solve leaves the incumbent
+non-maximal, and Proposition~\ref{prop:maximal} confines it to the region and its
+neighbourhood. Second, the data reduction rules are used \emph{inside}
 the move rather than only before the search, and this is what makes an exact
 sub-solve cheap enough for an inner loop; our ablation shows that the move
 carries essentially the entire improvement over the baselines. Third, the
@@ -318,10 +322,18 @@ $w$, neither of which is in $T$. If $f \in T$ then $(T \setminus \{f\}) \cup
 any other neighbour of $u$ or $w$ is adjacent to $f$ and hence outside $T$.
 Either way we obtain an independent set of size $|T| + 1$.
 
-($\le$) Let $S$ be a maximum independent set of $G$. By
-Lemma~\ref{lem:simplicial} applied to the case $|N(v)| = 2$ we may assume $S$
-contains $v$, or contains both $u$ and $w$; if it contained exactly one of
-$u,w$, exchanging that vertex for $v$ keeps the size. In the first case
+($\le$) Let $S$ be a maximum independent set of $G$. We first argue that $S$
+may be taken to contain $v$, or to contain both $u$ and $w$. Note that
+Lemma~\ref{lem:simplicial} is \emph{not} available here: its hypothesis is that
+$N(v)$ induces a clique, and $N(v) = \{u,w\}$ with $uw \notin E$ is precisely the
+case in which it does not. We argue directly instead. If $S$ contains neither
+$u$ nor $w$, then $S \cup \{v\}$ is independent, because $u$ and $w$ are the only
+neighbours of $v$; maximality of $S$ therefore forces $v \in S$ already. If $S$
+contains exactly one of them, say $u$, then $(S \setminus \{u\}) \cup \{v\}$ is
+independent --- the only neighbours of $v$ are $u$, which has been removed, and
+$w$, which is not in $S$ --- and has the same size, so we may replace $S$ by it
+and again have $v \in S$. In the one remaining case $u,w \in S$, and then
+$v \notin S$ because $v$ is adjacent to both. In the first case
 $S \setminus \{v\}$ is independent in $G'$ and avoids $f$. In the second,
 $(S \setminus \{u,w\}) \cup \{f\}$ is independent in $G'$, because no neighbour
 of $f$ other than through $u$ or $w$ exists. Either way we obtain an independent
@@ -370,10 +382,64 @@ $S' = (S \setminus R(F)) \cup T^\star$ is independent and
 $|S'| = |S| - |F| + |T^\star| \ge |S|$.
 \end{corollary}
 
+Corollary~\ref{cor:monotone} assumes the subproblem is solved to optimality,
+which Algorithm~\ref{alg:cascade} cannot guarantee: its sub-solver runs under a
+time bound and may return a set that is merely independent. Two further
+statements are therefore needed before the guarantee transfers to the
+implemented move.
+
+\begin{proposition}[Bounded sub-solves]
+\label{prop:bounded}
+Let $T$ be any independent set of $G[R(F)]$, not necessarily maximum, and let
+$S' = (S \setminus R(F)) \cup T$. Then $S'$ is independent, and
+$|S'| \ge |S|$ if and only if $|T| \ge |F|$.
+\end{proposition}
+
+\begin{proof}
+Independence is Theorem~\ref{thm:region}(b), whose proof assumes nothing about
+$T$ beyond independence in $G[R(F)]$. By Theorem~\ref{thm:region}(c) we have
+$S \cap R(F) = F$, so removing $R(F)$ from $S$ deletes exactly $|F|$ vertices and
+$|S'| = |S| - |F| + |T|$; the equivalence follows.
+\end{proof}
+
+The test $|T| \ge |F|$ is what the implementation applies before a region is
+written back, and it is what keeps the move monotone when the sub-solve is
+truncated; Corollary~\ref{cor:monotone} is the special case in which the
+sub-solve completes, since then $|T^\star| \ge |F|$ holds automatically by
+Theorem~\ref{thm:region}(c). Monotonicity thus does not depend on the sub-solver
+proving optimality, only on a smaller region solution never being accepted.
+
+\begin{proposition}[Maximality]
+\label{prop:maximal}
+If $S$ is maximal in $G$ and $T$ is maximal in $G[R(F)]$, then
+$S' = (S \setminus R(F)) \cup T$ is maximal in $G$.
+\end{proposition}
+
+\begin{proof}
+Let $u \notin S'$. If $u \in R(F)$ then $u \notin T$, and maximality of $T$ in
+$G[R(F)]$ gives $u$ a neighbour in $T \subseteq S'$. If $u \notin R(F)$ then
+$u \notin S$, for otherwise $u \in S \setminus R(F) \subseteq S'$. Since
+$u \notin R(F)$ and $u \notin S$, definition \eqref{eq:region} gives
+$N(u) \cap S \not\subseteq F$, so some $w \in N(u) \cap S$ has $w \notin F$. By
+Theorem~\ref{thm:region}(c), $w \notin R(F)$, hence
+$w \in S \setminus R(F) \subseteq S'$. Either way $u$ has a neighbour in $S'$.
+\end{proof}
+
+Maximality of $S'$ therefore also rests on the sub-solve completing. A truncated
+solve can return a $T$ that is independent but not maximal, and then a vertex of
+$R(F) \setminus T$ may be left with no neighbour in $S'$ at all, because the
+incumbent neighbours that blocked it all lay in $F$ and were released. The
+implementation repairs this by scanning the vertices adjacent to the region and
+taking any that have become free, which only adds vertices and so preserves
+Proposition~\ref{prop:bounded}. Proposition~\ref{prop:maximal} is the statement
+that no such repair is needed anywhere else: vertices outside $R(F)$ retain a
+blocking neighbour by construction, so the scan is confined to the region and its
+neighbourhood rather than to the graph.
+
 \begin{figure}[htbp]
 \centering
 \resizebox{\textwidth}{!}{\input{figures/region}}
-\caption{A region move that no swap-based neighbourhood expresses. Shaded
+\caption{A region move that no $(1,k)$-swap expresses. Shaded
 vertices are in the current solution. In (i) the incumbent $S=\{a,b,c\}$ is
 maximal, so no vertex can simply be added. Releasing any \emph{single} vertex
 also achieves nothing: $R(\{a\})=\{a,u_1\}$, $R(\{b\})=\{b,u_3\}$ and
@@ -410,16 +476,39 @@ Maintaining $t$ costs $O(\deg v)$ whenever a vertex $v$ enters or leaves $S$,
 which is charged to the move that changes it.
 \end{proof}
 
-The cost of the move is therefore dominated not by the size of the graph but by
-the total degree of the region, and the exact sub-solve is performed on the
+Proposition~\ref{prop:cost} bounds the construction of the region from a set $F$
+that is already given; selecting $F$ is a separate cost that it does not cover.
+The implementation grows $F$ by a breadth-first walk from a seed vertex,
+collecting incumbent vertices until the target size is reached and capping the
+number of vertices visited. The walk scans the full adjacency of each vertex it
+visits, so its cost is the total degree of the ball rather than of $F$, and a
+single step that reaches a high-degree vertex dominates the move: the largest
+degree in our benchmark is $100{,}029$. The per-move cost is therefore bounded by
+the total degree of the visited ball together with that of the region, and not by
+$|F|$.
+
+Subject to that, the cost of the move is dominated not by the size of the graph
+but by the total degree of the region, and the exact sub-solve is performed on the
 kernel of $G[R(F)]$ rather than on $G[R(F)]$ itself.
 
 \begin{corollary}[Relation to classical swaps]
+\label{cor:swaps}
 For $F = \{v\}$, $R(F) = \{v\} \cup \{u \notin S : N(u) \cap S = \{v\}\}$, which
 is the set examined by a $(1,2)$-swap \cite{andrade2012}. Solving $G[R(F)]$
-exactly therefore finds the best $(1,k)$-swap at $v$ for every $k$ at once, and
-larger $F$ yields moves no swap-based neighbourhood expresses.
+therefore finds the best $(1,k)$-swap at $v$ for every $k$ at once.
 \end{corollary}
+
+More generally, a region move that releases $|F| = j$ vertices and writes back an
+independent set of size $k$ removes $j$ solution vertices and inserts $k$, so it
+\emph{is} a $(j,k)$-swap. The neighbourhood is thus not a new class of move:
+$(j,k)$-swaps are the generalisation of the classical two-improvement introduced
+by Andrade et al.\ \cite{andrade2012}, and the present construction should not be
+read as reaching outside that class. What Theorem~\ref{thm:region} supplies is
+not a larger class but a way to search it: because $R(F)$ is separated from
+$S \setminus R(F)$, the best $(j,k)$-swap at $F$ over all $k$ is obtained by
+solving one induced subproblem, with no consistency check against the rest of the
+incumbent. That is what makes $j$ in the tens affordable, where implementations
+that enumerate swaps directly are in practice confined to $j \le 2$.
 
 \section{Algorithm and implementation}
 \label{sec:algorithm}
@@ -467,6 +556,16 @@ stopped improving, and the escape mechanisms exist to put it back.}
 \EndWhile
 \end{algorithmic}
 \end{algorithm}
+
+\paragraph{The decision-space move} The dive leaves behind a stack of decisions,
+one per discarded vertex. An alternative move operates on that stack rather than
+on the graph: it rewinds to a chosen level, reverses the decision taken there and
+re-dives from that point, so the cost is the suffix of the dive rather than the
+whole instance. This was the first move we designed, and it is the
+\textsc{dive} variant ablated in Section~\ref{sec:ablation}; it survives in the
+implementation as an option but not as a default, for the reasons reported there.
+It is described here only so that the ablation has something to refer to --- it
+has no separation property, and Theorem~\ref{thm:region} says nothing about it.
 
 \paragraph{Where the search looks} Every vertex decided by a reduction belongs
 to some maximum independent set, so an improving move must touch a vertex that
@@ -952,7 +1051,7 @@ the larger instances in the benchmark means tens of millions of constraints.
 Table~\ref{tab:ablation} reports four variants on seven instances spanning the
 families: \textsc{no-lns} disables region moves entirely, leaving kernelization
 plus the greedy dive and its restarts; \textsc{dive} replaces the region move
-with the decision-space move described in Section~\ref{sec:move}; \textsc{no-pert}
+with the decision-space move described in Section~\ref{sec:algorithm}; \textsc{no-pert}
 removes the perturbation step; and \textsc{no-lp} removes the
 Nemhauser--Trotter LP reduction. These are separate runs from the main study, so
 the full-solver column differs from Table~\ref{tab:quality-geometric} by a few
