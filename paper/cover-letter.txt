@@ -1,0 +1,94 @@
+Quang-Vinh Dang
+British University Vietnam
+Hung Yen, Vietnam
+vinh.dq4@buv.edu.vn
+ORCID 0000-0002-3877-8024
+
+To the Editors
+Computers & Operations Research
+
+
+Dear Editors,
+
+Please consider the enclosed manuscript, "Exact Large-Neighbourhood Search for
+the Maximum Independent Set Problem on Massive Sparse Graphs", for publication
+as a full-length research paper in Computers & Operations Research. I believe it
+falls under the journal's area of Optimization -- Approximate Methods.
+
+THE PROBLEM
+
+The maximum independent set problem, equivalently minimum vertex cover, is the
+model for selecting a largest mutually compatible subset when incompatibility is
+pairwise. The conflict graphs that arise from real data -- in scheduling,
+interference-limited wireless assignment, map labelling and record
+de-duplication -- routinely have millions of vertices and average degree in the
+low tens. For a decade the practical approach to such instances has been to
+apply safe data reduction rules until none fires and then search whatever
+survives. Methods differ almost entirely in that second step, and they share a
+weakness: instances whose reduced graph, or kernel, remains large.
+
+THE CONTRIBUTION
+
+The paper studies a neighbourhood that is solved exactly rather than sampled.
+Releasing a set F of vertices from an incumbent solution makes eligible exactly
+those vertices all of whose incumbent neighbours lie in F. The paper proves that
+the resulting region is separated from the remainder of the incumbent, so the
+region may be re-solved without any consistency check against the rest of the
+solution; that acceptance is safe whenever the returned region solution is no
+smaller than the set released, which is what preserves monotonicity when the
+sub-solver is truncated; and that maximality is preserved outside the region, so
+repair is confined to the region and its neighbourhood rather than the graph.
+
+Two things make this affordable in an inner loop. The reduction rules, normally
+used once as preprocessing, are applied inside each move, collapsing a region of
+thousands of vertices to a kernel of a few dozen. The size of F is not a
+parameter but is inferred at run time from whether the sub-problems are reaching
+proven optimality, which is what allows a single configuration to cover instance
+families whose appropriate neighbourhood sizes differ by three orders of
+magnitude.
+
+The paper also reports the engineering that the throughput rests on -- a dynamic
+graph with payload-free LIFO undo over a twin-indexed adjacency array, sub-solver
+reuse across moves, and a degree-ordered reduction queue -- with measurements
+rather than assertions, since the method's viability is a claim about constant
+factors as much as about the neighbourhood.
+
+THE EVIDENCE, AND WHAT IT DOES AND DOES NOT SHOW
+
+The computational study covers 27 instances in five families against six
+baselines under a common 60-second budget, with a ten-fold budget study, a seed
+study, a parameter-sensitivity study, an ablation, and a replication on
+different hardware.
+
+I have tried to report the outcome without inflating it. The method attains the
+best value of all seven solvers on every geometric instance, and is strictly
+ahead of all of them on the three Delaunay instances. Over the benchmark as a
+whole it is strictly ahead on three instances, matches the best value on
+thirteen, and is behind on eleven; a paired Wilcoxon test finds no significant
+difference from the strongest baseline. The ablation attributes the geometric
+margin to the exact neighbourhood move, and reports three further components
+that contributed nothing, including a move design that the measurements showed
+to be worthless. A section on threats to validity states where the method does
+not help and why the largest single margin is in part a difference in
+convergence rate rather than in final quality.
+
+CONFORMANCE
+
+The heuristic is described in metaphor-free language throughout. The paper
+reports algorithmic cost bounds for the move and its construction alongside the
+numerical experiments. The source code, the instance generators and the raw
+per-run records behind every table and figure are publicly available, and the
+appendix documents instance provenance in the detail needed to rebuild the
+benchmark exactly -- including a normalisation issue in a widely used benchmark
+family whose two distributed forms are easily confused, which we believe is of
+independent use to others reporting on it.
+
+The work is original, has not been published previously, and is not under
+consideration for publication elsewhere. I am the sole author and there are no
+competing interests to declare.
+
+Thank you for your time and consideration.
+
+Yours sincerely,
+
+Quang-Vinh Dang
