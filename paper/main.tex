@@ -518,6 +518,20 @@ the graph, because a rule applied in the wrong order does work that a later
 deletion would have made unnecessary, and the number of such wasted applications
 grows faster than the graph does. It is one line of counting sort.
 
+The last of these details is the one that decides whether the solver keeps its
+promise at all. Kernelization is run to exhaustion in principle, but on some
+graphs exhaustion is unaffordable: on \texttt{soc-pokec}, 1.6 million vertices,
+running the rules to a fixed point takes $180.5$\,s, three times the entire
+60-second budget, so a solver that insisted on finishing would return nothing at
+all. We therefore give kernelization a fixed share of the budget --- $0.3$ by
+default --- and stop it where it stands when that share is spent, keeping
+whatever reductions have been applied and continuing with the rest. On
+\texttt{soc-pokec} the phase is cut off at $18.0$\,s, exactly the share, and the
+solver returns 788\,868 within its budget. The truncation is recorded in the
+run records, so a reader can see on which instances the kernel is partial.
+This is the difference between a method that respects a deadline and one that
+merely has a time limit in its interface.
+
 Correctness is checked by comparing the exact solver against exhaustive search on
 random graphs, repeating the comparison with each reduction rule disabled in
 turn, and by verifying that every reported solution is independent and maximal.
