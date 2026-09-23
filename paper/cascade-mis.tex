@@ -426,10 +426,25 @@ larger $F$ yields moves no swap-based neighbourhood expresses.
 
 \subsection{The search}
 
+Figure~\ref{fig:pipeline} shows the shape of the method and
 Algorithm~\ref{alg:cascade} gives the overall structure. Kernelization runs
 once; a \emph{dive} then constructs an initial solution by repeatedly discarding
 a maximum-degree vertex and re-reducing, which reproduces reducing-peeling
 \cite{chang2017}; the remaining budget goes to region moves.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/pipeline}}
+\caption{Where the work goes. Kernelization and the dive run once, the first of
+them bounded by a share $\kappa$ of the budget so that it cannot consume the
+whole of it; everything after that is region moves. The
+step set in italics is what distinguishes the method: the reduction rules are
+applied \emph{inside} each move, to the region rather than to the input, which is
+what makes solving the region exactly affordable. A move never returns a worse
+solution than it received, so the only reason to leave the loop is that it has
+stopped improving, and the escape mechanisms exist to put it back.}
+\label{fig:pipeline}
+\end{figure}
 
 \begin{algorithm}
 \caption{\textsc{Cascade}}
