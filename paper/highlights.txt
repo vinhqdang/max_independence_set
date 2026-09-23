@@ -1,0 +1,5 @@
+A region freed from the incumbent is provably separated from the rest of it
+Re-solving that region exactly can never degrade the incumbent solution
+Data reduction applied inside each move makes an exact sub-solve affordable
+The neighbourhood size is inferred at run time rather than set as a parameter
+Best of seven solvers on every geometric instance of a 27-instance benchmark

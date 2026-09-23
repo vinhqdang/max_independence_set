@@ -1,6 +1,6 @@
 %% Computers & Operations Research -- Elsevier elsarticle class.
 %% Compile with: latexmk -pdf main.tex   (or: make)
-\documentclass[preprint,12pt]{elsarticle}
+\documentclass[preprint,authoryear,12pt]{elsarticle}
 
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
@@ -39,42 +39,33 @@
 \title{Exact Large-Neighbourhood Search for the Maximum Independent Set
        Problem on Massive Sparse Graphs}
 
-\author[buv]{Quang-Vinh Dang}
+\author[buv]{Quang-Vinh Dang\corref{cor1}}
 \ead{vinh.dq4@buv.edu.vn}
+\cortext[cor1]{Corresponding author.}
 \affiliation[buv]{organization={British University Vietnam},
                   city={Hung Yen}, country={Vietnam}}
 
 \begin{abstract}
-%% TODO: tighten once the final experiments are in.
-The maximum independent set problem is solved in practice by first applying
-safe data reduction rules and then searching whatever survives. Existing
-solvers differ only in that second step, and all of them are weak in the same
-place: instances whose reduced graph, or kernel, stays large. We propose a
-neighbourhood that is solved exactly rather than sampled. Releasing a set $F$
-of vertices from the incumbent solution makes exactly those vertices eligible
-whose every incumbent neighbour lies in $F$; we prove that the resulting region
-cannot interact with the rest of the solution, so re-solving it to optimality is
-always feasible and never degrades the incumbent. The reduction rules, normally
-used once as preprocessing, are what makes this affordable: they collapse a
-region of thousands of vertices to a kernel of a few dozen, so a move costs
-about half a millisecond and the solver performs some 1800 of them per second.
-The size of $F$ is tuned online from whether the sub-problems are
-being solved to proven optimality. On a benchmark of 27 instances in five
-families, compared against ReduMIS, OnlineMIS, NuMVC, FastVC, reducing-peeling
-and near-linear kernelization under a common 60-second budget, the method
-attains the best value of all seven solvers on every geometric instance, and is
-strictly ahead of all of them on the three Delaunay instances by a margin that
-grows with size, reaching $0.08\%$ over the strongest baseline at one million
-vertices. A run at ten times the budget shows that this margin over the best
-baseline is stable, while a much larger gap to ReduMIS at the same size is
-mostly a difference in convergence rate and closes as the budget grows. Over the whole benchmark it is strictly ahead
-on three instances, matches the best value on thirteen, and is behind on
-eleven: by at most $0.06\%$ on five large sparse graphs, and by one or two
-vertices on six BHOSLIB instances, where NuMVC and FastVC remain the stronger
-solvers. A paired
-Wilcoxon test over relative gaps places it ahead of five of the six baselines
-and finds no significant difference from ReduMIS. An ablation attributes the
-geometric margin to the exact neighbourhood move.
+The maximum independent set problem is solved in practice by applying safe data
+reduction rules and then searching whatever survives. Solvers differ only in
+that second step, and all are weak where the reduced graph, or kernel, stays
+large. We study a neighbourhood that is solved exactly rather than sampled.
+Releasing a set $F$ from an incumbent solution makes eligible exactly those
+vertices whose every incumbent neighbour lies in $F$. We prove that the
+resulting region is separated from the rest of the solution, so re-solving it
+never degrades the incumbent, and that acceptance needs only a region solution
+no smaller than the set released. Applying the reduction rules inside the move,
+not only before the search, collapses a region of thousands of vertices to a
+kernel of a few dozen, making an exact sub-solve affordable in an inner loop;
+the size of $F$ is inferred at run time from whether sub-problems reach proven
+optimality. On 27 instances in five families, against six baselines at a common
+60-second budget, the method attains the best value of all seven solvers on
+every geometric instance, and is strictly ahead on the three Delaunay instances,
+by $0.08\%$ at one million vertices. Over the whole benchmark it is strictly
+ahead on three instances, matches the best value on thirteen, and is behind on
+eleven. A paired Wilcoxon test finds no significant difference from ReduMIS,
+whose deficit at the largest geometric size closes as the budget grows. An
+ablation attributes the geometric margin to the exact neighbourhood move.
 \end{abstract}
 
 \begin{keyword}
@@ -252,7 +243,9 @@ otherwise.
 
 \begin{table}[htbp]
 \centering
-\caption{The reduction rules used. All are safe in the sense above.}
+\caption{The reduction rules used. All are safe in the sense above. The
+unconfined rule is that of \citet{xiao2017}; the LP rule is that of
+\citet{nemhauser1975}.}
 \label{tab:rules}
 \begin{tabular}{lll}
 \toprule
@@ -264,8 +257,8 @@ Simplicial & $N(v)$ is a clique & take $v$, discard $N(v)$ \\
 Degree-2 fold & $N(v)=\{u,w\}$, $uw \notin E$ & replace $v,u,w$ by one vertex \\
 Twin & $N(u)=N(v)$, $|N(u)|=3$ & take both, or fold \\
 Domination & $uv \in E$, $N[u] \subseteq N[v]$ & discard $v$ \\
-Unconfined \cite{xiao2017} & confining-set test fails & discard $v$ \\
-LP \cite{nemhauser1975} & half-integral LP optimum & fix the integral part \\
+Unconfined & confining-set test fails & discard $v$ \\
+LP & half-integral LP optimum & fix the integral part \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1243,10 +1236,30 @@ step given that recent activity in this area has concentrated on the weighted
 case.
 
 \section*{Data availability}
-Source code, instance generators and the raw per-run records are available at
-\url{https://github.com/vinhqdang/max_independence_set}.
+The source code, the instance generators and the raw per-run records behind
+every table and figure in this paper are available at
+\url{https://github.com/vinhqdang/max_independence_set}. The publicly archived
+instances are identified in Appendix~\ref{app:provenance} by the name under
+which their repository distributes them, and the generated instances are
+reproduced by the generator in that repository at the seed recorded there.
+
+\section*{CRediT authorship contribution statement}
+\textbf{Quang-Vinh Dang:} Conceptualization, Methodology, Software, Validation,
+Formal analysis, Investigation, Data curation, Writing --- original draft,
+Writing --- review and editing, Visualization.
+
+\section*{Declaration of competing interest}
+The author declares no known competing financial interests or personal
+relationships that could have appeared to influence the work reported in this
+paper.
+
+\section*{Funding}
+This research did not receive any specific grant from funding agencies in the
+public, commercial, or not-for-profit sectors.
 
 \appendix
+\setcounter{table}{0}
+\setcounter{figure}{0}
 
 \section{Instance provenance}
 \label{app:provenance}
@@ -1285,6 +1298,7 @@ compared.
 
 \input{tables/provenance}
 
+\setcounter{table}{0}
 \section{Complete per-instance results}
 \label{app:full}
 
@@ -1294,7 +1308,7 @@ including the seed study and the replication, are distributed with the source.
 
 \input{tables/appendix}
 
-\bibliographystyle{elsarticle-num}
+\bibliographystyle{elsarticle-harv}
 \bibliography{refs}
 
 \end{document}
