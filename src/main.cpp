@@ -56,12 +56,15 @@ int main(int argc, char** argv) {
         else if (a == "--sample") cfg.sample_size = atoi(next().c_str());
         else if (a == "--include-prob") cfg.include_prob = atof(next().c_str());
         else if (a == "--kernel-only") { kernel_only = true; cfg.kernel_only = true; }
+        else if (a == "--kernel-capped") cfg.kernel_capped = true;
         else if (a == "--no-lp") cfg.use_lp = false;
         else if (a == "--trace") cfg.trace_path = next();
         else if (a == "--restart-idle") cfg.restart_idle_dives = atof(next().c_str());
         else if (a == "--kernel-share") cfg.kernel_share = atof(next().c_str());
         else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
+        else if (a == "--lns-heuristic") cfg.lns_exact = false;
+        else if (a == "--lns-no-reduce") cfg.lns_region_reductions = false;
         else if (a == "--no-perturb") cfg.use_perturbation = false;
         else if (a == "--no-dive-moves") cfg.use_dive_moves = false;
         else if (a == "--dive-moves") cfg.use_dive_moves = true;
@@ -118,12 +121,14 @@ int main(int argc, char** argv) {
            "kernel_n=%lld kernel_m=%lld kernel_offset=%lld kernel_time=%.3f "
            "lp_decided=%lld kernel_truncated=%d first_dive=%lld first_dive_time=%.3f "
            "lns_moves=%lld lns_impr=%lld lns_gain=%lld lns_plateau=%lld "
-           "lns_free=%d restarts=%lld perturb=%lld sweeps=%lld\n",
+           "lns_free=%d restarts=%lld perturb=%lld sweeps=%lld "
+           "lns_proved=%lld lns_nodes=%lld lns_region_v=%lld lns_root_alive=%lld\n",
            path.c_str(), g.n, g.m, size, total, read_time,
            st.kernel_n, st.kernel_m, st.kernel_offset, st.kernel_seconds,
            st.lp_decided, st.kernel_truncated, st.first_dive_value, st.first_dive_seconds,
            st.lns_moves, st.lns_improvements, st.lns_gain, st.lns_plateau,
-           st.lns_expand, st.restarts, st.perturbations, st.lns_sweeps);
+           st.lns_expand, st.restarts, st.perturbations, st.lns_sweeps,
+           st.lns_proved, st.lns_nodes, st.lns_region_vertices, st.lns_root_alive);
 
     if (!cfg.trace_path.empty()) {
         FILE* tf = fopen(cfg.trace_path.c_str(), "wb");

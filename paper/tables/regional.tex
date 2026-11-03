@@ -1,0 +1,19 @@
+\begin{table}[htbp]
+\centering
+\caption{Exact against heuristic repair, and regional reductions on and off, under one implementation, one region-selection rule and one 60\,s budget. Mean size over three seeds (bracket: change from the full configuration). The last three columns are process data for the full configuration on that instance (per region move, mean over seeds): vertices in the region before reduction, vertices left after the root reduction pass, and the share of sub-solves proved optimal.}
+\label{tab:regional}
+\small
+\fittable{
+\begin{tabular}{lrrrrrrr}
+\toprule
+Instance & exact repair, regional reductions (full) & heuristic repair (reduce, then one greedy pass) & exact repair, no regional reductions & no region moves & $|R|$ & $|R'|$ & proved \\
+\midrule
+\texttt{del16} & 20645.0 & 20614.3 (-30.7) & 20595.0 (-50.0) & 20376.3 (-268.7) & 89 & 4.8 & 100.0\% \\
+\texttt{del18} & 82653.3 & 82510.0 (-143.3) & 82443.0 (-210.3) & 81635.0 (-1018.3) & 137 & 12.0 & 100.0\% \\
+\texttt{rgg16} & 16086.0 & 16086.0 (+0.0) & 16086.0 (+0.0) & 16084.7 (-1.3) & 69 & 1.1 & 100.0\% \\
+\texttt{roadNet-PA} & 533627.0 & 533607.0 (-20.0) & 533573.0 (-54.0) & 533375.3 (-251.7) & 203 & 16.5 & 100.0\% \\
+\texttt{web-Stanford} & 163373.3 & 163369.7 (-3.7) & 163371.3 (-2.0) & 163365.0 (-8.3) & 396 & 21.5 & 100.0\% \\
+\texttt{com-amazon} & 174632.0 & 174632.0 (+0.0) & 174632.0 (+0.0) & 174632.0 (+0.0) & 391 & 7.5 & 100.0\% \\
+\bottomrule
+\end{tabular}}
+\end{table}

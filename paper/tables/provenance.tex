@@ -1,7 +1,7 @@
 \footnotesize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{l l r r r r l}
-\caption{Provenance and basic statistics of the 27 benchmark instances. $\bar{d}$ is the average degree and $\Delta$ the maximum degree. Sources: SNAP is \texttt{snap.stanford.edu/data}, where each instance is the file of its own name; $^{\dagger}$ Network Repository \texttt{bhoslib}, used in complement as Section~\ref{sec:experiments} explains; $^{\ddagger}$ produced by \texttt{tools/gen\_instances.py} at seed 1.}\label{tab:provenance}\\
+\caption{Provenance and basic statistics of the 27 benchmark instances. $\bar{d}$ is the average degree and $\Delta$ the maximum degree. Sources: SNAP is \texttt{snap.stanford.edu/data}, where each instance is the file of its own name (the \texttt{com-*} graphs are the \texttt{.ungraph} files under \texttt{bigdata/communities}); $^{\dagger}$ Network Repository \texttt{bhoslib}, used in complement as Section~\ref{sec:experiments} explains; $^{\ddagger}$ produced by \texttt{tools/gen\_instances.py} at seed 1.}\label{tab:provenance}\\
 \toprule
 Instance & Family & $n$ & $m$ & $\bar{d}$ & $\Delta$ & Source \\
 \midrule
@@ -31,10 +31,10 @@ Instance & Family & $n$ & $m$ & $\bar{d}$ & $\Delta$ & Source \\
 \texttt{com-dblp} & social & 317,080 & 1,049,866 & 6.6 & 343 & SNAP \\
 \texttt{com-amazon} & social & 334,863 & 925,872 & 5.5 & 549 & SNAP \\
 \texttt{com-youtube} & social & 1,134,890 & 2,987,624 & 5.3 & 28,754 & SNAP \\
-\texttt{soc-pokec-relationships} & social & 1,632,803 & 22,301,964 & 27.3 & 14,854 & generated$^{\ddagger}$ \\
+\texttt{soc-pokec-relationships} & social & 1,632,803 & 22,301,964 & 27.3 & 14,854 & SNAP \\
 \texttt{as-skitter} & social & 1,696,415 & 11,095,298 & 13.1 & 35,455 & SNAP \\
 \texttt{wiki-Talk} & social & 2,394,385 & 4,659,565 & 3.9 & 100,029 & SNAP \\
-\texttt{com-lj} & social & 3,997,962 & 34,681,189 & 17.3 & 14,815 & generated$^{\ddagger}$ \\
+\texttt{com-lj} & social & 3,997,962 & 34,681,189 & 17.3 & 14,815 & SNAP \\
 \texttt{frb30-15-1} & bhoslib & 450 & 17,827 & 79.2 & 122 & NetRep$^{\dagger}$ \\
 \texttt{frb35-17-1} & bhoslib & 595 & 27,856 & 93.6 & 132 & NetRep$^{\dagger}$ \\
 \texttt{frb40-19-1} & bhoslib & 760 & 41,314 & 108.7 & 178 & NetRep$^{\dagger}$ \\

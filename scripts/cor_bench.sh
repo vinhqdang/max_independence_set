@@ -3,7 +3,7 @@
 # Run on an idle machine: every number is a wall-clock measurement.
 set -u
 cd "$(dirname "$0")/.."
-export MIS_BASELINE_DIR=${MIS_BASELINE_DIR:-/tmp/claude-0/-home-user-max-independence-set/ab0fd628-37f5-5a8a-bda6-c8eaa0ba89dd/scratchpad}
+export MIS_BASELINE_DIR=${MIS_BASELINE_DIR:-$HOME/baselines}
 OUT=results
 mkdir -p "$OUT"
 

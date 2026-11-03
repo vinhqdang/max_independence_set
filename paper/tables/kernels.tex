@@ -1,0 +1,33 @@
+\begin{table}[htbp]
+\centering
+\caption{Residual kernel after reduction, and the whole-input exact solve. \emph{Capped}: kernelization under the 60\,s run's own rule (a share $\kappa=0.3$ of the budget). \emph{Full}: run to a fixed point (limit 300\,s). \emph{Exact}: \textsc{Cascade}\,\texttt{--exact} on the whole input, limit 120\,s; time to a proven optimum, or the best value if not proved. Kernel size is the number of vertices left.}
+\label{tab:kernels}
+\small
+\fittable{
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Instance & $n$ & capped $|K|$ & \% of $n$ & time (s) & full $|K|$ & time (s) & exact (s) & status \\
+\midrule
+\texttt{ca-AstroPh} & 18772 & 0 & 0.00 & 0.01 & 0 & 0.01 & 0.01 & proved \\
+\texttt{ca-CondMat} & 23133 & 0 & 0.00 & 0.00 & 0 & 0.00 & 0.01 & proved \\
+\texttt{email-Enron} & 36692 & 0 & 0.00 & 0.01 & 0 & 0.01 & 0.02 & proved \\
+\texttt{rgg16} & 65501 & 686 & 1.05 & 0.20 & 686 & 0.28 & 120 & open \\
+\texttt{del16} & 65536 & 55757 & 85.08 & 0.27 & 55757 & 0.21 & 120 & open \\
+\texttt{rgg18} & 262011 & 3118 & 1.19 & 1.71 & 3118 & 1.26 & 120 & open \\
+\texttt{del18} & 262144 & 221573 & 84.52 & 2.16 & 221573 & 3.32 & 148 & open \\
+\texttt{web-Stanford} & 281903 & 9510 & 3.37 & 1.20 & 9510 & 1.52 & 120 & open \\
+\texttt{com-dblp} & 317080 & 0 & 0.00 & 0.14 & 0 & 0.18 & 0.21 & proved \\
+\texttt{com-amazon} & 334863 & 126 & 0.04 & 0.40 & 126 & 0.35 & 0.54 & proved \\
+\texttt{web-BerkStan} & 685230 & 21743 & 3.17 & 2.03 & 21743 & 2.13 & 120 & open \\
+\texttt{del20} & 1048576 & 893358 & 85.20 & 11.47 & 893358 & 17.56 & 278 & open \\
+\texttt{roadNet-PA} & 1088092 & 44072 & 4.05 & 1.18 & 44072 & 0.93 & 120 & open \\
+\texttt{com-youtube} & 1134890 & 0 & 0.00 & 0.63 & 0 & 0.59 & 0.86 & proved \\
+\texttt{soc-pokec-relationships} & 1632803 & 1197405$^{\ast}$ & 73.33 & 18.02 & 686846 & 331.70 & 743 & no output \\
+\texttt{as-skitter} & 1696415 & 4938 & 0.29 & 8.15 & 4938 & 8.71 & 120 & open \\
+\texttt{roadNet-CA} & 1965206 & 67274 & 3.42 & 1.71 & 67274 & 2.04 & 120 & open \\
+\texttt{wiki-Talk} & 2394385 & 0 & 0.00 & 1.41 & 0 & 1.87 & 1.28 & proved \\
+\texttt{com-lj} & 3997962 & 212739$^{\ast}$ & 5.32 & 18.01 & 1781 & 24.30 & 120 & open \\
+\bottomrule
+\end{tabular}}
+\\[2pt]\footnotesize $^{\ast}$ kernelization stopped by the budget share before a fixed point.
+\end{table}

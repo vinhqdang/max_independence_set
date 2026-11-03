@@ -20,9 +20,11 @@ The residual kernel is where all of them are weak, and it is large on exactly
 the families the literature identifies: meshes and Delaunay triangulations,
 dense web and social cores, and adversarial Model-RB instances.
 
-CASCADE attacks the residual kernel with moves that are **solved exactly rather
-than sampled**, using the reduction machinery as the engine that makes big exact
-moves affordable.
+CASCADE attacks the residual kernel with region moves whose sub-problem is solved
+by branch-and-reduce, using the reduction machinery inside the move to keep each
+sub-solve cheap.  The region construction below is the one used by Borowitz,
+Grossmann and Schulz (ALENEX 2025) for dynamic independent sets; CASCADE applies
+it to static graphs and adapts `|F|` online.
 
 ## The move
 
@@ -48,10 +50,12 @@ Two consequences make this the right move:
   `G[R(F)]`, so a maximum independent set of `G[R(F)]` has size at least
   `|S ∩ R(F)|`.  Replacing the region by its optimum can only keep or increase
   the total.
-* **It subsumes classical swaps.**  With `|F| = 1` the region is exactly what an
-  ARW (1,2)-swap examines; solving it exactly finds the best (1,k)-swap for any
-  `k` at once.  Growing `|F|` gives moves that no swap-based local search can
-  express.
+* **It is a (j,k)-swap.**  With `|F| = 1` the region is exactly what an ARW
+  (1,2)-swap examines; solving it exactly finds the best (1,k)-swap for any `k`
+  at once.  A move that releases `j` vertices and writes back `k` is a
+  `(j,k)`-swap, so the neighbourhood is not larger than the (j,k)-swap class; what
+  the construction buys is a way to search it without a consistency check against
+  the rest of the solution.
 
 The move is applied as: build `R(F)`, extract the induced subgraph, solve it by
 branch-and-reduce, write the result back.  Vertices left free by the rewrite

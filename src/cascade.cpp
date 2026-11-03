@@ -249,7 +249,12 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
 
     ExactConfig ec;
     ec.red = cfg_.red;
+    if (!cfg_.lns_region_reductions) {
+        ec.red.degree_rules = ec.red.fold2 = ec.red.domination = false;
+        ec.red.unconfined = ec.red.twin = false;
+    }
     ec.node_budget = node_budget_;
+    if (!cfg_.lns_exact) { ec.node_budget = 0; ec.seed_greedy = true; }
     ec.lower_bound = incoming - 1;  // an equal-size region solution is still recorded
     ec.seed = rng_();
     double slice = std::min(deadline, elapsed() + slice_);
@@ -257,6 +262,8 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
     if (res.proved_optimal) ++stats_.lns_proved;
     stats_.lns_nodes += res.nodes;
     stats_.lns_region_vertices += (long long)region_.size();
+    stats_.lns_root_alive += res.root_alive;
+    if (!cfg_.lns_exact) res.proved_optimal = true;  // adapt k on region size only
 
     long long gain = 0;
     if ((int)res.solution.size() == sub.n && res.size >= incoming) {
@@ -461,7 +468,7 @@ long long Cascade::run(double deadline, const std::function<double()>& elapsed) 
 
     // Phase 1: exhaustive kernelization of the whole graph.
     double t0 = elapsed();
-    double kernel_deadline = cfg_.kernel_only ? 1e18 : t0 + cfg_.kernel_share * deadline;
+    double kernel_deadline = (cfg_.kernel_only && !cfg_.kernel_capped) ? 1e18 : t0 + cfg_.kernel_share * deadline;
     red_.set_stop([&]() { return elapsed() > kernel_deadline; });
     red_.push_all();
     red_.reduce();

@@ -1,24 +1,18 @@
-# CASCADE — maximum independent set on massive sparse graphs
+# CASCADE: region-move local search for maximum independent set
 
 CASCADE computes large independent sets (equivalently, small vertex covers) on
-sparse graphs with millions of vertices, and proves optimality on instances that
-are small enough for its exact mode.
+sparse graphs with millions of vertices.  After kernelization and a greedy dive it
+repeatedly releases a set `F` of incumbent vertices, collects every outside vertex
+whose incumbent neighbours all lie in `F`, and re-solves that region with a
+branch-and-reduce engine.  Nothing outside the region touches the incumbent inside
+it, so a region solution of size at least `|F|` can be written back without any
+check against the rest of the graph.
 
-The solver is built around one idea: **improvement moves should be solved
-exactly, not sampled.**  Freeing a set `F` of vertices from the current solution
-makes exactly those vertices addable whose every solution neighbour lies in `F`.
-That region cannot interact with anything outside it, so re-solving it optimally
-is always safe and never loses ground.  A full reduction suite (degree-0/1,
-simplicial, degree-2 folding, twin, domination, unconfined) collapses each region
-before branching, which is what makes regions of thousands of vertices solvable
-in microseconds — and lets a single move restructure a whole neighbourhood where
-a classical (1,2)-swap moves one or two vertices.
-
-The size of `F` tunes itself: it shrinks when a region turns out to be too hard
-to solve exactly, and grows when regions of the current size are being solved to
-optimality without finding anything.  The same binary therefore settles on
-neighbourhoods of tens of vertices on a mesh and one or two on a dense
-adversarial instance, with no per-family configuration.
+The region construction is the one used by Borowitz, Grossmann and Schulz,
+*Optimal Neighborhood Exploration for Dynamic Independent Sets* (ALENEX 2025), for
+dynamic graphs.  CASCADE applies it to static graphs, runs reductions inside each
+move, and adapts `|F|` online: it halves when a sub-solve is cut off and doubles
+after a run of proved, fruitless regions.
 
 ## Build
 
@@ -47,25 +41,21 @@ Useful options:
 | `--seed N` | random seed |
 | `--lns-free N` | initial number of incumbent vertices freed per region |
 | `--kernel-only` | stop after kernelization and report the kernel |
-| `--no-lns`, `--dive-moves` | ablation switches |
+| `--no-lns`, `--dive-moves`, `--lns-heuristic`, `--lns-no-reduce` | ablation switches (heuristic repair; no reductions inside regions) |
 
 ## Results
 
-Against the published solvers under a common 60 second budget, on 27 instances
-across five families, with every solution independently verified
-(`docs/EXPERIMENTS.md` has the full tables and the caveats):
+Under a 60 s budget on 27 instances in five families, against six solvers from
+2012-2019 (`paper/`, `results/`):
 
-| family | outcome |
-| --- | --- |
-| Delaunay triangulations | ahead on all three, by +10, +277 and +5535 (1.7% on `del20`) |
-| random geometric | level with ReduMIS; `rgg16` and `rgg18` are provably optimal |
-| road networks | level |
-| social | level on 8 of 10; behind on `as-skitter` by 1 and `soc-pokec` by 342 |
-| web | behind by 15 and 100 |
-| BHOSLIB `frb` | level on 5 of 7 over three seeds, behind by 1 on the other two |
+* strictly ahead of the best of the other six on 3 instances (all Delaunay graphs
+  from one generator seed), tied on 13, behind on 11;
+* mean relative gap 0.785%, third of seven (FastVC 0.340%, ReduMIS 0.501%);
+* Wilcoxon on relative gaps, Holm-corrected: ahead of OnlineMIS, NearLinear and
+  LinearTime; no significant difference from ReduMIS, NuMVC or FastVC;
+* behind on dense BHOSLIB instances and slightly behind on web graphs.
 
-The margin comes from the neighbourhood move: removing it costs 1022 vertices on
-`del18` and 242 on `roadNet-PA`, more than the entire margin over the baselines.
+More recent solvers (for example InfVC, IJCAI 2025) were not run.
 
 ## Evaluation
 
@@ -73,8 +63,8 @@ The margin comes from the neighbourhood move: removing it costs 1022 vertices on
 gives every solver the same wall-clock budget and verifies each returned set
 independently, and a summariser.  Baselines are built from their authors'
 published code (KaMIS ReduMIS and OnlineMIS, the reducing-peeling solver of
-Chang et al., Akiba & Iwata's branch-and-reduce, the PACE 2019 winner) plus a
-HiGHS integer-programming reference.
+Chang et al., NuMVC and FastVC, Akiba & Iwata's branch-and-reduce, the PACE 2019
+winner) plus a HiGHS integer-programming reference.
 
 ```sh
 python3 tools/gen_instances.py --out data/geometric --scales 16,18,20

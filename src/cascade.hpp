@@ -32,6 +32,11 @@ struct CascadeConfig {
     int sample_size = 32;       // candidates inspected per decision (BMS style)
     double include_prob = 0.0;  // probability of an include decision while diving
     bool use_lns = true;        // exact large-neighbourhood moves
+    // Ablation switches for the region sub-solve.  lns_exact=false replaces the
+    // branch-and-reduce repair with reductions followed by one greedy pass (no
+    // branching); lns_region_reductions=false branches on the raw region.
+    bool lns_exact = true;
+    bool lns_region_reductions = true;
     int lns_start_free = 4;     // incumbent vertices freed per region; self-tuning
     int lns_max_free = 4096;
     int lns_region_cap = 3000;  // regions larger than this are too slow to solve
@@ -41,6 +46,7 @@ struct CascadeConfig {
     int lns_max_target = 20000;
     long long lns_node_budget = 20000;
     bool kernel_only = false;   // stop after kernelization
+    bool kernel_capped = false; // with kernel_only: still honour kernel_share
     // Share of the budget kernelization may use before the search takes over.
     // A partial kernel is still sound, and on a graph whose kernel stays large
     // the search is a better use of the remaining time than more reducing.
@@ -91,6 +97,7 @@ struct CascadeStats {
     long long restarts = 0;
     long long lns_nodes = 0;
     long long lns_region_vertices = 0;
+    long long lns_root_alive = 0;   // region vertices left after the root reduction pass
     int lns_target = 0;
     long long kernel_n = 0;
     long long kernel_m = 0;

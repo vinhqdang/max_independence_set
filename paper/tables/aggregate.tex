@@ -1,18 +1,18 @@
 \begin{table}[htbp]
 \centering
-\caption{Aggregate over all 27 instances. The gap of an algorithm on an instance is $(\text{best found by any algorithm} - \text{its value}) / \text{best found by any algorithm}$.}
+\caption{Aggregate over all 27 instances. The gap of an algorithm on an instance is $(\text{best of the seven algorithms} - \text{its value}) / \text{best of the seven algorithms listed}$.}
 \label{tab:aggregate}
-\fittable{
 \begin{tabular}{lrrrr}
 \toprule
 Algorithm & \#best & \#solved & mean gap & max gap \\
 \midrule
-\textsc{Cascade} & 17 & 27 & 0.414\% & 2.857\% \\
-ReduMIS & 23 & 26 & 0.113\% & 2.575\% \\
-OnlineMIS & 1 & 27 & 1.791\% & 5.732\% \\
-NearLinear & 7 & 27 & 6.831\% & 32.500\% \\
-LinearTime & 2 & 27 & 7.742\% & 32.653\% \\
+\textsc{Cascade} & 16 & 27 & 0.785\% & 4.444\% \\
+ReduMIS & 19 & 26 & 0.501\% & 4.444\% \\
+OnlineMIS & 1 & 27 & 2.156\% & 6.667\% \\
+NearLinear & 6 & 27 & 7.113\% & 32.500\% \\
+LinearTime & 2 & 27 & 8.019\% & 34.000\% \\
+NuMVC & 8 & 26 & 1.219\% & 6.956\% \\
+FastVC & 11 & 27 & 0.340\% & 3.448\% \\
 \bottomrule
 \end{tabular}
-}
 \end{table}

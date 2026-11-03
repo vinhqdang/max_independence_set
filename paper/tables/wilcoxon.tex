@@ -1,18 +1,18 @@
 \begin{table}[htbp]
 \centering
-\caption{Paired Wilcoxon signed-rank test of \textsc{Cascade} against each baseline over the instances both solved, at the 60\,s budget. A verdict names the better solver when $p<0.05$.}
+\caption{Paired Wilcoxon signed-rank test of \textsc{Cascade} against each baseline over the instances both solved, at the 60\,s budget, computed on relative gaps to the best of the seven solvers. $p_{\mathrm{Holm}}$ is Holm-adjusted over the six comparisons; a verdict names the better solver when $p_{\mathrm{Holm}}<0.05$.}
 \label{tab:wilcoxon}
 \fittable{
-\begin{tabular}{lrrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-Baseline & pairs & win & tie & loss & $p$ & verdict \\
+Baseline & pairs & win & tie & loss & $p$ & $p_{\mathrm{Holm}}$ & verdict \\
 \midrule
-ReduMIS & 26 & 3 & 14 & 9 & 0.1951 & -- \\
-FastVC & 27 & 13 & 8 & 6 & 0.0300 & \textsc{Cascade} \\
-NearLinear & 27 & 20 & 6 & 1 & 0.0001 & \textsc{Cascade} \\
-NuMVC & 26 & 18 & 2 & 6 & 0.0008 & \textsc{Cascade} \\
-OnlineMIS & 27 & 23 & 4 & 0 & $<10^{-4}$ & \textsc{Cascade} \\
-LinearTime & 27 & 24 & 2 & 1 & $<10^{-4}$ & \textsc{Cascade} \\
+ReduMIS & 26 & 3 & 14 & 9 & 0.1268 & 0.3805 & -- \\
+OnlineMIS & 27 & 23 & 4 & 0 & $<10^{-4}$ & $<10^{-4}$ & \textsc{Cascade} \\
+NearLinear & 27 & 20 & 6 & 1 & $<10^{-4}$ & 0.0002 & \textsc{Cascade} \\
+LinearTime & 27 & 24 & 2 & 1 & $<10^{-4}$ & 0.0001 & \textsc{Cascade} \\
+NuMVC & 26 & 18 & 2 & 6 & 0.1549 & 0.3805 & -- \\
+FastVC & 27 & 13 & 8 & 6 & 0.4406 & 0.4406 & -- \\
 \bottomrule
 \end{tabular}
 }

@@ -8,7 +8,7 @@ import os
 
 SOLVERS = [("cascade", r"\textsc{Cascade}"), ("redumis", "ReduMIS"),
            ("online_mis", "OnlineMIS"), ("nearlinear", "NearLinear"),
-           ("lineartime", "LinearTime")]
+           ("lineartime", "LinearTime"), ("numvc", "NuMVC"), ("fastvc", "FastVC")]
 FAMILY_TITLE = {"geometric": "Geometric (Delaunay and random geometric)",
                 "road": "Road networks", "social": "Social networks",
                 "web": "Web graphs", "bhoslib": "BHOSLIB \\texttt{frb}"}
@@ -61,8 +61,8 @@ def summary_table(best, meta, out_dir):
     insts = sorted(meta)
     lines = [r"\begin{table}[htbp]", r"\centering",
              r"\caption{Aggregate over all %d instances. The gap of an algorithm on an "
-             r"instance is $(\text{best found by any algorithm} - \text{its value}) / "
-             r"\text{best found by any algorithm}$.}" % len(insts),
+             r"instance is $(\text{best of the seven algorithms} - \text{its value}) / "
+             r"\text{best of the seven algorithms listed}$.}" % len(insts),
              r"\label{tab:aggregate}", r"\begin{tabular}{lrrrr}", r"\toprule",
              r"Algorithm & \#best & \#solved & mean gap & max gap \\", r"\midrule"]
     for key, label in SOLVERS:
@@ -142,7 +142,7 @@ def budget_table(path, out_dir, budget=60.0):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default="results")
-    ap.add_argument("--main", default="heuristic.csv")
+    ap.add_argument("--main", default="cor_main60.csv")
     ap.add_argument("--out", default="paper/tables")
     args = ap.parse_args()
     os.makedirs(args.out, exist_ok=True)

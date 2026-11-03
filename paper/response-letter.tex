@@ -1,0 +1,222 @@
+\documentclass[11pt]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{enumitem,booktabs,hyperref}
+\setlist{itemsep=2pt,topsep=3pt}
+\newcommand{\rev}[1]{\medskip\noindent\textbf{#1}}
+\newcommand{\q}[1]{\par\smallskip\noindent\emph{#1}\par\smallskip}
+\title{Response to the reviews of CAOR-D-26-02865 and summary of changes\\
+\large Manuscript prepared for the \emph{European Journal of Operational Research}}
+\author{Quang-Vinh Dang}
+\date{3 November 2026}
+\begin{document}
+\maketitle
+
+This note lists every point raised in the four reviews, what was changed in the
+manuscript (\texttt{paper/cascade-mis.tex}), where, and what was \emph{not}
+done. Section and table numbers refer to the new manuscript. The paper was
+rejected; the manuscript is rewritten for a new submission, and the note is
+written so that each change can be checked against the text and the data in
+\texttt{results/}.
+
+\section*{Summary}
+\begin{itemize}
+\item \textbf{The central construction is not new} (Reviewers 1, 3). The region
+  $R(F)$ is the construction of Borowitz, Gro{\ss}mann and Schulz (ALENEX 2025). The
+  paper no longer claims it. It is now presented as the use of that construction
+  as the inner move of a \emph{static} solver, with reductions applied inside the
+  region and an online rule for $|F|$, and the contribution list says so.
+\item \textbf{The result tables were wrong} (Reviewers 1, 4). The quality,
+  aggregate and budget tables had been generated from five of the seven solvers,
+  and the Wilcoxon test had been run on raw sizes although the text said relative
+  gaps. Both are fixed at the source scripts. The corrected statistics change the
+  claims: the method is significantly ahead of three of six baselines, not five,
+  and third of seven on mean relative gap.
+\item \textbf{New experiments} (own solver only): residual-kernel statistics and
+  whole-input exact solves; exact against heuristic repair and regional
+  reductions on/off; a sweep over the initial release size; independent Delaunay
+  graphs.
+\item \textbf{Not done}: no recent baseline (InfVC) was run, and no baseline was run
+  on the new Delaunay graphs. See ``What remains open''.
+\end{itemize}
+
+\section*{Reviewer 3}
+
+\rev{3.1 Explain the Twin, Unconfined and LP rules.}
+Section 2 now has a paragraph for each, with the condition, the effect, why it is
+safe (a two-line exchange argument for the twin rule with an edge in the shared
+neighbourhood), and the implementation bounds on the unconfined test (set size 8,
+$2\times10^4$ scanned edges; a capped test answers ``confined'', so the cap
+cannot make the rule unsound).
+
+\rev{3.2 How does $R(F)$ differ from the region of Borowitz et al.?}
+It does not, in essence. After closing their subgraph $H$ under incumbent
+neighbours and adding the tight vertices, their subgraph is $R(F)$ for $F$ the
+incumbent vertices it contains. A Remark after Theorem 5 (the region theorem) says so, the
+introduction states it, and Table 1 compares the two constructions along six
+axes (problem, how the released set is chosen, candidate restriction,
+sub-problem objective, reductions, sub-solver, size control). What differs is
+the setting (static against dynamic), the released set (count of incumbent
+vertices along a walk, against BFS depth on all vertices), no high-degree pruning
+here, an in-house reusable sub-solver, and an online rule for $|F|$ in place of
+fixed $d,\nu_{\max}$. I did not run their code, so the comparison is of
+constructions, not of performance, and the paper says that.
+
+\rev{3.3 Algorithm 1 is unclear.}
+Algorithm 1 is rewritten with explicit input and output, and a new parameter table (Section 4.1)
+gives every parameter and its value: (1) initial $k_0=4$; doubling after
+$s=512$ consecutive proved sub-solves without gain; halving when a sub-solve is
+cut off or the region exceeds 3000 vertices; $+\lfloor k/4\rfloor+1$ after a
+sweep with no gain. (2) $F$ is the first $k$ incumbent vertices met by a
+breadth-first walk from the seed, visiting at most $\max(64,64k)$ vertices.
+(3) Plateau moves switch on after one full sweep without gain, and off after a
+sweep with gain. (4) A perturbation runs after every batch of 64 region moves;
+a restart fires after 200 failed full-strength kicks or after 200 first-dive
+durations without improvement. (5) Input: graph, budget, seed; output: a
+maximal independent set. All values are read from the code, not from memory of
+the design.
+
+\rev{3.4, 3.5 More recent baselines; update related work.}
+Related work now covers Borowitz et al.\ (2025), Hashimoto et al.\ (2019),
+Katzmann and Komusiewicz (2017), InfVC (IJCAI 2025), and the 2024 weighted-case
+survey and concurrent local search of Gro{\ss}mann, Langedal and Schulz. \textbf{No
+recent solver was run}; Section 5.15 says that the ranking claims are claims
+against 2012--2019 solvers.
+
+\rev{3.6 Sensitivity to $k$.}
+New table (Section 5.9): the initial value $k_0\in\{1,4,16,64,256,1024\}$ on
+four instances. On \texttt{del18} the results span 0.023\% (the seed spread is
+0.024\%), and the final $k$ is 80--128 for every $k_0$. One run per cell.
+
+\section*{Reviewer 1}
+
+\rev{1.1 Contribution not distinguished from existing frameworks; (j,k)-swap
+claim inconsistent.}
+The claim that larger release sets give moves ``no swap neighbourhood expresses''
+is withdrawn everywhere (it was already withdrawn in Section 3 of the submitted
+version and is now absent from the introduction, the abstract and the README). A
+region move releasing $j$ vertices and writing back $k$ is a $(j,k)$-swap, and the
+text says so. Following the reviewer's observation, Proposition 7 shows
+$R(F)=V\setminus N[S\setminus F]$: the region subproblem is the residual MIS
+problem with $S\setminus F$ fixed. Table 1 compares release-set selection,
+candidate restrictions, objectives, reduction placement and sub-solvers across
+Andrade et al., Hashimoto et al., Borowitz et al.\ and this work. Computational
+evidence for the additions that can be isolated in one implementation is the
+exact/heuristic and reductions/no-reductions ablation (Table 20).
+
+\rev{1.2(a) Reconcile counts and reference sets.}
+The abstract's 3/13/11 was against the best of the six \emph{other} solvers, which
+is correct and unchanged (16 attain the best of all seven). Table 7 gave 17 because
+the table had been built from five solvers; with all seven it is 16. The
+ReduMIS-only comparison has 26 pairs (ReduMIS returned nothing on
+\texttt{soc-pokec}) and is 3/14/9. Section 5.4 now defines the three reference
+sets explicitly. On relative gaps, as the text had always claimed, the Wilcoxon
+$p$ against ReduMIS is 0.127 (Holm 0.38), not 0.195.
+
+\rev{1.2(b) Benchmark composition.}
+Added: six independent generator seeds at $2^{16}$ and $2^{18}$ and the public
+DIMACS10 \texttt{delaunay\_n16/18/20} (Table 21, Section 5.13). \textbf{Baselines
+were not run on them}, so the experiment cannot test whether the margin
+generalises. It shows that Cascade's value varies by 0.25\% ($2^{16}$) and 0.10\%
+($2^{18}$) between graphs against at most 0.05\% between solver seeds, several
+times the margin claimed on the seed-1 graph (0.03\%, 0.09\%). The abstract and the
+conclusion now restrict the claim to one sample. No additional sparse
+large-kernel family was added; I know of no public one and say so.
+
+\rev{1.3 Residual kernel size and direct exact solving.}
+Table 14 (Section 5.5): capped kernel, fixed-point kernel, and a 120\,s exact
+solve of the whole input, for 19 of the 27 instances (BHOSLIB instances could not
+be rebuilt here). Findings: seven instances reduce to $\le126$ vertices and are
+proved in $\le1.3$\,s, so region search is irrelevant there; twelve keep
+between 0.3\% and 85\% and none is proved by the exact engine in 120\,s. Spearman
+correlation of retained fraction with margin is 0.14 ($p=0.56$); the premise of
+the paper (large kernel) holds on 12 of 19 instances but does not predict wins:
+\texttt{soc-pokec} has a 73\% kernel and is a loss. The submitted text's
+``\texttt{com-lj} leaves 9780'' came from another tool; our fixed-point kernel
+is 1781, and under the 18\,s cap it ranged from 3544 to 899\,607 across three
+runs. The paper now says that the capped residual depends on speed.
+
+\rev{1.4 Ablation does not isolate exact repair and regional reductions.}
+New switches \texttt{--lns-heuristic} (reductions then one greedy pass) and
+\texttt{--lns-no-reduce}, same implementation, region selection and budget,
+three seeds, six instances, with process data (region size before/after the
+root reduction, move rate). On \texttt{del18}: $-143$ (heuristic), $-210$ (no
+regional reductions), $-1018$ (no region moves). Reductions let regions be
+$89$--$203$ vertices that collapse to $5$--$17$; without them $k$ settles at
+16--32. A caveat is stated: the heuristic variant's $k$ rule has no proof signal.
+
+\rev{1.5 Recent task-matched solver (InfVC).}
+\textbf{Not done.} It is cited and discussed, and Section 5.15 states why the
+comparison is absent and that published numbers cannot substitute.
+
+\rev{Minor 1. Provenance and preprocessing.}
+\texttt{soc-pokec} and \texttt{com-lj} are relabelled SNAP in the table and the
+generator script. The isolated-vertex statement is corrected: removing $q$
+isolated vertices lowers $\alpha$ by $q$. SHA-256 checksums of every downloaded
+and generated file are in \texttt{results/instance\_checksums.sha256}.
+
+\rev{Minor 2. Cross-platform conclusion.}
+Restricted to what was tested, and extended: all 519 solver pairs with a value
+on both platforms were compared; 498 have the same sign, 21 change between equal
+and strictly ordered, and none reverses.
+
+\section*{Reviewer 2}
+
+\rev{Main idea hard to follow.}
+The introduction now opens the idea with a plain example (the $(1,2)$-swap, then
+the same question for a set of released vertices) before any notation, and refers
+to the worked figure.
+
+\rev{Relations to existing work.}
+Katzmann and Komusiewicz (AAAI 2017) is added, with Hashimoto et al.\ and
+Borowitz et al.
+
+\rev{Comparison to state-of-the-art solvers; clearer conclusion.}
+Abstract and Conclusions state the result as it is: strictly ahead on three
+Delaunay graphs from one seed, 13 ties, 11 losses, no significant difference from
+ReduMIS, NuMVC or FastVC, third of seven by mean gap. See ``What remains open''
+for what is still missing.
+
+\section*{Reviewer 4}
+
+The reviewer is right about the central defect: methods missing from tables that
+the text refers to. The cause was \texttt{make\_tables.py} (a five-solver list and
+the wrong default input file). It is fixed, and every table is regenerated from
+\texttt{results/cor\_main60.csv}. I then checked the text against the data rather
+than only the tables. Additional errors found and corrected:
+\begin{itemize}
+\item the seed-study significance claims (FastVC $p=0.016$, NuMVC $p=0.023$) came
+  from raw sizes; on relative gaps with Holm correction only OnlineMIS is
+  significant;
+\item ``significantly ahead of five of six baselines'' $\to$ three of six;
+\item ``mean gap 0.414\%'' $\to$ 0.785\% (third of seven); FastVC is lowest, 0.340\%;
+\item the ablation text now states that two ablated variants beat the shipped
+  configuration on \texttt{del16}/\texttt{del18}, within seed noise;
+\item the 543\,$\mu$s per move figure now has a record (the new runs reproduce it:
+  $560\,\mu$s on \texttt{del18});
+\item the queue-ordering timings had no record and were removed;
+\item a table of the whence-ReduMIS decomposition listed 27 instances where 26
+  were paired.
+\end{itemize}
+The compile has no undefined references or citations. Repository: the
+\texttt{reviews/} directory and committed build outputs were removed.
+
+\section*{What remains open}
+\begin{enumerate}
+\item \textbf{InfVC and any 2024--2026 solver}: not run. Required by Reviewers 1 and 3.
+\item \textbf{Baselines on the independent Delaunay graphs}: not run, so the claim
+  that Cascade leads on Delaunay graphs rests on one sample. Running ReduMIS and
+  FastVC on Table 21's graphs is the single experiment that decides whether the
+  positive result exists.
+\item \textbf{BHOSLIB kernel statistics}: not measured (instances not available
+  here).
+\item \textbf{Cascade vs.\ the Borowitz et al.\ implementation}: not run.
+\item The new experiments ran on a different machine (4-core Xeon 2.8\,GHz,
+  three concurrent runs) from the main tables; the paper says so.
+\item Author list of InfVC in \texttt{refs.bib} is incomplete (first author only
+  verified) and the two Gro{\ss}mann et al.\ items are arXiv entries; please
+  check the bibliographic details before submission.
+\item EJOR's exact limits (abstract length, highlights, structure) were not
+  retrievable; the abstract is 147 words and the five highlights are
+  $\le 77$ characters.
+\end{enumerate}
+\end{document}

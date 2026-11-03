@@ -21,8 +21,9 @@ import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SNAP = ["web-Stanford", "web-BerkStan", "as-skitter", "ca-AstroPh", "ca-CondMat",
-        "email-Enron", "roadNet-CA", "roadNet-PA", "wiki-Talk"]
-SNAP_COMM = ["com-amazon", "com-dblp", "com-youtube"]
+        "email-Enron", "roadNet-CA", "roadNet-PA", "wiki-Talk",
+        "soc-pokec-relationships"]
+SNAP_COMM = ["com-amazon", "com-dblp", "com-youtube", "com-lj"]
 FAMILY_ORDER = ["geometric", "road", "web", "social", "collaboration",
                 "communication", "bhoslib"]
 

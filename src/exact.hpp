@@ -18,6 +18,7 @@ struct ExactResult {
     long long size = 0;
     bool proved_optimal = false;
     long long nodes = 0;
+    long long root_alive = 0;     // vertices left after the root reduction pass
     std::vector<char> solution;  // indexed by vertex of the input graph
 };
 
@@ -75,12 +76,14 @@ private:
         red_.push_all();
         red_.reduce();
         size_t clo = push_live_range(lo, hi, fold_mark);
+        root_alive_ = dg_.num_alive();
         if (cfg_.seed_greedy) seed_greedy_incumbent(clo, arena_.size());
         bool complete = branch(clo, arena_.size());
         ExactResult r;
         r.size = best_;
         r.proved_optimal = complete && !out_of_budget_;
         r.nodes = nodes_;
+        r.root_alive = root_alive_;
         r.solution = best_sol_;
         r.solution.resize(n0_);
         return r;
@@ -235,6 +238,7 @@ private:
     Reducer red_;
     long long best_ = 0;
     long long nodes_ = 0;
+    long long root_alive_ = 0;
     bool out_of_budget_ = false;
     std::vector<char> best_sol_;
     std::vector<int> arena_, cand_;
