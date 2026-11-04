@@ -1,0 +1,24 @@
+\begin{tikzpicture}[
+  every node/.style={font=\small},
+  box/.style={draw,rounded corners=2pt,align=center,minimum height=8mm,inner sep=4pt,fill=black!4},
+  dec/.style={draw,diamond,aspect=2.4,align=center,inner sep=1pt,fill=yellow!15},
+  act/.style={draw,rounded corners=2pt,align=center,inner sep=4pt,fill=green!12},
+  bad/.style={draw,rounded corners=2pt,align=center,inner sep=4pt,fill=red!10},
+  arr/.style={-{Stealth},thick},
+  node distance=9mm]
+\node[box] (walk) {pick seed $v$;\\ walk $\to$ $F$ ($k$ incumbent vertices)};
+\node[box,right=10mm of walk] (reg) {region $R=F\cup\{\text{tight}\}$\\ root reduction};
+\node[box,right=10mm of reg] (solve) {branch-and-reduce\\ node budget $\nu$, slice $\sigma$};
+\node[dec,below=12mm of solve] (ok) {proved\\ and $|R|\le\rho$?};
+\node[bad,left=12mm of ok] (halve) {$k\leftarrow\lfloor k/2\rfloor$\\ re-queue $v$};
+\node[dec,below=12mm of ok] (gain) {$|T|>|F|$?};
+\node[act,left=12mm of gain] (accept) {write back $T$;\\ reset fruitless count};
+\node[box,below=12mm of gain] (stale) {fruitless count $+1$;\\ if $=s$: $k\leftarrow\min(k_{\max},2k)$};
+\node[box,left=12mm of stale] (sweep) {end of sweep with no gain:\\ $k\leftarrow k+\lfloor k/4\rfloor+1$,\\ plateau moves on, budgets enlarged};
+\draw[arr] (walk)--(reg); \draw[arr] (reg)--(solve); \draw[arr] (solve)--(ok);
+\draw[arr] (ok)--node[above]{no} (halve); \draw[arr] (ok)--node[right]{yes} (gain);
+\draw[arr] (gain)--node[above]{yes} (accept); \draw[arr] (gain)--node[right]{no} (stale);
+\draw[arr,dashed] (stale)--(sweep);
+\draw[arr,dotted] (halve.north) -- ++(0,0.6) -| (walk.south);
+\draw[arr,dotted] (accept.west) -- ++(-0.6,0) |- ([yshift=-3mm]walk.south west) -- (walk.south west);
+\end{tikzpicture}

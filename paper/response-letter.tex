@@ -161,10 +161,20 @@ and strictly ordered, and none reverses.
 
 \section*{Reviewer 2}
 
-\rev{Main idea hard to follow.}
-The introduction now opens the idea with a plain example (the $(1,2)$-swap, then
-the same question for a set of released vertices) before any notation, and refers
-to the worked figure.
+\rev{Main idea hard to follow; more visualisation and explanation of the algorithms.}
+The idea is now introduced with a plain example in the introduction, before any
+notation. Four new figures were added, all drawn from the actual construction or
+from solver runs rather than sketched: (1) a worked region move on a real
+90-vertex Delaunay graph, in three panels (incumbent and seed; released set and
+region; reduction, exact solve and write-back); (2) the three less obvious
+reduction rules (domination, degree-2 fold, twins) on small examples; (3) a
+flow diagram of one iteration of the inner loop, matched to the line numbers of
+Algorithm~1, with a paragraph that reads the algorithm line by line; (4) the
+adaptation rule in operation: $k$ against time from three starting values, the
+region size before and after reduction, and cumulative gain. The solver gained a
+\texttt{--lns-log} option to record the data for (4)
+(\texttt{results/adapt/}); the figures are reproduced by
+\texttt{scripts/make\_move\_figure.py} and \texttt{scripts/make\_adapt\_figure.py}.
 
 \rev{Relations to existing work.}
 Katzmann and Komusiewicz (AAAI 2017) is added, with Hashimoto et al.\ and

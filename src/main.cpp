@@ -63,6 +63,7 @@ int main(int argc, char** argv) {
         else if (a == "--kernel-share") cfg.kernel_share = atof(next().c_str());
         else if (a == "--exact") exact = true;
         else if (a == "--no-lns") cfg.use_lns = false;
+        else if (a == "--lns-log") { cfg.log_windows = true; cfg.lns_log_path = next(); }
         else if (a == "--lns-heuristic") cfg.lns_exact = false;
         else if (a == "--lns-no-reduce") cfg.lns_region_reductions = false;
         else if (a == "--no-perturb") cfg.use_perturbation = false;
@@ -129,6 +130,16 @@ int main(int argc, char** argv) {
            st.lns_moves, st.lns_improvements, st.lns_gain, st.lns_plateau,
            st.lns_expand, st.restarts, st.perturbations, st.lns_sweeps,
            st.lns_proved, st.lns_nodes, st.lns_region_vertices, st.lns_root_alive);
+
+    if (!cfg.lns_log_path.empty()) {
+        FILE* lf = fopen(cfg.lns_log_path.c_str(), "wb");
+        if (lf) {
+            fprintf(lf, "t moves k region root proved gain\n");
+            for (const auto& r : solver.lns_rows())
+                fprintf(lf, "%.3f %lld %d %.2f %.2f %.3f %lld\n", r.t, r.moves, r.k, r.region, r.root, r.proved, r.gain);
+            fclose(lf);
+        }
+    }
 
     if (!cfg.trace_path.empty()) {
         FILE* tf = fopen(cfg.trace_path.c_str(), "wb");

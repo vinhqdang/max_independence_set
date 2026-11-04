@@ -36,6 +36,8 @@ struct CascadeConfig {
     // branch-and-reduce repair with reductions followed by one greedy pass (no
     // branching); lns_region_reductions=false branches on the raw region.
     bool lns_exact = true;
+    bool log_windows = false;   // record the per-500-move window log (adaptation figure)
+    std::string lns_log_path;
     bool lns_region_reductions = true;
     int lns_start_free = 4;     // incumbent vertices freed per region; self-tuning
     int lns_max_free = 4096;
@@ -166,9 +168,14 @@ private:
     void trace_point(double seconds, long long value);
     std::function<double()> now_;
     std::vector<std::pair<double, long long>> trace_;
+    // Window log for the adaptation figure: one row per 500 region moves.
+    struct LnsRow { double t; long long moves; int k; double region, root, proved; long long gain; };
+    std::vector<LnsRow> lns_rows_;
+    long long win_n_ = 0, win_region_ = 0, win_root_ = 0, win_proved_ = 0;
 
 public:
     const std::vector<std::pair<double, long long>>& trace() const { return trace_; }
+    const std::vector<LnsRow>& lns_rows() const { return lns_rows_; }
 
 private:
     void restart(double deadline, const std::function<double()>& elapsed);

@@ -263,6 +263,15 @@ long long Cascade::lns_move(double deadline, const std::function<double()>& elap
     stats_.lns_nodes += res.nodes;
     stats_.lns_region_vertices += (long long)region_.size();
     stats_.lns_root_alive += res.root_alive;
+    if (cfg_.log_windows) {
+        ++win_n_; win_region_ += (long long)region_.size(); win_root_ += res.root_alive;
+        win_proved_ += res.proved_optimal ? 1 : 0;
+        if (win_n_ == 500) {
+            lns_rows_.push_back({elapsed(), stats_.lns_moves, free_target_, win_region_ / 500.0,
+                                 win_root_ / 500.0, win_proved_ / 500.0, stats_.lns_gain});
+            win_n_ = win_region_ = win_root_ = win_proved_ = 0;
+        }
+    }
     if (!cfg_.lns_exact) res.proved_optimal = true;  // adapt k on region size only
 
     long long gain = 0;
