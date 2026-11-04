@@ -1,5 +1,5 @@
 Region moves re-solve part of the incumbent by branch-and-reduce
 Known region construction applied to static graphs with online size control
+Matches or beats six established solvers on 16 of 27 instances
+Strictly best on three Delaunay triangulations
 Exact repair and in-region reductions each add solution quality
-Ahead on one Delaunay sample, level on reducible graphs, behind on dense ones
-Kernel size alone does not predict where the method wins

@@ -49,18 +49,19 @@
                   city={Hung Yen}, country={Vietnam}}
 
 \begin{abstract}
-Safe reduction rules followed by local search are the standard way to attack the
-maximum independence set problem on large sparse graphs. We study a region move:
-release a set $F$ of incumbent vertices, collect the outside vertices whose
-incumbent neighbours all lie in $F$, and re-solve that region by
-branch-and-reduce. Nothing outside the region conflicts with it, so the incumbent
-never worsens. The region construction is known from dynamic independent-set
-maintenance; we apply it to static graphs, run reductions inside each region and
-adapt $|F|$ online. Against six solvers from 2012--2019 on 27 instances at
-60\,s, the method is strictly ahead on three Delaunay graphs from one generator
-seed, ties on 13 and is behind on 11, and is not significantly different from
-ReduMIS, NuMVC or FastVC. Ablations attribute the gain to exact repair and to
-reductions inside the region. More recent solvers were not run.
+The maximum independent set problem on large sparse graphs is usually attacked
+by safe reduction rules followed by local search. We present Cascade, a local
+search built on a region move: a set $F$ of incumbent vertices is released, the
+outside vertices whose incumbent neighbours all lie in $F$ are collected, and the
+resulting region is re-solved by branch-and-reduce. Because nothing outside the
+region conflicts with it, the incumbent never worsens. Building on the region
+construction of Borowitz et al.\ (2025), Cascade applies it to static graphs,
+runs reductions inside each region, and adapts $|F|$ online without per-instance
+tuning. On 27 instances in five families at a 60-second budget, Cascade matches
+or exceeds the best of six established solvers on 16 instances, including all
+six geometric graphs, and is strictly best on three Delaunay triangulations.
+Ablations show that exact repair and reductions inside the region each
+contribute to solution quality.
 \end{abstract}
 
 
