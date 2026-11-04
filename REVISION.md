@@ -13,3 +13,17 @@ Open items (also in the response letter): no baseline newer than 2019 has been
 run; no baseline has been run on the independent Delaunay graphs; BHOSLIB kernel
 statistics were not measured; bibliographic details of the InfVC and the two
 arXiv entries should be checked.
+
+## Submission record
+
+Submitted to the European Journal of Operational Research on 4 November 2026
+(manuscript built from the commit that follows `9c70c82`).
+
+Title, abstract and keywords as in `paper/cascade-mis.tex`; highlights in
+`paper/highlights.txt`; cover letter in `paper/cover-letter.txt`.
+
+If the journal asks for a revision, in this order:
+1. Run ReduMIS, FastVC and InfVC on the independent Delaunay graphs
+   (`results/instance_checksums.sha256` lists the files; seeds 1-6 and DIMACS10).
+2. Add InfVC to the main benchmark under the same rules.
+3. Check the InfVC author list and the two arXiv entries in `paper/refs.bib`.
