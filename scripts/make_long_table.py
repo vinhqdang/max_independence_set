@@ -58,7 +58,7 @@ def main():
         r"with the 60-second tables: what the extra budget buys differs sharply by "
         r"instance, and Section~\ref{sec:longbudget} reads the difference.}",
         r"\label{tab:longbudget}",
-        r"\begin{tabular}{l " + " ".join(["r@{\\,/\\,}l"] * len(present)) + r"}",
+        r"\fittable{\begin{tabular}{l " + " ".join(["r@{\\,/\\,}l"] * len(present)) + r"}",
         r"\toprule",
         r"Solver & " + " & ".join(r"\multicolumn{2}{c}{\texttt{%s}}" % i.replace("_", r"\_")
                                   for i in present) + r" \\",
@@ -77,7 +77,7 @@ def main():
             txt = r"\textbf{%d}" % size if size == best[i] else "%d" % size
             cells.append("%s & %.0f" % (txt, secs))
         tex.append("%s & %s \\\\" % (LABEL[s], " & ".join(cells)))
-    tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    tex += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w") as f:

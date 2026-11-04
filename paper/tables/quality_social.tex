@@ -3,17 +3,20 @@
 \caption{Social networks: size of the independent set found within the 60\,s budget (larger is better). Best value per instance in bold.}
 \label{tab:quality-social}
 \small
-\begin{tabular}{lrrrrrrrrrr}
+\fittable{\begin{tabular}{lrrrrrrr}
 \toprule
-Algorithm & \texttt{ca-AstroPh} & \texttt{ca-CondMat} & \texttt{email-Enron} & \texttt{com-dblp} & \texttt{com-amazon} & \texttt{com-youtube} & \texttt{soc-pokec-relationships} & \texttt{as-skitter} & \texttt{wiki-Talk} & \texttt{com-lj} \\
+Instance & \textsc{Cascade} & ReduMIS & OnlineMIS & NearLinear & LinearTime & NuMVC & FastVC \\
 \midrule
-\textsc{Cascade} & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & \textbf{174632} & \textbf{857945} & 788866 & 1170576 & \textbf{2338222} & \textbf{2085626} \\
-ReduMIS & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & \textbf{174632} & \textbf{857945} & -- & \textbf{1170580} & \textbf{2338222} & \textbf{2085626} \\
-OnlineMIS & \textbf{6760} & 9601 & 22227 & 152061 & 172685 & 857680 & 776663 & 1152300 & 2338207 & 2066610 \\
-NearLinear & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & 174627 & \textbf{857945} & 789161 & 1170541 & \textbf{2338222} & 2085604 \\
-LinearTime & 6759 & 9611 & \textbf{22255} & 152129 & 174612 & 857944 & 789003 & 1170410 & \textbf{2338222} & 2085353 \\
-NuMVC & \textbf{6760} & 9611 & 22253 & 152112 & 174510 & 857708 & 787320 & 1168352 & 2338220 & -- \\
-FastVC & \textbf{6760} & \textbf{9612} & \textbf{22255} & \textbf{152131} & 174605 & \textbf{857945} & \textbf{789352} & 1168417 & \textbf{2338222} & 2085169 \\
+\texttt{ca-AstroPh} & \textbf{6760} & \textbf{6760} & \textbf{6760} & \textbf{6760} & 6759 & \textbf{6760} & \textbf{6760} \\
+\texttt{ca-CondMat} & \textbf{9612} & \textbf{9612} & 9601 & \textbf{9612} & 9611 & 9611 & \textbf{9612} \\
+\texttt{email-Enron} & \textbf{22255} & \textbf{22255} & 22227 & \textbf{22255} & \textbf{22255} & 22253 & \textbf{22255} \\
+\texttt{com-dblp} & \textbf{152131} & \textbf{152131} & 152061 & \textbf{152131} & 152129 & 152112 & \textbf{152131} \\
+\texttt{com-amazon} & \textbf{174632} & \textbf{174632} & 172685 & 174627 & 174612 & 174510 & 174605 \\
+\texttt{com-youtube} & \textbf{857945} & \textbf{857945} & 857680 & \textbf{857945} & 857944 & 857708 & \textbf{857945} \\
+\texttt{soc-pokec-relationships} & 788866 & -- & 776663 & 789161 & 789003 & 787320 & \textbf{789352} \\
+\texttt{as-skitter} & 1170576 & \textbf{1170580} & 1152300 & 1170541 & 1170410 & 1168352 & 1168417 \\
+\texttt{wiki-Talk} & \textbf{2338222} & \textbf{2338222} & 2338207 & \textbf{2338222} & \textbf{2338222} & 2338220 & \textbf{2338222} \\
+\texttt{com-lj} & \textbf{2085626} & \textbf{2085626} & 2066610 & 2085604 & 2085353 & -- & 2085169 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

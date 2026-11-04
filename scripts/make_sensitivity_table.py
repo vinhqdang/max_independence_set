@@ -56,7 +56,7 @@ def main():
         r"Section~\ref{sec:experiments}: $0.024\%$ on the geometric family and up to "
         r"$2.5\%$ on BHOSLIB.}",
         r"\label{tab:sensitivity}",
-        r"\begin{tabular}{l r " + "r " * len(instances) + r"}", r"\toprule",
+        r"\fittable{\begin{tabular}{l r " + "r " * len(instances) + r"}", r"\toprule",
         r"Parameter & Value & " + " & ".join(r"\texttt{%s}" % i.replace("_", r"\_")
                                              for i in instances)
         + r" \\",
@@ -89,7 +89,7 @@ def main():
                    % " & ".join(r"\emph{%.3f}" % x for x in spreads))
         if pi < len(ORDER) - 1:
             tex.append(r"\midrule")
-    tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    tex += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w") as f:

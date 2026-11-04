@@ -96,14 +96,14 @@ def main():
         r"cutoff on \texttt{roadNet-CA} on the replication machine. \emph{Max} is the "
         r"largest single relative difference.}" % len(shared),
         r"\label{tab:replication}",
-        r"\begin{tabular}{l " + "r " * len(FAMILIES) + r"r r}", r"\toprule",
+        r"\fittable{\begin{tabular}{l " + "r " * len(FAMILIES) + r"r r}", r"\toprule",
         r"Solver & " + " & ".join(f.capitalize() for f in FAMILIES)
         + r" & Same & Max \\",
         r"\midrule",
     ]
     for label, cells, ident, n, mx in rows:
         tex.append("%s & %s & %d/%d & %.2f \\\\" % (label, " & ".join(cells), ident, n, mx))
-    tex += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    tex += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
 
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     with open(args.out, "w") as f:

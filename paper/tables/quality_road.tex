@@ -3,17 +3,12 @@
 \caption{Road networks: size of the independent set found within the 60\,s budget (larger is better). Best value per instance in bold.}
 \label{tab:quality-road}
 \small
-\begin{tabular}{lrr}
+\fittable{\begin{tabular}{lrrrrrrr}
 \toprule
-Algorithm & \texttt{roadNet-PA} & \texttt{roadNet-CA} \\
+Instance & \textsc{Cascade} & ReduMIS & OnlineMIS & NearLinear & LinearTime & NuMVC & FastVC \\
 \midrule
-\textsc{Cascade} & 533627 & \textbf{961851} \\
-ReduMIS & \textbf{533628} & \textbf{961851} \\
-OnlineMIS & 515876 & 924236 \\
-NearLinear & 531184 & 957199 \\
-LinearTime & 530910 & 956573 \\
-NuMVC & 513067 & 915797 \\
-FastVC & 532571 & 959909 \\
+\texttt{roadNet-PA} & 533627 & \textbf{533628} & 515876 & 531184 & 530910 & 513067 & 532571 \\
+\texttt{roadNet-CA} & \textbf{961851} & \textbf{961851} & 924236 & 957199 & 956573 & 915797 & 959909 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

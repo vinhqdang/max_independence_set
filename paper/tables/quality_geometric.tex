@@ -3,17 +3,16 @@
 \caption{Geometric (Delaunay and random geometric): size of the independent set found within the 60\,s budget (larger is better). Best value per instance in bold.}
 \label{tab:quality-geometric}
 \small
-\begin{tabular}{lrrrrrr}
+\fittable{\begin{tabular}{lrrrrrrr}
 \toprule
-Algorithm & \texttt{rgg16} & \texttt{del16} & \texttt{rgg18} & \texttt{del18} & \texttt{rgg20} & \texttt{del20} \\
+Instance & \textsc{Cascade} & ReduMIS & OnlineMIS & NearLinear & LinearTime & NuMVC & FastVC \\
 \midrule
-\textsc{Cascade} & \textbf{16086} & \textbf{20647} & \textbf{64278} & \textbf{82656} & \textbf{256994} & \textbf{330066} \\
-ReduMIS & \textbf{16086} & 20640 & \textbf{64278} & 82385 & \textbf{256994} & 321566 \\
-OnlineMIS & 16082 & 20630 & 63912 & 82019 & 242366 & 311146 \\
-NearLinear & 16035 & 20284 & 64094 & 81211 & 256277 & 324619 \\
-LinearTime & 15321 & 20213 & 61282 & 80881 & 244769 & 323438 \\
-NuMVC & 15905 & 20180 & 62548 & 80695 & 239118 & 311421 \\
-FastVC & 16085 & 20638 & 64242 & 82579 & 256680 & 329802 \\
+\texttt{rgg16} & \textbf{16086} & \textbf{16086} & 16082 & 16035 & 15321 & 15905 & 16085 \\
+\texttt{del16} & \textbf{20647} & 20640 & 20630 & 20284 & 20213 & 20180 & 20638 \\
+\texttt{rgg18} & \textbf{64278} & \textbf{64278} & 63912 & 64094 & 61282 & 62548 & 64242 \\
+\texttt{del18} & \textbf{82656} & 82385 & 82019 & 81211 & 80881 & 80695 & 82579 \\
+\texttt{rgg20} & \textbf{256994} & \textbf{256994} & 242366 & 256277 & 244769 & 239118 & 256680 \\
+\texttt{del20} & \textbf{330066} & 321566 & 311146 & 324619 & 323438 & 311421 & 329802 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}

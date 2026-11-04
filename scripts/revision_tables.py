@@ -137,7 +137,7 @@ def delaunay_table():
     for i in sorted(cells, key=lambda x: (("DIMACS" in x), x)):
         v = cells[i]
         L.append("%s & %d & %d & %.1f & %d \\\\" % (tt(i) if "DIMACS" not in i else i.replace("DIMACS10 ", r"DIMACS10 \texttt{") + "}", len(v), min(v), mean_(v), max(v)))
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     write("delaunay.tex", L)
     for i, v in sorted(cells.items()):
         print(i, v)
@@ -161,7 +161,7 @@ def sweep_table():
         L.append(tt(i) + " & " + " & ".join(str(d[k]["size"]) if k in d else "--" for k in ks) +
                  " & %.3f \\\\" % (100.0 * (max(v) - min(v)) / max(v)))
         print(i, {k: (d[k]["size"], d[k].get("lns_free")) for k in ks if k in d})
-    L += [r"\bottomrule", r"\end{tabular}", r"\end{table}"]
+    L += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
     write("ksweep.tex", L)
 
 

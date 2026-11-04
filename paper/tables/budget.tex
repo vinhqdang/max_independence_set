@@ -2,7 +2,7 @@
 \centering
 \caption{Wall-clock time actually taken under a 60\,s budget, over all instances. Time is measured around the whole process, so it includes reading and any construction phase.}
 \label{tab:budget}
-\begin{tabular}{lrrrr}
+\fittable{\begin{tabular}{lrrrr}
 \toprule
 Algorithm & median & mean & max & runs $>1.5\times$ budget \\
 \midrule
@@ -14,5 +14,5 @@ LinearTime & 0.1 & 0.3 & 2.5 & 0 \\
 NuMVC & 85.9 & 204.3 & 960.0 & 12 \\
 FastVC & 60.2 & 60.7 & 67.5 & 0 \\
 \bottomrule
-\end{tabular}
+\end{tabular}}
 \end{table}
