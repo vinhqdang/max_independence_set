@@ -53,7 +53,7 @@ def main():
         r"Cells are the size returned at a 60-second budget, HIGHER IS BETTER. "
         r"The \emph{spread} line under each block is $100\,(\max-\min)/\max$ over that "
         r"block, per instance, to be read against the seed-to-seed spread of "
-        r"Section~\ref{sec:experiments}: $0.024\%$ on the geometric family and up to "
+        r"Section~\ref{M-sec:experiments}: $0.024\%$ on the geometric family and up to "
         r"$2.5\%$ on BHOSLIB.}",
         r"\label{tab:sensitivity}",
         r"\fittable{\begin{tabular}{l r " + "r " * len(instances) + r"}", r"\toprule",

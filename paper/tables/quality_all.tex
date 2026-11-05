@@ -1,0 +1,43 @@
+\begin{table}[htbp]
+\centering
+\caption{Size of the independent set found within the 60\,s budget (larger is better), all 27 instances. Best value per instance in bold; -- means no solution within the cutoff. Family order: geometric, road, social, web, BHOSLIB.}
+\label{tab:quality}
+\footnotesize
+\fittable{\begin{tabular}{llrrrrrrrr}
+\toprule
+Instance & Family & $n$ & \textsc{Cascade} & ReduMIS & OnlineMIS & NearLinear & LinearTime & NuMVC & FastVC \\
+\midrule
+\texttt{rgg16} & geometric & 65501 & \textbf{16086} & \textbf{16086} & 16082 & 16035 & 15321 & 15905 & 16085 \\
+\texttt{del16} & geometric & 65536 & \textbf{20647} & 20640 & 20630 & 20284 & 20213 & 20180 & 20638 \\
+\texttt{rgg18} & geometric & 262011 & \textbf{64278} & \textbf{64278} & 63912 & 64094 & 61282 & 62548 & 64242 \\
+\texttt{del18} & geometric & 262144 & \textbf{82656} & 82385 & 82019 & 81211 & 80881 & 80695 & 82579 \\
+\texttt{rgg20} & geometric & 1048171 & \textbf{256994} & \textbf{256994} & 242366 & 256277 & 244769 & 239118 & 256680 \\
+\texttt{del20} & geometric & 1048576 & \textbf{330066} & 321566 & 311146 & 324619 & 323438 & 311421 & 329802 \\
+\midrule
+\texttt{roadNet-PA} & road & 1088092 & 533627 & \textbf{533628} & 515876 & 531184 & 530910 & 513067 & 532571 \\
+\texttt{roadNet-CA} & road & 1965206 & \textbf{961851} & \textbf{961851} & 924236 & 957199 & 956573 & 915797 & 959909 \\
+\midrule
+\texttt{ca-AstroPh} & social & 18772 & \textbf{6760} & \textbf{6760} & \textbf{6760} & \textbf{6760} & 6759 & \textbf{6760} & \textbf{6760} \\
+\texttt{ca-CondMat} & social & 23133 & \textbf{9612} & \textbf{9612} & 9601 & \textbf{9612} & 9611 & 9611 & \textbf{9612} \\
+\texttt{email-Enron} & social & 36692 & \textbf{22255} & \textbf{22255} & 22227 & \textbf{22255} & \textbf{22255} & 22253 & \textbf{22255} \\
+\texttt{com-dblp} & social & 317080 & \textbf{152131} & \textbf{152131} & 152061 & \textbf{152131} & 152129 & 152112 & \textbf{152131} \\
+\texttt{com-amazon} & social & 334863 & \textbf{174632} & \textbf{174632} & 172685 & 174627 & 174612 & 174510 & 174605 \\
+\texttt{com-youtube} & social & 1134890 & \textbf{857945} & \textbf{857945} & 857680 & \textbf{857945} & 857944 & 857708 & \textbf{857945} \\
+\texttt{soc-pokec-relationships} & social & 1632803 & 788866 & -- & 776663 & 789161 & 789003 & 787320 & \textbf{789352} \\
+\texttt{as-skitter} & social & 1696415 & 1170576 & \textbf{1170580} & 1152300 & 1170541 & 1170410 & 1168352 & 1168417 \\
+\texttt{wiki-Talk} & social & 2394385 & \textbf{2338222} & \textbf{2338222} & 2338207 & \textbf{2338222} & \textbf{2338222} & 2338220 & \textbf{2338222} \\
+\texttt{com-lj} & social & 3997962 & \textbf{2085626} & \textbf{2085626} & 2066610 & 2085604 & 2085353 & -- & 2085169 \\
+\midrule
+\texttt{web-Stanford} & web & 281903 & 163375 & \textbf{163390} & 162453 & 163198 & 163121 & 162453 & 162953 \\
+\texttt{web-BerkStan} & web & 685230 & 408380 & \textbf{408482} & 406062 & 408054 & 407716 & 405003 & 406323 \\
+\midrule
+\texttt{frb30-15-1} & bhoslib & 450 & \textbf{30} & \textbf{30} & 29 & 24 & 22 & \textbf{30} & \textbf{30} \\
+\texttt{frb35-17-1} & bhoslib & 595 & 34 & \textbf{35} & 33 & 27 & 25 & \textbf{35} & \textbf{35} \\
+\texttt{frb40-19-1} & bhoslib & 760 & 39 & \textbf{40} & 39 & 27 & 29 & \textbf{40} & \textbf{40} \\
+\texttt{frb45-21-1} & bhoslib & 945 & 43 & 43 & 42 & 33 & 32 & \textbf{45} & \textbf{45} \\
+\texttt{frb50-23-1} & bhoslib & 1150 & 48 & 49 & 48 & 35 & 33 & \textbf{50} & 49 \\
+\texttt{frb53-24-1} & bhoslib & 1272 & 50 & 51 & 49 & 38 & 40 & \textbf{52} & 51 \\
+\texttt{frb59-26-1} & bhoslib & 1534 & 56 & 57 & 56 & 43 & 43 & \textbf{58} & 56 \\
+\bottomrule
+\end{tabular}}
+\end{table}

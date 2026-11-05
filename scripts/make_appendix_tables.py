@@ -54,7 +54,7 @@ def provenance(catalogue, out):
         r"$\bar{d}$ is the average degree and $\Delta$ the maximum degree. Sources: "
         r"SNAP is \texttt{snap.stanford.edu/data}, where each instance is the file of "
         r"its own name; $^{\dagger}$ Network Repository \texttt{bhoslib}, used in "
-        r"complement as Section~\ref{sec:experiments} explains; $^{\ddagger}$ produced "
+        r"complement as Section~\ref{M-sec:experiments} explains; $^{\ddagger}$ produced "
         r"by \texttt{tools/gen\_instances.py} at seed 1.}\label{tab:provenance}\\" % len(rows),
         r"\toprule", head, r"\midrule", r"\endfirsthead",
         r"\multicolumn{7}{l}{\itshape Table~\ref{tab:provenance}, continued}\\",

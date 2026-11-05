@@ -1,7 +1,8 @@
 %% European Journal of Operational Research -- Elsevier elsarticle class.
 %% Compile with: latexmk -pdf main.tex   (or: make)
-\documentclass[preprint,authoryear,12pt]{elsarticle}
+\documentclass[review,authoryear,11pt]{elsarticle}
 
+\usepackage[a4paper,margin=2.5cm]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{algorithm}
@@ -66,8 +67,8 @@ contribute to solution quality.
 
 
 \begin{keyword}
-maximum independent set \sep minimum vertex cover \sep large neighbourhood
-search \sep data reduction \sep kernelization \sep combinatorial optimisation
+maximum independent set \sep large neighbourhood search \sep data reduction
+\sep kernelization \sep combinatorial optimisation
 \end{keyword}
 
 \end{frontmatter}
@@ -77,231 +78,152 @@ search \sep data reduction \sep kernelization \sep combinatorial optimisation
 
 Given an undirected graph $G=(V,E)$, the maximum independent set problem asks
 for a largest set of pairwise non-adjacent vertices. It is equivalent to the
-minimum vertex cover problem on $G$ and to the maximum clique problem on the
-complement of $G$. The problem is NP-hard and, unless P${}={}$NP, admits no
-constant-factor approximation, so instances of practical size are attacked
-heuristically.
+minimum vertex cover problem on $G$ and to maximum clique on the complement.
+The problem is NP-hard and admits no constant-factor approximation unless
+P${}={}$NP, so large instances are attacked heuristically. It models any
+selection of a largest mutually compatible set under pairwise conflicts, for
+example jobs with conflicting resources, interfering transmitters, overlapping
+label placements or duplicate records, and the conflict graphs that arise from
+such data routinely have millions of vertices and low average degree.
 
-The formulation is a natural model wherever a largest mutually compatible
-selection is wanted and incompatibility is pairwise. In scheduling, vertices are
-tasks and edges record conflicting resource demands, so an independent set is a
-largest set of jobs that can run together. In wireless networks, vertices are
-transmitters and edges record interference, and an independent set is a largest
-simultaneously active subset. In map labelling and in computer vision,
-candidate placements or detections that overlap are joined by an edge, and the
-largest consistent selection is again an independent set. In entity resolution
-and de-duplication over large record collections, edges express that two records
-cannot both be kept as distinct entities. What these share is scale and
-sparsity: the conflict graphs arising from real data routinely have millions of
-vertices and average degree in the low tens, which is the regime this paper
-addresses.
-
-Over the last decade the practical state of the art has converged on a single
+Over the last decade the practical state of the art has converged on one
 template: apply \emph{safe data reduction rules} until none fires, then search
-whatever survives. The rules are exact, in the sense that they preserve the
-optimum, and on many real-world graphs they dissolve the instance outright.
-Solvers differ almost entirely in what they do once the rules stall. Reducing-
-peeling \citep{chang2017} performs one greedy descent and never revisits a
-decision. ReduMIS \citep{lamm2017} and OnlineMIS \citep{dahlum2016} run swap-based
-local search on the reduced graph. Branch-and-reduce \citep{akiba2016} explores
-the decisions exhaustively and is complete but exponential. Local search
-methods developed in the operations research literature, notably NuMVC
-\citep{cai2013numvc} and FastVC \citep{cai2017fastvc}, dominate small dense
-instances but, as our experiments confirm, either fail outright or lose ground
-on graphs with millions of vertices.
-
-All of these share a weakness in the same place: instances whose reduced graph,
-or \emph{kernel}, remains large. Delaunay triangulations are the canonical
-example, and they are where the published solvers are furthest from each other
-and from the optimum.
+whatever survives. Solvers differ in what they do once the rules stall.
+Reducing-peeling \citep{chang2017} performs one greedy descent. ReduMIS
+\citep{lamm2017} and OnlineMIS \citep{dahlum2016} run swap-based local search on
+the reduced graph. Branch-and-reduce \citep{akiba2016} is complete but
+exponential. NuMVC \citep{cai2013numvc} and FastVC \citep{cai2017fastvc}, from the
+vertex cover literature, are strong on small dense instances but lose ground on
+graphs with millions of vertices. All of these are weakest where the reduced
+graph, or \emph{kernel}, stays large; Delaunay triangulations are the canonical
+example.
 
 \paragraph{The idea in one example} Suppose a maximal independent set $S$ is in
-hand and nothing can be added. A classical $(1,2)$-swap asks: if I remove one
-vertex $v$ of $S$, do two non-adjacent vertices become available? Those two must
-have $v$ as their \emph{only} neighbour in $S$. The same question can be asked
-about two or ten removed vertices at once: remove a set $F$ of solution vertices
-and collect every outside vertex all of whose solution neighbours lie in $F$.
-These vertices, together with $F$, form a \emph{region}; nothing outside the
-region touches the solution inside it, so any independent set of the region
-can be swapped in for $F$ without checking the rest of the graph. The best swap
-for this $F$ is therefore the maximum independent set of the region, a smaller
-instance of the same problem. Figure~\ref{fig:region} shows a case where
-releasing one vertex never helps and releasing two does.
+hand and nothing can be added. A classical $(1,2)$-swap asks: if one vertex $v$ of
+$S$ is removed, do two non-adjacent vertices become available? Those two must have
+$v$ as their \emph{only} neighbour in $S$. The same question can be asked about
+two or ten removed vertices at once: remove a set $F$ of solution vertices and
+collect every outside vertex all of whose solution neighbours lie in $F$. These
+vertices, together with $F$, form a \emph{region}; nothing outside the region
+touches the solution inside it, so any independent set of the region can be swapped
+in for $F$ without checking the rest of the graph. The best swap for this $F$ is
+the maximum independent set of the region, a smaller instance of the same problem.
+Figures~\ref{fig:region} and~\ref{fig:move} show a case where releasing one vertex
+never helps and releasing several does.
 
 This is large-neighbourhood search \citep{hashimoto2019,katzmann2017} for the
-independent set problem, and the construction of the region is not new: it is
-the one used by \citet{borowitz2025} in the dynamic setting, where an edge
-update triggers an exactly solved local subproblem
-(Section~\ref{sec:related}). What this paper contributes is the use of that
-construction as the inner move of a \emph{static} solver for massive graphs, the
-engineering that makes it cheap enough to run thousands of times per
-second, an online rule for how many solution vertices to release, and an
-empirical account---including negative results---of where this helps.
-
-Our contributions are:
+independent set problem, and the construction of the region is not new: it is the
+one used by \citet{borowitz2025} in the dynamic setting, where an edge update
+triggers an exactly solved local subproblem (Section~\ref{sec:related}). This paper
+uses that construction as the inner move of a \emph{static} solver for massive
+graphs, with reductions applied inside each region and an online rule for how many
+solution vertices to release. Our contributions are:
 \begin{enumerate}
-\item a static region-move local search for maximum independent set, with a
-      proof that an incumbent is never worsened when sub-solves are
-      truncated (Section~\ref{sec:move}), and an explicit
-      comparison with the region constructions of
-      \citet{borowitz2025}, \citet{hashimoto2019} and swap
-      neighbourhoods (Table~\ref{tab:frameworks});
-\item an online rule for the number of released vertices, driven by whether
-      sub-problems are solved to proven optimality, with a stated schedule
-      (Section~\ref{sec:search}) and a sensitivity study;
-\item a dynamic graph with last-in-first-out undo that lets reductions run
-      inside the move (Section~\ref{sec:implementation});
-\item a computational study with every reported solution independently verified
-      where the baseline emits one, including measurements that tie the method's
-      behaviour to the size of the residual kernel, to whether the region
-      sub-solve is exact, and to whether reductions are applied inside the
-      region (Section~\ref{sec:experiments}). The positive result is narrow
-      and we delimit it.
+\item a static region-move local search with a proof that an incumbent is never
+      worsened when sub-solves are truncated (Section~\ref{sec:move}), and an
+      explicit comparison with the region constructions of \citet{borowitz2025},
+      \citet{hashimoto2019} and swap neighbourhoods (Table~\ref{tab:frameworks});
+\item an online rule for the number of released vertices, with a stated schedule
+      and a sensitivity study (Section~\ref{sec:search});
+\item a dynamic graph with last-in-first-out undo that lets reductions run inside
+      the move (Section~\ref{sec:implementation});
+\item a computational study on 27 instances, including measurements that tie the
+      method's behaviour to the residual kernel, to whether the region sub-solve is
+      exact and to whether reductions run inside the region
+      (Section~\ref{sec:experiments}). The positive result is narrow and we
+      delimit it.
 \end{enumerate}
-
+Proofs of the standard reduction rules, per-family tables and secondary experiments
+are in a supplementary document.
 
 \subsection{Related work}
 \label{sec:related}
 
-\paragraph{Data reductions} The reduction approach traces back to the
-Nemhauser--Trotter theorem \citep{nemhauser1975}, which shows that the vertex
-cover linear program is half-integral and that its integral part may be fixed
-without losing an optimum. Parameterized complexity supplied the combinatorial
-counterpart: vertex cover admits a kernel with at most $2k$ vertices, obtained
-either from that linear program or from crown decompositions
-\citep{chen2001,abukhzam2007}. In parallel, the line of exact exponential
-algorithms that began with \citet{tarjan1977} and was
-sharpened by measure-and-conquer analysis \citep{fomin2009} produced most of the
-local rules now used in practice, including the confining-set machinery behind
-the unconfined rule \citep{xiao2013,xiao2017}.
+\paragraph{Reductions and exact solvers} The reduction approach traces to the
+Nemhauser--Trotter theorem \citep{nemhauser1975} and to kernelization for vertex
+cover \citep{chen2001,abukhzam2007}, with local rules from exact exponential
+algorithms \citep{tarjan1977,fomin2009,xiao2013,xiao2017}.
+\citet{akiba2016} showed that branch-and-reduce with the full rule set is
+competitive with integer programming on real instances; \citet{hespe2019}
+parallelised kernelization and characterised which families reduce well, and later
+work enlarges the set of applicable rules \citep{gellner2021,figiel2022,hespe2021}.
+The PACE 2019 winner \citep{pace2019,hespe2020} combines kernelization, local search,
+branch-and-reduce and a maximum-clique solver \citep{li2017momc}. The weighted
+variant has attracted most recent activity
+\citep{lamm2019,xiaowww2021,grossmann2023,langedal2022,grossmann2024survey,grossmann2025chils}.
 
-\citet{akiba2016} first demonstrated that a branch-and-reduce
-algorithm carrying the full rule set is competitive with, and often superior to,
-integer programming on real instances, and established the rule ordering that
-subsequent solvers reuse. \citet{hespe2019} parallelised
-kernelization, introduced dependency checking to avoid re-testing rules that
-cannot fire, and characterised which instance families reduce well; their
-measurements are the source of the observation that success is essentially
-determined by whether the kernel becomes small. \citet{gellner2021} showed that transformations which temporarily \emph{increase}
-the graph can unlock further reduction, and \citet{figiel2022}
-that \emph{undoing} a rule can enable others, yielding a smaller final kernel.
-Branching itself can be aimed at provoking reductions \citep{hespe2021}, and
-reduction-based solvers have been combined with SAT solving
-\citep{plachetta2021}. The weighted variant has attracted most of the recent
-activity \citep{lamm2019,xiaowww2021,grossmann2023,langedal2022}.
-
-\paragraph{Local search} \citet{andrade2012} introduced the
-$(1,2)$-swap neighbourhood with an $O(m)$ test for improving moves, which
-underpins the KaMIS solvers \citep{lamm2017,dahlum2016}. In the operations
-research and artificial intelligence literature the same problem is usually
-posed as minimum vertex cover. NuMVC \citep{cai2013numvc} combines edge weighting
-with a two-stage exchange step and configuration checking with forgetting, and
-is extremely strong on the dense structured instances of the DIMACS and BHOSLIB
-collections. Its cost per step, however, makes it unsuitable for massive graphs,
-which motivated FastVC \citep{cai2015,cai2017fastvc}: a cheaper construction
-together with best-from-multiple-selection, trading some quality for the ability
-to run on such graphs at all. Our experiments reproduce both halves of this
-picture, including instances on which NuMVC returns no solution.
-
-\paragraph{Exact solvers} Branch-and-bound on the complement with incremental
-MaxSAT reasoning \citep{li2017momc} is the strongest general approach on dense
-instances. The solver that won the vertex cover track of the PACE 2019
-challenge \citep{pace2019} is a portfolio combining aggressive kernelization,
-iterated local search, branch-and-reduce and two calls to such a clique solver
-\citep{hespe2020}; it is among our baselines, and remains far stronger than our
-own exact mode on dense instances for exactly this reason.
+\paragraph{Local search} \citet{andrade2012} introduced the $(1,2)$-swap with an
+$O(m)$ test, which underlies the KaMIS solvers \citep{lamm2017,dahlum2016}. NuMVC
+\citep{cai2013numvc} combines edge weighting with configuration checking and is
+extremely strong on dense structured instances; FastVC
+\citep{cai2015,cai2017fastvc} trades some quality for the ability to run on massive
+graphs, and InfVC \citep{sun2025infvc} adds inference rules and a degree-biased
+perturbation, reporting gains on massive instances. We did not run InfVC
+(Section~\ref{sec:threats}).
 
 \paragraph{Neighbourhood search with exactly solved subproblems}
-\citet{andrade2012} introduced the $(1,2)$-swap and, more generally, $(j,k)$-swaps
-for the unweighted problem; \citet{hashimoto2019} extend the $(k,\ell)$
-neighbourhood to the weighted problem and embed a branch-and-bound solver in the
-local search so that a very large neighbourhood can be explored.
-\citet{katzmann2017} search the $k$-swap neighbourhood of minimum vertex cover
-systematically, with a running time of $\Delta^{O(k)}n$ for maximum degree
-$\Delta$, and report that larger $k$ pays off. The closest work is that of
-\citet{borowitz2025}, who maintain an independent set under edge updates. After
-an update that the greedy repair cannot absorb, they build a subgraph $H$ by a
-breadth-first search of bounded depth $d$ around the endpoints, add the incumbent
-neighbours of $H$ so that no incumbent vertex outside $H$ is adjacent to it, add
-the ``tight'' vertices of $N(H)\setminus H$, and solve the induced subgraph with
-the branch-and-reduce solver of KaMIS \citep{lamm2019}, which applies the full
-reduction suite exhaustively. The size of $H$ is capped by a parameter
-$\nu_{\max}$, and high-degree vertices are pruned from $H$ before solving.
+\citet{andrade2012} introduced $(j,k)$-swaps; \citet{hashimoto2019} extend the
+$(k,\ell)$ neighbourhood to the weighted problem and embed branch-and-bound in the
+local search; \citet{katzmann2017} search the $k$-swap neighbourhood of vertex cover
+systematically in $\Delta^{O(k)}n$ time. The closest work is that of
+\citet{borowitz2025}, who maintain an independent set under edge updates: after an
+update the greedy repair cannot absorb, they build a subgraph $H$ by a bounded-depth
+breadth-first search, add the incumbent neighbours of $H$ and the tight vertices of
+$N(H)\setminus H$, and solve the induced subgraph with KaMIS branch-and-reduce
+\citep{lamm2019}, capping $|H|$ by $\nu_{\max}$ and pruning high-degree vertices.
 
-The region of Section~\ref{sec:move} is the same object: if $F$ is the set of
-incumbent vertices in their subgraph after closing it, their region is $R(F)$.
-\emph{Theorem~\ref{thm:region} is therefore not a new observation}; it is the
-statement that justifies their construction, and we state and prove it for
-self-containedness. The \emph{use of reductions on the region} is likewise
-present in their work, through the sub-solver. Table~\ref{tab:frameworks}
-lists what differs: the setting (static against dynamic), how the released set
-is chosen (counting incumbent vertices along a breadth-first walk, against
-a depth limit on all vertices), how its size is controlled (an online rule
-against a fixed cap), the pruning step (absent here, so every sub-solve is
-exact whenever it completes), and the sub-solver (an in-house reusable
-branch-and-reduce engine with $O(\deg)$ undo, whose reuse across moves is what
-sets the move rate). Whether those differences matter on static graphs is an
-empirical question, and Section~\ref{sec:ablation} measures the parts we can
-isolate within our own implementation: exact against heuristic repair, and
-reductions inside the region against none. We did not run their code.
+The region of Section~\ref{sec:move} is the same object: with $F$ the incumbent
+vertices of their closed subgraph, their region is $R(F)$.
+\emph{Theorem~\ref{thm:region} is therefore not a new observation}; we state and
+prove it for self-containedness, and reductions on the region are likewise present
+in their work through the sub-solver. Table~\ref{tab:frameworks} lists what differs:
+the setting (static against dynamic), how the released set is chosen, how its size
+is controlled (an online rule against a fixed cap), the absence of pruning here, and
+the sub-solver (an in-house reusable branch-and-reduce engine). Whether those
+differences matter on static graphs is empirical, and Section~\ref{sec:regional}
+measures the parts that can be isolated within our own implementation. We did not
+run their code.
 
 \begin{table}[htbp]
 \centering
-\caption{Region-based neighbourhood search frameworks compared. ``Released
-set'' is the set of incumbent vertices removed before the region is re-solved.}
+\caption{Region-based neighbourhood search frameworks compared. ``Released set'' is
+the set of incumbent vertices removed before the region is re-solved.}
 \label{tab:frameworks}
+\footnotesize
 \fittable{
-\begin{tabular}{P{2.6cm}P{3.1cm}P{3.1cm}P{3.1cm}P{3.1cm}}
+\begin{tabular}{P{2.3cm}P{3.0cm}P{3.0cm}P{3.0cm}P{3.0cm}}
 \toprule
  & \citet{andrade2012} & \citet{hashimoto2019} & \citet{borowitz2025} & This work \\
 \midrule
 Problem & unweighted, static & weighted, static & (weighted) dynamic & unweighted, static \\
-Released set & $j\le 2$ vertices, enumerated & $k$ vertices dropped, candidates restricted by bound on $\ell$ & incumbent vertices met by BFS of depth $d$, closed under neighbours & $k$ incumbent vertices along a BFS walk from a seed \\
+Released set & $j\le 2$ vertices, enumerated & $k$ vertices dropped, candidates restricted & incumbent vertices met by BFS of depth $d$, closed under neighbours & $k$ incumbent vertices along a BFS walk from a seed \\
 Candidate restriction & only vertices with the released set as sole solution neighbours & $(k,\ell)$ candidate lists & tight vertices of $N(H)\setminus H$; high-degree vertices pruned & all tight vertices (no pruning) \\
-Sub-problem objective & best $(j,k)$-swap & best $(k,\ell)$-swap by branch-and-bound & MIS of $G[H]$ & MIS of $G[R(F)]$ \\
-Reductions & none & none in the move & inside KaMIS BnR & inside the move, on the region \\
-Sub-solver & enumeration & branch-and-bound & KaMIS BnR, time-capped & in-house branch-and-reduce, node- and time-capped \\
-Size control & fixed & fixed & fixed ($d$, $\nu_{\max}$) & online (Section~\ref{sec:search}) \\
+Objective & best $(j,k)$-swap & best $(k,\ell)$-swap & MIS of $G[H]$ & MIS of $G[R(F)]$ \\
+Reductions & none & none in the move & inside KaMIS BnR & inside the move \\
+Sub-solver & enumeration & branch-and-bound & KaMIS BnR, time-capped & in-house, node- and time-capped \\
+Size control & fixed & fixed & fixed ($d$, $\nu_{\max}$) & online \\
 \bottomrule
 \end{tabular}}
 \end{table}
 
-\paragraph{Recent local search for vertex cover} Local search for minimum vertex
-cover on massive graphs has continued to develop since FastVC. InfVC
-\citep{sun2025infvc} adds inference rules to the search and a degree-biased
-perturbation, and reports gains over earlier solvers on massive instances. We
-did not run it; see Section~\ref{sec:threats}. For the weighted problem,
-\citet{grossmann2024survey} survey the reduction rules developed to date, and
-\citet{grossmann2025chils} combine learned screening of reductions with a
-concurrent iterated local search that reports gains on the largest standard
-instances. These are weighted solvers and were not run here.
-
 \section{Preliminaries}
 Let $G=(V,E)$ be a simple undirected graph. A set $S \subseteq V$ is
-\emph{independent} if no edge of $G$ has both endpoints in $S$; $\alpha(G)$
-denotes the maximum size of such a set. For $v \in V$ we write $N(v)$ for its
-neighbourhood and $N[v] = N(v) \cup \{v\}$.
-
-\begin{definition}[Safe reduction]
-A rule transforming $G$ into $G'$ with an offset $c$ is \emph{safe} if
-$\alpha(G) = \alpha(G') + c$ and a maximum independent set of $G$ can be
-reconstructed from one of $G'$.
-\end{definition}
-
-We use the rule set that is standard in this literature
-\citep{akiba2016,lamm2017,hespe2019}, summarised in Table~\ref{tab:rules}. A
-graph on which no rule fires is called a \emph{kernel}. Each rule records how to
-reconstruct a solution, and \emph{lifting} replays those records in reverse; for
-instance a fold of $v$ with non-adjacent neighbours $u,w$ into a new vertex $f$
-records that $u$ and $w$ are taken when $f$ ends up in the solution and $v$
-otherwise.
+\emph{independent} if no edge has both endpoints in $S$; $\alpha(G)$ is the
+maximum size of such a set. $N(v)$ is the neighbourhood of $v$ and
+$N[v]=N(v)\cup\{v\}$. A rule transforming $G$ into $G'$ with an offset $c$ is
+\emph{safe} if $\alpha(G)=\alpha(G')+c$ and a maximum independent set of $G$ can be
+reconstructed from one of $G'$. We use the rule set that is standard in this
+literature \citep{akiba2016,lamm2017,hespe2019}, in Table~\ref{tab:rules}; a graph on
+which no rule fires is a \emph{kernel}. Each rule records how to reconstruct a
+solution, and \emph{lifting} replays those records in reverse. Proofs of the
+simplicial, domination and degree-2 folding rules are in the supplement.
 
 \begin{table}[htbp]
 \centering
-\caption{The reduction rules used. All are safe in the sense above. The
-unconfined rule is that of \citet{xiao2017}; the LP rule is that of
-\citet{nemhauser1975}.}
+\caption{The reduction rules used. The unconfined rule is that of
+\citet{xiao2017}; the LP rule is that of \citet{nemhauser1975}.}
 \label{tab:rules}
+\small
 \begin{tabular}{lll}
 \toprule
 Rule & Condition & Effect \\
@@ -318,120 +240,44 @@ LP & half-integral LP optimum & fix the integral part \\
 \end{tabular}
 \end{table}
 
-Three entries of Table~\ref{tab:rules} are less self-explanatory than the rest.
+\paragraph{Twin} Two non-adjacent degree-three vertices $u,v$ with the same
+neighbourhood $\{p,q,r\}$ are twins. A solution that uses one of $p,q,r$ gives up
+both $u$ and $v$, so only two outcomes matter: both twins are taken, or all of
+$p,q,r$ are. If the neighbourhood contains an edge, at most two of $p,q,r$ can be
+taken, so taking $u$ and $v$ is never worse (delete $p,q,r$). If it is independent
+we \emph{fold}: replace the five vertices by one vertex $f$ adjacent to every other
+neighbour of $p,q,r$ and add $2$ to the offset, so that $f$ stands for $\{p,q,r\}$
+and its absence for $\{u,v\}$ \citep{akiba2016}.
 
-\paragraph{Twin} Two non-adjacent vertices $u,v$ of degree three with the same
-neighbourhood $\{p,q,r\}$ are twins. Any solution that uses one of $p,q,r$ gives
-up both $u$ and $v$, so only two outcomes matter: both twins are taken, or all
-of $p,q,r$ are. If the neighbourhood contains an edge, say $pq$, at most two of
-$p,q,r$ can be taken, so taking $u$ and $v$ is never worse and we do that
-(delete $p,q,r$). If it is independent, neither outcome dominates, and we
-\emph{fold}: replace the five vertices by a single vertex $f$ adjacent to every
-other neighbour of $p,q,r$ and add $2$ to the offset, so that $f$ in the reduced
-solution stands for $\{p,q,r\}$ and $f$ absent stands for $\{u,v\}$
-\citep{akiba2016}. In the first case the argument is a one-line exchange:
-if an optimal $S$ meets $\{p,q,r\}$ in $T \neq \emptyset$ then $u,v \notin S$ and
-$|T|\le 2$, so $(S\setminus T)\cup\{u,v\}$ is independent and no smaller; if
-$T=\emptyset$ then maximality puts $u,v$ in $S$.
+\paragraph{Unconfined} Start from $S=\{v\}$. A vertex $u\in N(S)$ with exactly one
+neighbour in $S$ is a \emph{child}. If some child has $N(u)\subseteq N[S]$, swapping
+$S$ for $u$ in any independent set containing $v$ loses nothing, so $v$ is
+discarded. If the child's remaining neighbourhood is a single vertex $w$, then $w$
+is added to $S$ and the test continues; otherwise $v$ is \emph{confined}. Domination
+is the case $S=\{v\}$ \citep{xiao2013,xiao2017}. We cap $|S|$ at eight and the edges
+scanned per test at $2\times10^4$; a capped test answers ``confined'', so the cap
+cannot make the rule unsound.
 
-\paragraph{Unconfined} Start from $S=\{v\}$. A vertex $u \in N(S)$ with exactly
-one neighbour in $S$ is a \emph{child} of $S$. If some child $u$ has
-$N(u)\subseteq N[S]$, then swapping $S$ for $u$ in any independent set that
-contains $v$ cannot lose anything, so some optimum avoids $v$ and $v$ is
-discarded. If the child's remaining neighbourhood $N(u)\setminus N[S]$ is a
-single vertex $w$, then $w$ is added to $S$ and the test continues; otherwise
-the test stops and $v$ is \emph{confined}. The rule generalises domination, which
-is the case $S=\{v\}$ with $N[u]\subseteq N[v]$ \citep{xiao2013,xiao2017}. We
-cap $|S|$ at eight and the edges scanned per test at $2\times 10^4$; a capped
-test simply reports ``confined'', so the cap makes the rule fire less often but
-never unsound.
-
-\paragraph{LP} Relax the vertex cover problem to $x_v\in[0,1]$ with
-$x_u+x_v\ge 1$ on every edge. Its optimum is half-integral
-\citep{nemhauser1975}, and any optimal half-integral $x$ has a maximum
-independent set that contains every vertex with $x_v=0$ and avoids every vertex
-with $x_v=1$; only vertices at $\tfrac12$ remain. The optimum is read from a
-maximum matching in the bipartite double cover via K\"onig's theorem. This is the only
-rule that looks at the whole graph rather than a neighbourhood, which is why it
-fires where the local rules have stalled. Because it must run to completion for
-persistency to hold, it is skipped rather than interrupted when the budget is
-short.
+\paragraph{LP} Relax vertex cover to $x_v\in[0,1]$ with $x_u+x_v\ge 1$ on every
+edge. The optimum is half-integral \citep{nemhauser1975}, and some maximum
+independent set contains every vertex with $x_v=0$ and avoids every vertex with
+$x_v=1$; only vertices at $\tfrac12$ remain. The optimum comes from a maximum
+matching in the bipartite double cover via K\"onig's theorem. It is the only rule
+that looks at the whole graph, which is why it fires where the local rules have
+stalled; it must run to completion for persistency to hold, so it is skipped
+rather than interrupted when the budget is short.
 
 \begin{figure}[htbp]
 \centering
-\resizebox{\textwidth}{!}{\input{figures/rules}}
-\caption{Three of the rules of Table~\ref{tab:rules} on small examples. (a)~Domination
-deletes $v$ because $u$ is adjacent to it and sees nothing $v$ does not.
-(b)~Degree-2 folding contracts the path $u,v,w$ into one vertex $f$: choosing $f$
-stands for taking both ends, not choosing it for taking the middle vertex. (c)~Twins:
-two vertices with the same three neighbours; an edge among the neighbours (red) means
-at most two of them can be used, so taking $u$ and $v$ is never worse.}
+\resizebox{0.8\textwidth}{!}{\input{figures/rules}}
+\caption{Three rules on small examples. (a)~Domination deletes $v$ because $u$ is
+adjacent to it and sees nothing $v$ does not. (b)~Degree-2 folding contracts the
+path $u,v,w$ into one vertex $f$: choosing $f$ stands for taking both ends, not
+choosing it for taking the middle vertex. (c)~Twins with an edge among the
+neighbours (red): at most two of them can be used, so taking $u$ and $v$ is never
+worse.}
 \label{fig:rules}
 \end{figure}
-
-For completeness we record why the two rules that are least obvious are safe.
-
-\begin{lemma}[Simplicial vertices]
-\label{lem:simplicial}
-If $N(v)$ induces a clique then some maximum independent set contains $v$.
-\end{lemma}
-
-\begin{proof}
-Let $S$ be a maximum independent set with $v \notin S$. Since $N(v)$ is a
-clique, $|S \cap N(v)| \le 1$. If $S \cap N(v) = \emptyset$ then $S \cup \{v\}$
-is independent and larger, contradicting maximality. Otherwise
-$S \cap N(v) = \{u\}$ for a single $u$, and $(S \setminus \{u\}) \cup \{v\}$ is
-independent, of the same size, and contains $v$.
-\end{proof}
-
-Degree-0 and degree-1 vertices are the special cases $|N(v)| \in \{0,1\}$.
-
-\begin{lemma}[Domination]
-\label{lem:domination}
-If $uv \in E$ and $N[u] \subseteq N[v]$ then some maximum independent set
-excludes $v$.
-\end{lemma}
-
-\begin{proof}
-Let $S$ be a maximum independent set containing $v$. Then $u \notin S$, because
-$u$ and $v$ are adjacent. Consider $S' = (S \setminus \{v\}) \cup \{u\}$. Any
-neighbour of $u$ lies in $N[u] \subseteq N[v]$, that is, it is either $v$, which
-has been removed, or a neighbour of $v$, which is not in $S$ because $v \in S$.
-Hence $S'$ is independent, has the same size as $S$, and excludes $v$.
-\end{proof}
-
-\begin{lemma}[Degree-2 folding]
-\label{lem:fold}
-Let $N(v) = \{u,w\}$ with $uw \notin E$, and let $G'$ be obtained from $G$ by
-deleting $v,u,w$ and adding a vertex $f$ adjacent to
-$(N(u) \cup N(w)) \setminus \{v,u,w\}$. Then $\alpha(G) = \alpha(G') + 1$.
-\end{lemma}
-
-\begin{proof}
-($\ge$) Let $T$ be a maximum independent set of $G'$. If $f \notin T$ then
-$T \cup \{v\}$ is independent in $G$, since $v$'s only neighbours are $u$ and
-$w$, neither of which is in $T$. If $f \in T$ then $(T \setminus \{f\}) \cup
-\{u,w\}$ is independent in $G$: $u$ and $w$ are non-adjacent by assumption, and
-any other neighbour of $u$ or $w$ is adjacent to $f$ and hence outside $T$.
-Either way we obtain an independent set of size $|T| + 1$.
-
-($\le$) Let $S$ be a maximum independent set of $G$. We first argue that $S$
-may be taken to contain $v$, or to contain both $u$ and $w$. Note that
-Lemma~\ref{lem:simplicial} is \emph{not} available here: its hypothesis is that
-$N(v)$ induces a clique, and $N(v) = \{u,w\}$ with $uw \notin E$ is precisely the
-case in which it does not. We argue directly instead. If $S$ contains neither
-$u$ nor $w$, then $S \cup \{v\}$ is independent, because $u$ and $w$ are the only
-neighbours of $v$; maximality of $S$ therefore forces $v \in S$ already. If $S$
-contains exactly one of them, say $u$, then $(S \setminus \{u\}) \cup \{v\}$ is
-independent --- the only neighbours of $v$ are $u$, which has been removed, and
-$w$, which is not in $S$ --- and has the same size, so we may replace $S$ by it
-and again have $v \in S$. In the one remaining case $u,w \in S$, and then
-$v \notin S$ because $v$ is adjacent to both. In the first case
-$S \setminus \{v\}$ is independent in $G'$ and avoids $f$. In the second,
-$(S \setminus \{u,w\}) \cup \{f\}$ is independent in $G'$, because no neighbour
-of $f$ other than through $u$ or $w$ exists. Either way we obtain an independent
-set of $G'$ of size $|S| - 1$.
-\end{proof}
 
 \section{The region move}
 \label{sec:move}
@@ -605,84 +451,38 @@ the region against the graph is visible.}
 \label{fig:move}
 \end{figure}
 
-The region is cheap to construct if the number of incumbent neighbours is
-maintained.
+\paragraph{Cost of a move} With $t(u)=|N(u)\cap S|$ maintained incrementally,
+$R(F)$ is built from a given $F$ in $O(\sum_{v\in F}\deg v)$: count for each outside
+neighbour of $F$ how many of its neighbours lie in $F$, and admit it when the count
+equals $t(u)$. Selecting $F$ is a separate cost: the implementation grows $F$ by a
+breadth-first walk from a seed, collecting incumbent vertices until the target size
+is reached and capping the vertices visited. The walk scans the full adjacency of
+each vertex it visits, so a move is bounded by the total degree of the visited ball
+and of the region, not by $|F|$; the largest degree in our benchmark is $100{,}029$.
+The exact sub-solve is performed on the kernel of $G[R(F)]$ rather than on
+$G[R(F)]$ itself.
 
-\begin{proposition}[Cost of a move]
-\label{prop:cost}
-Let $t(u) = |N(u) \cap S|$ be maintained incrementally. Then $R(F)$ can be
-constructed in time $O\!\left(\sum_{v \in F} \deg v\right)$, and the induced
-subgraph $G[R(F)]$ in time $O\!\left(\sum_{v \in R(F)} \deg v\right)$.
-\end{proposition}
-
-\begin{proof}
-Scanning the neighbourhoods of the vertices of $F$ and counting, for each
-vertex $u$ outside $S$, how many of its neighbours lie in $F$, costs
-$\sum_{v \in F} \deg v$. A vertex $u$ satisfies $N(u) \cap S \subseteq F$
-exactly when that count equals $t(u)$, so membership in $R(F)$ is decided in
-constant time per candidate, and only vertices adjacent to $F$ are candidates.
-Maintaining $t$ costs $O(\deg v)$ whenever a vertex $v$ enters or leaves $S$,
-which is charged to the move that changes it.
-\end{proof}
-
-Proposition~\ref{prop:cost} bounds the construction of the region from a set $F$
-that is already given; selecting $F$ is a separate cost that it does not cover.
-The implementation grows $F$ by a breadth-first walk from a seed vertex,
-collecting incumbent vertices until the target size is reached and capping the
-number of vertices visited. The walk scans the full adjacency of each vertex it
-visits, so its cost is the total degree of the ball rather than of $F$, and a
-single step that reaches a high-degree vertex dominates the move: the largest
-degree in our benchmark is $100{,}029$. The per-move cost is therefore bounded by
-the total degree of the visited ball together with that of the region, and not by
-$|F|$.
-
-Subject to that, the cost of the move is dominated not by the size of the graph
-but by the total degree of the region, and the exact sub-solve is performed on the
-kernel of $G[R(F)]$ rather than on $G[R(F)]$ itself.
-
-\begin{corollary}[Relation to classical swaps]
-\label{cor:swaps}
-For $F = \{v\}$, $R(F) = \{v\} \cup \{u \notin S : N(u) \cap S = \{v\}\}$, which
-is the set examined by a $(1,2)$-swap \citep{andrade2012}. Solving $G[R(F)]$
-therefore finds the best $(1,k)$-swap at $v$ for every $k$ at once.
-\end{corollary}
-
-More generally, a region move that releases $|F| = j$ vertices and writes back an
-independent set of size $k$ removes $j$ solution vertices and inserts $k$, so it
-\emph{is} a $(j,k)$-swap. The neighbourhood is thus not a new class of move:
-$(j,k)$-swaps are the generalisation of the classical two-improvement introduced
-by \citet{andrade2012}, and the present construction should not be
-read as reaching outside that class. What Theorem~\ref{thm:region} supplies is
-not a larger class but a way to search it: because $R(F)$ is separated from
-$S \setminus R(F)$, the best $(j,k)$-swap at $F$ over all $k$ is obtained by
-solving one induced subproblem, with no consistency check against the rest of the
-incumbent. That is what makes $j$ in the tens affordable, where implementations
-that enumerate swaps directly are in practice confined to $j \le 2$.
+\paragraph{Relation to classical swaps} For $F=\{v\}$, $R(F)$ is the set examined by
+a $(1,2)$-swap \citep{andrade2012}, and solving $G[R(F)]$ finds the best $(1,k)$-swap
+at $v$ for every $k$ at once. More generally, a move that releases $j$ vertices and
+writes back $k$ \emph{is} a $(j,k)$-swap, so the neighbourhood is not a new class of
+move. What Theorem~\ref{thm:region} supplies is a way to search it: the best
+$(j,k)$-swap at $F$ over all $k$ is one induced subproblem, with no consistency check
+against the rest of the incumbent, which is what makes $j$ in the tens affordable
+where implementations that enumerate swaps are confined to $j\le 2$.
 
 \section{Algorithm and implementation}
 \label{sec:algorithm}
 
 \subsection{The search}\label{sec:search}
 
-Figure~\ref{fig:pipeline} shows the shape of the method and
 Algorithm~\ref{alg:cascade} gives the overall structure. Kernelization runs
 once; a \emph{dive} then constructs an initial solution by repeatedly discarding
 a maximum-degree vertex and re-reducing, which reproduces reducing-peeling
-\citep{chang2017}; the remaining budget goes to region moves.
-
-\begin{figure}[htbp]
-\centering
-\resizebox{\textwidth}{!}{\input{figures/pipeline}}
-\caption{Where the work goes. Kernelization and the dive run once, the first of
-them bounded by a share $\kappa$ of the budget so that it cannot consume the
-whole of it; everything after that is region moves. The
-step set in italics is what distinguishes the method: the reduction rules are
-applied \emph{inside} each move, to the region rather than to the input, which is
-what makes solving the region exactly affordable. A move never returns a worse
-solution than it received, so the only reason to leave the loop is that it has
-stopped improving, and the escape mechanisms exist to put it back.}
-\label{fig:pipeline}
-\end{figure}
+\citep{chang2017}; the remaining budget goes to region moves. The step that
+distinguishes the method is that the reduction rules are applied \emph{inside}
+each move, to the region rather than to the input, which is what makes solving the
+region exactly affordable.
 
 \begin{algorithm}
 \caption{\textsc{Cascade}: static region-move search}
@@ -789,19 +589,14 @@ on \texttt{web-Stanford} and \texttt{roadNet-PA} are restarts, which reset $k$ t
 $k_0$. (b)~On \texttt{del18} the mean region has a few hundred vertices before the
 root reduction pass and tens after it; this gap is what the reductions buy.
 (c)~Cumulative gain from region moves: most of it arrives in the first
-seconds on \texttt{del18} and \texttt{roadNet-PA}, in line with the small effect of a longer budget in Section~\ref{sec:longbudget}.}
+seconds on \texttt{del18} and \texttt{roadNet-PA}, in line with the small effect of a longer budget (supplement).}
 \label{fig:adapt}
 \end{figure}
 
-\paragraph{The decision-space move} The dive leaves behind a stack of decisions,
-one per discarded vertex. An alternative move operates on that stack rather than
-on the graph: it rewinds to a chosen level, reverses the decision taken there and
-re-dives from that point, so the cost is the suffix of the dive rather than the
-whole instance. This was the first move we designed, and it is the
-\textsc{dive} variant ablated in Section~\ref{sec:ablation}; it survives in the
-implementation as an option but not as a default, for the reasons reported there.
-It is described here only so that the ablation has something to refer to --- it
-has no separation property, and Theorem~\ref{thm:region} says nothing about it.
+\paragraph{The decision-space move} An alternative move rewinds the stack of dive
+decisions to a chosen level, reverses the decision there and re-dives. It was our
+first design and is the \textsc{dive} variant of the ablation
+(Section~\ref{sec:ablation}); it has no separation property and is not a default.
 
 \paragraph{Where the search looks} Every vertex decided by a reduction belongs
 to some maximum independent set, so an improving move must touch a vertex that
@@ -810,345 +605,255 @@ rather than from all of $V$ matters on graphs that reduce well: a graph such as
 \texttt{com-lj} has four million vertices and reduces to $1781$ at a fixed point
 (Table~\ref{tab:kernels}).
 
-\paragraph{Choosing the neighbourhood size} The useful value of $k=|F|$ differs
-by orders of magnitude across instance families, so it is inferred rather than
-set; the rule is the one in Algorithm~\ref{alg:cascade} and the text below it.
-On meshes it settles at tens of released vertices; on dense instances at one or
-two, where the move degenerates to a classical swap. Section~\ref{sec:sensitivity}
-varies the starting value $k_0$ over three orders of magnitude.
-
-\paragraph{Escaping local optima} Because region moves never degrade the
-incumbent, the search stalls at a solution that is optimal for every region of
-the current size. Three mechanisms address this. \emph{Plateau moves} accept a
-region optimum of equal size that differs from the incumbent, once a full sweep
-has stopped producing gains; randomised tie-breaking in the sub-solver makes
-repeated solves of the same region return different optima. \emph{Perturbation}
-forces a vertex into the solution, evicts its blocking neighbours and lets
-region moves repair the damage, with a change log that rolls back only the
-touched vertices if the result is worse. \emph{Restarts} discard the incumbent
-and dive again, keeping the best solution in an archive; the trigger is idle
-time measured in multiples of the cost of one dive, since a restart must pay for
-a re-dive. This keying matters: on the smallest instances the algorithm restarts
-hundreds of times within a minute, while on the largest it never restarts.
+\paragraph{Escaping local optima} Because region moves never degrade the incumbent,
+the search stalls at a solution that is optimal for every region of the current
+size. \emph{Plateau moves} (above) and \emph{perturbation}, which forces a vertex into
+the solution, evicts its blocking neighbours, lets region moves repair the damage and
+rolls back through a change log if the result is worse, address this. \emph{Restarts}
+discard the incumbent and dive again, keeping the best solution in an archive; the
+trigger is idle time in multiples of the cost of one dive, since a restart must pay for
+a re-dive, so the smallest instances restart hundreds of times in a minute and the
+largest never.
 
 \subsection{Data structures and throughput}
 \label{sec:implementation}
 
-Reductions and branching decisions both mutate the graph and must be reversible,
-at every node of the sub-searches and after every region move. We use a compressed
-adjacency array in which each entry stores the position of its twin, together
-with a per-vertex pointer separating the live neighbours from the dead ones.
-Deleting a vertex $v$ swaps its entry to the end of each live neighbour's range
-and decrements that neighbour's pointer; undoing the deletion merely increments
-the pointers again. Nothing has to be swapped back, because no later operation
-touches an entry outside the live range. Both directions cost $O(\deg v)$ and
-carry no payload, and degrees remain exact throughout.
-
-Degree-2 folding introduces edges that do not fit in the static array; these go
-into per-vertex overflow lists which are append-only and undone by a pop, and
-which are allocated only for vertices that actually take part in a fold.
-
-Two engineering details matter for throughput. First, each node of a sub-search
-owns an exact list of its live vertices, built by filtering its parent's. An
-earlier version shared one list and could drop a vertex when a fold created a new
-one; the clique-cover bound then failed to cover that vertex, came out too small,
-and pruned optimal solutions while still reporting that optimality had been
-proven. Second, the sub-solver is reused across region moves instead of being
-constructed afresh, since at a hundred thousand moves per minute the set-up of
-the graph and reduction state costs more than the search itself.
-
-To give these choices a number, the full configuration in the ablation runs of
-Section~\ref{sec:regional} (three seeds, three processes sharing the machine)
-kernelizes \texttt{del18}, 262\,144 vertices, in $1.6$--$2.0$\,s, completes the
-first dive in a further $0.55$--$0.63$\,s and performs $102\,906$--$112\,414$
-region moves in the rest of the 60\,s, one every $560\,\mu$s on average. On
-\texttt{web-Stanford} the figures are $1.0$--$1.1$\,s, $0.03$--$0.05$\,s and
-$70\,496$--$91\,130$ moves. Those rates are what the reuse of the sub-solver and
-the payload-free undo buy; the throughput, not the asymptotics, is what makes
-an exactly-solved neighbourhood practical.
-
-The reduction queue is seeded in increasing order of degree, so that the cheap
-rules fire on the vertices most likely to trigger cascades before any expensive
-test is attempted on a hub. This is a design choice, not a measured result of
-this paper: we did not keep a plain-order variant and report no comparison.
-
-The last of these details is the one that decides whether the solver keeps its
-promise at all. Kernelization is run to exhaustion in principle, but on some
-graphs exhaustion is unaffordable: on \texttt{soc-pokec}, 1.6 million vertices,
-running the rules to a fixed point takes $180.5$\,s in an early measurement on
-the main-table machine and $332$\,s in the loaded measurement of
-Table~\ref{tab:kernels}, three or more times the entire 60-second budget, so a
-solver that insisted on finishing would return nothing at all. We therefore give kernelization a fixed share of the budget --- $0.3$ by
-default --- and stop it where it stands when that share is spent, keeping
-whatever reductions have been applied and continuing with the rest. On
-\texttt{soc-pokec} the phase is cut off at $18.0$\,s, exactly the share, and the
-solver returns 788\,868 within its budget. The truncation is recorded in the
-run records, so a reader can see on which instances the kernel is partial.
-This is the difference between a method that respects a deadline and one that
-merely has a time limit in its interface.
-
-Correctness is checked by comparing the exact solver against exhaustive search on
-random graphs, repeating the comparison with each reduction rule disabled in
-turn, and by verifying that every solution our solver reports is independent and maximal.
-
+Reductions and branching decisions mutate the graph and must be reversible at every
+node of a sub-search and after every region move. We use a compressed adjacency
+array in which each entry stores the position of its twin, with a per-vertex pointer
+separating live from dead neighbours; deleting a vertex swaps its entry to the end of
+each live neighbour's range and decrements the pointer, and undoing it increments the
+pointers again, both in $O(\deg v)$ with no payload. Degree-2 folding adds edges that
+go into append-only per-vertex overflow lists, undone by a pop. Each node of a
+sub-search owns an exact list of its live vertices; an earlier version that shared one
+list could drop a vertex created by a fold, so the clique-cover bound came out too
+small and pruned optimal solutions while still reporting a proof. The sub-solver is
+reused across moves, since at a hundred thousand moves per minute its set-up would
+cost more than the search. Kernelization gets a fixed share $\kappa=0.3$ of the
+budget and is stopped where it stands when that is spent: on \texttt{soc-pokec},
+running the rules to a fixed point takes $180$--$332$\,s, several times the whole
+60-second budget, so a solver that insisted on finishing would return nothing. In the
+ablation runs (three seeds, three processes sharing the machine) the full
+configuration kernelizes \texttt{del18} in $1.6$--$2.0$\,s, completes the first dive in
+a further $0.55$--$0.63$\,s and performs $102\,906$--$112\,414$ region moves in the
+rest of 60\,s, one every $560\,\mu$s. Correctness is checked against exhaustive search
+on random graphs with each rule disabled in turn, and every solution our solver reports
+is verified independent and maximal. Further implementation notes are in the
+supplement.
 \section{Computational study}
 \label{sec:experiments}
 
-\subsection{Setup}\label{sec:setup-machine}
+\subsection{Setup and instances}
+\label{sec:setup-machine}
 
-All runs are performed on the same machine and are single-threaded: an Intel
-Xeon at 2.10\,GHz with four cores and 15\,GB of memory, running Ubuntu 24.04,
-with every solver compiled by GCC 13.3 at \texttt{-O3}. Every solver
-receives the same wall-clock budget, measured around the entire process, so that
-reading the instance and any construction phase are charged to the solver that
-incurs them. This is deliberate: a solver whose construction phase cannot be
-interrupted is genuinely less useful under a deadline, and
-Table~\ref{tab:budget} reports how closely each solver keeps to the budget.
+Runs are single-threaded on a four-core Intel Xeon at 2.10\,GHz with 15\,GB of
+memory under Ubuntu 24.04, every solver compiled by GCC 13.3 at \texttt{-O3} and
+given the same wall-clock budget, measured around the whole process so that reading
+the instance and any construction phase are charged to the solver. Baselines are
+built from their authors' sources: ReduMIS and OnlineMIS from KaMIS
+\citep{lamm2017,dahlum2016}, reducing-peeling and near-linear kernelization (NearLinear,
+LinearTime) from the release of \citet{chang2017}, and NuMVC and FastVC from a library
+carrying the original implementations; the last two solve vertex cover and their
+output is converted to an independent set. Each solver reads the format its own
+implementation expects, converted by one tool distributed with our code.
 
-Every value is checked independently where the solver emits its set. A separate
-program re-reads the original instance, confirms that the returned set contains
-no edge, and reports its size; a value that fails this check is not counted. The
-exception is the reference implementations of reducing-peeling (NearLinear and
-LinearTime), which print a size without the corresponding set. Their values are
-included in the tables, marked unverified in the raw records, and taken on trust;
-all 54 of their runs are in this category, and one run each of ReduMIS and NuMVC
-(the instance on which they returned nothing) is also unverified.
+Every value is checked independently where the solver emits its set: a separate
+program re-reads the instance and confirms that the set contains no edge. The
+exception is NearLinear and LinearTime, which print a size without the set; their
+values are included, marked unverified in the raw records, and taken on trust (all 54
+of their runs), as is one run each of ReduMIS and NuMVC (the instance on which they
+returned nothing).
 
-Baselines are built from their authors' published sources, at the revision the
-provisioning script pins, and with the authors' own build settings. ReduMIS and
-OnlineMIS come from KaMIS \citep{lamm2017,dahlum2016}; reducing-peeling and the
-near-linear kernelization from the implementation released with
-\citet{chang2017}; NuMVC \citep{cai2013numvc} and FastVC
-\citep{cai2017fastvc} from a library that carries the original implementations.
-The last two solve the minimum vertex cover formulation, and we convert their
-output to an independent set before verification. Each solver is given the
-instance in the format its own implementation expects, converted by a single
-tool distributed with our code, so that no solver pays a parsing penalty another
-avoids.
+The benchmark has 27 instances in five families: Delaunay triangulations and random
+geometric graphs (generated, fixed seed), road networks, social and web graphs (SNAP)
+and the BHOSLIB \texttt{frb} collection \citep{xu2007}. The BHOSLIB instances are
+distributed in \emph{clique} form, and the copies in common repositories are the
+dense clique graphs (\texttt{frb30-15-1} there has 83,198 edges and independence
+number 15); the instance for this problem is the complement, with 17,827 edges and
+independence number 30, and that is what we use. Provenance, checksums and
+preprocessing rules are in the supplement; isolated vertices are kept, since removing
+$q$ of them lowers the independence number by exactly $q$.
 
-The main tables carry no exact or integer-programming baseline. Those methods
-answer a different question, and on most of this benchmark they do not answer it
-within the budget; we report them separately in Section~\ref{sec:exact}, where
-the comparison is on their own terms.
-
-\subsection{Instances}
-
-The benchmark comprises 27 instances in five families: Delaunay triangulations
-and random geometric graphs, road networks, social networks, web graphs, and the
-BHOSLIB \texttt{frb} collection generated from Model RB \citep{xu2007}. The geometric
-family is generated by a script included with the source; the rest are public
-(SNAP and Network Repository; Appendix~\ref{app:provenance}), and SHA-256
-checksums of the downloaded files are distributed with the source.
-
-One instance-preparation issue is worth recording, because it silently produces
-wrong answers. The BHOSLIB instances are distributed in \emph{clique} form, and
-the copies in common repositories are the dense clique graphs: \texttt{frb30-15-1}
-there has 450 vertices and 83,198 edges. A maximum independent set of that file
-has size 15, the domain size of the underlying construction, and every solver we
-tested returns exactly 15 on it. The instance relevant to the present problem is
-the complement, with 17,827 edges and independence number 30, and that is what
-we use. Benchmarking the distributed file directly would have every solver agree
-on a confidently wrong value.
-
-\input{tables/quality_geometric}
-\input{tables/quality_road}
-\input{tables/quality_social}
-\input{tables/quality_web}
-\input{tables/quality_bhoslib}
+\input{tables/quality_all}
 \input{tables/aggregate}
 \input{tables/wilcoxon}
-\input{tables/budget}
-\input{tables/ablation}
 
-\subsection{Solution quality}
+\subsection{Solution quality and aggregate comparison}
 
-Tables~\ref{tab:quality-geometric}--\ref{tab:quality-bhoslib} give the size of
-the independent set each solver returned, by family.
+Table~\ref{tab:quality} gives the size each solver returned; per-family tables, the
+decomposition of the comparison with ReduMIS and the budget actually used by each
+solver are in the supplement. \textsc{Cascade} attains the best value of the seven
+solvers on every geometric instance and is strictly ahead on the three Delaunay
+graphs, by $+7$, $+77$ and $+264$ vertices over the strongest baseline on each
+($0.03\%$, $0.09\%$ and $0.08\%$; ReduMIS on \texttt{del16}, FastVC on the others). Against
+ReduMIS alone the margins are $+7$, $+271$ and $+8500$, but the last is largely a
+statement about convergence rate: at ten times the budget it shrinks to $+1550$ while
+the margin over the strongest baseline is unchanged (supplement). On the random
+geometric graphs \textsc{Cascade} and ReduMIS reach the same value, which the exact
+solvers prove optimal for \texttt{rgg16} and \texttt{rgg18}. On road networks and most
+social graphs the strong solvers agree to within a handful of vertices because the
+kernels are small, and what separates them is robustness: ReduMIS returned nothing on
+\texttt{soc-pokec} within eleven minutes and NuMVC nothing on \texttt{com-lj} within
+sixteen, while \textsc{Cascade} returned a verified solution on every instance. On web
+graphs it is behind ReduMIS by 15 and 102 vertices ($0.009\%$ and $0.025\%$) and on
+\texttt{soc-pokec} $0.06\%$ behind FastVC. On BHOSLIB it is the weaker tool: it reaches
+the optimum of \texttt{frb30-15-1} but is one or two vertices short of the best value
+on the other six, always NuMVC's or FastVC's (45 against our 43 on
+\texttt{frb45-21-1}, a $4.4\%$ gap, the largest we record). On a dense graph almost
+every outside vertex has several incumbent neighbours, so releasing a small $F$
+unlocks nothing and a large one makes the region the whole graph; the move degenerates
+and specialised local search is the better tool.
 
-On the geometric family \textsc{Cascade} attains the best value of the seven
-solvers on every instance. On the three Delaunay instances it is strictly ahead
-of all of them, and the margin grows with size: $+7$ on \texttt{del16}, $+77$ on
-\texttt{del18} and $+264$ on \texttt{del20}, measured against the strongest
-baseline on each, which is ReduMIS on the first and FastVC on the other two.
-Read against ReduMIS alone the same three margins are $+7$, $+271$ and $+8500$,
-because ReduMIS degrades sharply at the largest size while FastVC does not; this
-is why we report the comparison against the per-instance best rather than
-against a single reference solver. The $+8500$ should also be read with
-Section~\ref{sec:longbudget}, which shows that it shrinks to $+1550$ when both
-solvers are given ten times the budget: on \texttt{del20} ReduMIS converges
-slowly rather than to a worse answer. The margin over the strongest baseline,
-by contrast, is unaffected by the budget. In relative terms the margin over the
-strongest baseline is small in every case --- $0.03\%$, $0.09\%$ and $0.08\%$ ---
-but it is consistent, and it is the only family in which any solver separates
-itself from the rest. This is also the family whose kernels remain a large
-fraction of the input, but Section~\ref{sec:kernels} shows that kernel size by
-itself does not predict the margin, so we do not offer it as the explanation. On the random geometric graphs the reduction
-rules are far more effective, and \textsc{Cascade} and ReduMIS reach the same
-value on all three sizes; for \texttt{rgg16} and \texttt{rgg18} the exact
-solvers of Section~\ref{sec:exact} prove that this common value is optimal, so
-no solver could have done better there.
+\paragraph{Reference sets} Three reference sets appear and are not interchangeable.
+(i)~\emph{Best of the other six}: against it \textsc{Cascade} is strictly ahead on 3
+instances, ties on 13 and is behind on 11, i.e.\ it attains the best of all seven on
+$3+13=16$; these are the counts in the abstract and in Table~\ref{tab:aggregate}.
+(ii)~\emph{Best of the seven}: the denominator of the gaps in Table~\ref{tab:aggregate}
+and of the Wilcoxon tests. (iii)~\emph{ReduMIS alone}: 26 instances, since ReduMIS
+returned nothing on \texttt{soc-pokec}; \textsc{Cascade} is ahead on 3, level on 14
+and behind on 9. An earlier version of this study built the quality tables from five of
+the seven solvers; all tables here include all seven.
 
-On road networks and on most social networks the strong solvers agree to within
-a handful of vertices, because the kernels are a small fraction of the input:
-\texttt{com-lj} has four million vertices and kernelization run to a fixed point
-leaves 1781 of them (Table~\ref{tab:kernels}). What separates the solvers there is robustness rather than
-quality, and the differences that remain run in both directions. \textsc{Cascade}
-ties ReduMIS exactly on \texttt{com-lj} and is four vertices behind it on
-\texttt{as-skitter} out of $1.17$ million; on \texttt{soc-pokec} it is $0.06\%$
-behind FastVC, the best value there. Robustness is where the gap is visible:
-ReduMIS returned nothing on \texttt{soc-pokec} within eleven minutes, and NuMVC
-returned nothing on \texttt{com-lj} within sixteen, while \textsc{Cascade}
-produced a verified solution on every instance in the benchmark.
-
-On web graphs \textsc{Cascade} is behind ReduMIS by 15 and 102 vertices, which
-is $0.009\%$ and $0.025\%$. On the BHOSLIB family it is the weaker tool. It
-reaches the known optimum of \texttt{frb30-15-1}, as do ReduMIS, NuMVC and
-FastVC, but on the other six instances it is one or two vertices short of the
-best value, and that best value is NuMVC's or FastVC's on every one of them ---
-45 against our 43 on \texttt{frb45-21-1}, 58 against our 56 on
-\texttt{frb59-26-1}. Because these optima are small, a two-vertex shortfall is a
-$4.4\%$ relative gap, the largest we record anywhere. The structural
-reason is given in Section~\ref{sec:move}: on a dense graph almost every vertex
-outside the incumbent has several incumbent neighbours, so releasing a small
-$F$ unlocks nothing while releasing a large one makes the region the whole
-graph. The move degenerates, and specialised local search is the better tool.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.78\textwidth]{figures/profile}
-\caption{Performance profile on solution quality. For each instance the ratio is
-the best value any solver found divided by the value this solver returned, so
-$\tau = 1$ means it matched the best. The axis is truncated to keep the region
-where the curves separate legible: an arrow marks a curve that continues beyond
-it, which here is reducing-peeling and near-linear kernelization, whose worst
-ratios are $1.52$ and $1.48$. Below $1.0$ at the right-hand edge without an
-arrow means a run that returned no solution at all, namely ReduMIS on
-\texttt{soc-pokec} and NuMVC on \texttt{com-lj}. Note that the profile is a
-\emph{relative} measure and therefore weights the small dense instances heavily,
-where losing a single vertex is already a $2$--$3\%$ ratio;
-Table~\ref{tab:aggregate} and the absolute margins below give the complementary
-view.}
-\label{fig:profile}
-\end{figure}
-
-\input{tables/whence}
-
-\subsection{Aggregate comparison}
-
-Counting wins is misleading here, because instances differ in scale by four
-orders of magnitude and a one-vertex loss on a 450-vertex instance is not
-comparable to a five-thousand-vertex win on a million-vertex one. We therefore
-report both the mean relative gap (Table~\ref{tab:aggregate}) and a paired
-Wilcoxon signed-rank test (Table~\ref{tab:wilcoxon}).
-
-\paragraph{Reference sets} Three reference sets appear in this paper and they are
-not interchangeable. (i)~\emph{Best of the other six}: for each instance, the
-best value among the six baselines. Against it \textsc{Cascade} is strictly
-ahead on 3 instances, ties on 13 and is behind on 11 (27 in all); equivalently
-it attains the best of all seven solvers on $3+13=16$ instances. These are the
-counts in the abstract and in Table~\ref{tab:aggregate} (\#best). (ii)~\emph{Best
-of the seven}: the denominator of the gaps in Table~\ref{tab:aggregate}, the
-performance profile, and the Wilcoxon tests. (iii)~\emph{ReduMIS alone}
-(Table~\ref{tab:wilcoxon}, Table~\ref{tab:whence}): 26 instances, because ReduMIS
-returned no solution on \texttt{soc-pokec}; there \textsc{Cascade} is ahead on 3,
-level on 14 and behind on 9. An earlier version of this study built the quality
-tables from five of the seven solvers; the tables, the aggregate and the budget
-tables here include all seven.
-
-Over the seven solvers the mean relative gap of \textsc{Cascade} is $0.785\%$,
-against $0.340\%$ for FastVC, $0.501\%$ for ReduMIS and $1.219\%$ for NuMVC
-(Table~\ref{tab:aggregate}); by that statistic \textsc{Cascade} is third of
-seven, because its worst instances are the dense BHOSLIB ones, where one or two
-vertices is a gap of several percent. The Wilcoxon tests are run on these
-relative gaps and Holm-corrected over the six comparisons. They find
-\textsc{Cascade} significantly better than OnlineMIS, NearLinear and LinearTime,
-and \emph{no significant difference} from ReduMIS ($p_{\mathrm{Holm}}=0.38$),
-NuMVC ($0.38$) or FastVC ($0.44$). Table~\ref{tab:whence} decomposes the ReduMIS
-comparison by family. Summed over the 26 instances both solved, \textsc{Cascade}
-is ahead by 8778 vertices and behind by 127; nearly all the surplus is one
-instance, \texttt{del20}, and the deficit is concentrated in the two web graphs.
-The reading is that the strong solvers are equal on most of this benchmark,
-that \textsc{Cascade} degrades more gracefully on the largest geometric
-instance, and that ReduMIS holds a small edge on web graphs.
-
-\emph{Verification coverage.} Two of the three baselines that \textsc{Cascade}
-beats significantly, NearLinear and LinearTime, are reducing-peeling programs
-that print a size without writing the set, so none of their 54 runs is
-verified; NuMVC and ReduMIS each have one unverified run (the instance on which
-they returned nothing). All other values are re-derived from an emitted solution.
-
-Figure~\ref{fig:profile} shows the same data as a performance profile.
-\textsc{Cascade} matches the best value on 16 of the 27 instances, reaches
-within $0.07\%$ of it on a further five, and returns a solution on every
-instance, which ReduMIS and NuMVC do not. Its curve is then flat from
-$\tau \approx 1.0006$ to $\tau \approx 1.026$, and the six instances beyond that
-break are the whole of the rest of the BHOSLIB family. The break is an artefact
-of scale rather than of behaviour: a one-vertex shortfall on a 35-vertex optimum
-is a $2.9\%$ ratio, and a two-vertex shortfall on a 45-vertex optimum is
-$4.7\%$, so instances whose absolute loss is one or two vertices sit further to
-the right than instances whose absolute loss is a hundred. This is the
-complementary weakness of the profile to the one noted for the absolute margins,
-and the two views should be read together.
-
-Table~\ref{tab:budget} should be read alongside these results. NuMVC checks its
-cutoff only between search steps, so under a 60\,s budget it takes 204\,s on
-average and exceeds 90\,s on twelve of the 27 instances; it is therefore
-compared here under conditions that favour it, and is still behind.
+\paragraph{Aggregate} The mean relative gap of \textsc{Cascade} is $0.785\%$, against
+$0.340\%$ for FastVC, $0.501\%$ for ReduMIS and $1.219\%$ for NuMVC, so by that
+statistic it is third of seven, because its worst instances are the dense BHOSLIB ones.
+The Wilcoxon tests (Table~\ref{tab:wilcoxon}) are run on relative gaps and
+Holm-corrected over the six comparisons. They find \textsc{Cascade} significantly
+better than OnlineMIS, NearLinear and LinearTime and \emph{no significant difference}
+from ReduMIS ($p_{\mathrm{Holm}}=0.38$), NuMVC ($0.38$) or FastVC ($0.44$). Two of the
+three significant comparisons are against the unverified reducing-peeling programs. The
+reading is that the strong solvers are equal on most of this benchmark, that
+\textsc{Cascade} degrades more gracefully on the largest geometric instance, and that
+ReduMIS holds a small edge on web graphs.
 
 \subsection{Residual kernels and direct exact solving}
 \label{sec:kernels}
 
-The motivation for region moves is a large residual kernel, so the first
-measurement is how large the kernel actually is on this benchmark, how long it
-takes to reach, and whether the kernel could simply be solved exactly.
-Table~\ref{tab:kernels} reports, for the 19 instances that can be rebuilt
-(the BHOSLIB instances are excluded; see below), the kernel left under the 60\,s
-run's own rule (kernelization limited to the share $\kappa=0.3$ of the budget),
-the kernel at a fixed point, and the result of running the exact engine of
-Section~\ref{sec:implementation} on the whole input for 120\,s (the engine is
-\textsc{Cascade}\,\texttt{--exact}: the same reductions, then branch-and-reduce).
-These runs were made on a different, shared machine from the main tables, with
-three processes at a time, so kernelization times are only indicative.
+The motivation for region moves is a large residual kernel, so the first measurement
+is how large the kernel is on this benchmark and whether it could simply be solved
+exactly. Table~\ref{tab:kernels} reports, for the 19 instances that can be rebuilt
+(BHOSLIB excluded), the kernel left under the 60\,s run's own rule (kernelization
+limited to $\kappa=0.3$ of the budget), the kernel at a fixed point, and the result of
+running the exact engine of Section~\ref{sec:implementation} on the whole input for
+120\,s (\textsc{Cascade}\,\texttt{--exact}: the same reductions, then
+branch-and-reduce). These runs were made on a different, shared machine from the main
+tables, with three processes at a time, so times are only indicative.
 
 \input{tables/kernels}
 
-\emph{Kernel size is bimodal.} Six instances reduce to an empty kernel and a
-seventh to 126 vertices; on these, kernelization alone is optimal, and direct
-exact solving proves it in under 1.3\,s. For them region moves have nothing to
-do, and the ties in Table~\ref{tab:quality-social} are exactly what one expects.
-Road networks, random geometric graphs, web graphs and \texttt{as-skitter} keep
-$0.3$--$4\%$ of their vertices (686 to 67\,274), and the Delaunay graphs keep
-$85\%$. None of the 12
-instances with a non-trivial kernel is solved by the exact engine in 120\,s
-(\texttt{del18} and \texttt{del20} overran the limit because the reduction pass
-is not interruptible; \texttt{soc-pokec} produced no output in 743\,s for the
-same reason). So the premise of a hard residual kernel holds on 12 of the 19
-instances, and does not on the other seven. Table~\ref{tab:exact} shows what
-other exact solvers do on the smaller ones.
+\emph{Kernel size is bimodal.} Six instances reduce to an empty kernel and a seventh to
+126 vertices; there kernelization alone is optimal, direct exact solving proves it in
+under 1.3\,s, and region moves have nothing to do. Road networks, random geometric
+graphs, web graphs and \texttt{as-skitter} keep $0.3$--$4\%$ of their vertices (686 to
+67\,274) and the Delaunay graphs $85\%$. None of the 12 instances with a non-trivial
+kernel is solved by the exact engine in 120\,s (\texttt{del18} and \texttt{del20}
+overran the limit because the reduction pass is not interruptible, and \texttt{soc-pokec}
+produced no output in 743\,s for the same reason). So the premise of a hard residual
+kernel holds on 12 of the 19 instances and not on the other seven.
 
-\emph{Kernel size does not predict the margin.} Across the 19 instances the
-Spearman correlation between the retained fraction and the relative margin over
-the best baseline is $\rho=0.14$ ($p=0.56$); omitting the three Delaunay graphs
-it is $-0.57$ ($p=0.02$). All three strict wins have a kernel of about $85\%$.
-But \texttt{soc-pokec}, whose capped kernel is $73\%$, is a loss, and the
-instances with $0.3$--$4\%$ kernels are ties or small losses. A large kernel is
-therefore not sufficient. What the three wins share beyond kernel size is that
-they are planar, of bounded degree (at most 22) and generated by one mechanism;
-the benchmark does not contain a second family with that property, and
-Section~\ref{sec:delaunay} tests independent samples of it.
+\emph{Kernel size does not predict the margin.} Across the 19 instances the Spearman
+correlation between retained fraction and relative margin over the best baseline is
+$\rho=0.14$ ($p=0.56$); omitting the three Delaunay graphs it is $-0.57$ ($p=0.02$).
+All three strict wins have a kernel of about $85\%$, but \texttt{soc-pokec}, with a
+$73\%$ capped kernel, is a loss and the instances with $0.3$--$4\%$ kernels are ties or
+small losses. A large kernel is therefore not sufficient. What the three wins share
+beyond it is that they are planar, of bounded degree (at most 22) and generated by one
+mechanism, and the benchmark contains no second family with that property.
 
 \emph{Budget caps change what ``kernel'' means.} For \texttt{com-lj} and
-\texttt{soc-pokec} the cap of $0.3B=18$\,s stops kernelization early on this
-machine, and where it stops depends on the speed of the run: three runs of the
-same configuration left \texttt{com-lj} with $3544$, $212\,739$ (reported in
-Table~\ref{tab:kernels}) and $899\,607$ vertices (the last with three processes
-sharing the machine), against $1781$ at a fixed point after 24\,s;
-\texttt{soc-pokec} is left with $73$--$75\%$ against $42\%$ after 332\,s. The
-residual a budgeted run searches is thus a function of the budget and the
-machine as much as of the graph, and a statement that ``\texttt{com-lj} reduces
-to a few thousand vertices'' holds only if kernelization is allowed to finish.
-On the machine of the main tables, where kernelization of \texttt{com-lj} took
-14\,s in an earlier measurement, the cap does not bind.
+\texttt{soc-pokec} the cap of $0.3B=18$\,s stops kernelization early on this machine,
+and where it stops depends on speed: three runs of the same configuration left
+\texttt{com-lj} with $3544$, $212\,739$ (reported) and $899\,607$ vertices (the last with
+three processes sharing the machine), against $1781$ at a fixed point after 24\,s, and
+\texttt{soc-pokec} with $73$--$75\%$ against $42\%$ after 332\,s. The residual a budgeted
+run searches is a function of the budget and the machine as much as of the graph.
+
+\subsection{Ablation}
+\label{sec:ablation}
+
+Table~\ref{tab:ablation} removes whole components: \textsc{no-lns} disables region
+moves, leaving kernelization plus the greedy dive and restarts; \textsc{dive} replaces
+the move with the decision-space move; \textsc{no-pert} removes perturbation and
+restarts; \textsc{no-lp} removes the LP reduction. These are separate runs from the main
+study, so the full column differs from Table~\ref{tab:quality} by a few vertices.
+Removing region moves costs $1.2\%$ on \texttt{del18}, $1.4\%$ on \texttt{del16} (an order
+of magnitude more than the margin over the strongest baseline) and $32.5\%$ on
+\texttt{frb40-19-1}, $1577$ vertices summed over the seven instances; nothing else comes
+close. The decision-space move recovers almost none of this on the large sparse
+instances. Perturbation and the LP reduction are within noise, and on the family where
+the margin lives the shipped configuration is not the best variant: without
+perturbation and restarts \texttt{del16} returns 20\,656 against 20\,648, and without
+the LP reduction \texttt{del18} returns 82\,666 against 82\,661. Both differences are of
+the order of the seed spread ($0.024\%$), so they are not evidence that the components
+hurt, nor that they help.
+
+\input{tables/ablation}
+
+\subsection{Exact against heuristic repair, and regional reductions}
+\label{sec:regional}
+
+Table~\ref{tab:ablation} does not separate the two ingredients of the method: that the
+region is solved \emph{exactly} and that reductions run \emph{inside} it.
+Table~\ref{tab:regional} does, under one implementation, one region-selection rule, one
+budget and three seeds. \emph{Heuristic repair} applies the root reduction pass and then
+one greedy pass (lowest degree first) with no branching and the same acceptance test
+$|T|\ge|F|$; \emph{no regional reductions} runs the exact branch-and-bound on the raw
+region. In both the online rule for $k$ is the same code, except that for heuristic
+repair a sub-solve counts as ``solved'' whenever the region is below the size cap
+$\rho$, since there is no proof signal.
+
+\input{tables/regional}
+
+Exact repair with reductions is the best of the four on every instance and the others
+are never ahead. On \texttt{del18}, heuristic repair loses 143 vertices and removing the
+regional reductions 210, against 1018 for removing region moves altogether; on
+\texttt{del16}, 31, 50 and 269; on \texttt{roadNet-PA}, 20, 54 and 252. The two
+instances that reduce almost completely show no difference. The process columns show
+why. Without reductions the sub-solver cannot afford large regions: $k$ settles at
+$16$--$32$ and regions have $36$--$53$ vertices, against $k=64$--$256$ and regions of
+$89$--$203$ vertices on the Delaunay and road instances in the full configuration, which
+the root reduction pass collapses to $5$--$17$ live vertices (a factor of $11$--$19$).
+With heuristic repair the rule has no brake and $k$ climbs to $512$--$1024$, so one
+greedy pass is applied to regions of $177$--$589$ vertices. The proved share is near
+$100\%$ in the full configuration by construction, since a failed sub-solve halves $k$;
+the information is in the \emph{size} of the region it can hold. The move rate is
+$1.3\times10^3$ to $8.4\times10^3$ per second.
+
+\subsection{Independent Delaunay graphs}
+\label{sec:delaunay}
+
+All three strict wins are on one sample of one generator, so Table~\ref{tab:delaunay}
+runs \textsc{Cascade} on six independent samples at $2^{16}$ and $2^{18}$ points
+(generator seeds 1--6; seed 1 is the main-benchmark graph) and on the public DIMACS10
+\texttt{delaunay\_n16}, \texttt{n18} and \texttt{n20}, three solver seeds each (two for
+seeds 4--6).
+
+\input{tables/delaunay}
+
+\emph{This experiment does not test the comparison}: the baselines were not run on these
+graphs, so it says nothing about whether \textsc{Cascade} is ahead of ReduMIS or FastVC
+on a new Delaunay graph. It does show how much a one-graph margin can mean. The mean over
+solver seeds varies by $50.8$ vertices ($0.25\%$) across the six $2^{16}$ samples and by
+$84.5$ ($0.10\%$) across the six $2^{18}$ samples, while the spread over solver seeds on
+a fixed graph is at most 11 and 13, several times smaller than the between-sample range and
+the margins claimed on the seed-1 graph ($0.03\%$, $0.09\%$). Such a margin is a paired
+difference on one graph and cannot be extrapolated to the family without paired runs on
+more samples.
+
+\subsection{Parameter sensitivity}
+\label{sec:sensitivity}
+
+The online rule starts from $k_0=4$. Table~\ref{tab:ksweep} varies $k_0$ from $1$ to
+$1024$ on four instances, one run per cell. On \texttt{del18} the results span
+$82\,641$--$82\,660$ ($0.023\%$, the seed-to-seed spread of $0.024\%$), on
+\texttt{web-Stanford} and \texttt{roadNet-PA} one or two vertices, and on \texttt{rgg16}
+every setting returns 16\,086. The rule forgets its start where it matters: on
+\texttt{del18} the final $k$ is $80$--$128$ for every $k_0$. Among the other parameters
+(supplement) only \texttt{restart\_idle\_dives} is sensitive: it moves \texttt{del18}
+by $0.081\%$, three times the seed spread, and restarting too eagerly costs quality
+while restarting too lazily costs almost nothing.
+
+\input{tables/ksweep}
 
 \subsection{Seed study}
 
@@ -1188,39 +893,6 @@ each instance. Boxes show the quartiles and the median; whiskers the range.}
 \label{fig:seeds}
 \end{figure}
 
-\subsection{Convergence}
-\label{sec:convergence}
-
-Table~\ref{tab:longbudget} shows what each solver reaches by the end of its
-budget; Figure~\ref{fig:convergence} shows how it gets there. Four instances
-were re-run with every improvement of the incumbent recorded against the wall
-clock. Only the three solvers that report improvements as they happen are
-plotted; the reduction-only baselines produce a single point.
-
-The shapes differ more than the endpoints do. On \texttt{del18} and
-\texttt{roadNet-PA} our solver reaches a value the others need most of the
-budget to approach, and then flattens: the kernelization and the first dive do
-most of the work, and the region moves refine it. On \texttt{web-Stanford} it
-converges almost immediately and improves six times in sixty seconds, which is
-the same observation the long-budget run makes from the other direction --- there
-is very little left to find once the graph has been reduced. The dense instance
-inverts the picture. All three solvers finish on the same value of 40, but NuMVC
-reaches it after $0.2$ seconds and FastVC after $0.8$, where we need $6.6$: on a
-graph this dense the region move has to work its way to what a specialised local
-search finds almost at once, and the tie at the deadline hides a large
-difference in how quickly it was reached.
-
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=\textwidth]{figures/convergence}
-\caption{Incumbent size against wall-clock time at a 60-second budget, on a
-symmetric-log time axis so the first second is legible. Note that the solvers
-report at different granularities: ours records one point per search batch
-(between 6 and 586 points here) while NuMVC and FastVC report every individual
-improvement (up to 33\,000), so the apparent smoothness of a curve reflects how
-often a solver reports, not how often it improves.}
-\label{fig:convergence}
-\end{figure}
 
 \subsection{The long budget}
 \label{sec:longbudget}
@@ -1267,436 +939,83 @@ solution quality.
 
 \input{tables/longbudget}
 
-\subsection{Parameter sensitivity}
-\label{sec:sensitivity}
+\subsection{Further experiments}
 
-The method exposes several tunable parameters, and a reader is entitled to ask
-whether the results depend on having found good values for them.
-Table~\ref{tab:sensitivity} varies four of them one at a time over a wide range,
-holding the rest at their defaults, on three instances from different families.
-The comparison that makes the numbers interpretable is with the seed-to-seed
-spread of Section~\ref{sec:experiments}: a parameter whose whole range moves the
-answer by less than the noise between two seeds is not a parameter the user has
-to think about.
-
-On the two large sparse instances that is what happens. Over ranges spanning a
-factor of seven to sixteen, \texttt{kernel\_share}, \texttt{lns\_start\_free}
-and \texttt{lns\_slice} move the result by at most $0.013\%$ on \texttt{del18}
-and $0.001\%$ on \texttt{web-Stanford}, against a seed spread of $0.024\%$ on
-that family. On \texttt{web-Stanford} two of them are exactly flat: every value of
-\texttt{kernel\_share} from $0.1$ to $0.7$, and every value of
-\texttt{lns\_slice} from $0.01$ to $0.2$, returns the same 163\,375.
-
-One parameter is genuinely sensitive, and we report it as such.
-\texttt{restart\_idle\_dives} moves \texttt{del18} by $0.081\%$, three times the
-seed spread, and the shape is informative: 82\,592 at 50, 82\,639 at 100, 82\,659
-at the default 200, then 82\,655 at both 400 and 800. Restarting too eagerly
-costs real quality, while restarting too lazily costs almost nothing. The
-default sits at the top of that curve rather than on its slope, but a reader
-porting this method to a new family should know that this is the one dial worth
-checking, and that the safe direction to err in is upwards.
-
-The dense instance is where this design runs out of resolution, and we say so
-rather than reading meaning into it. The spreads there are $2.5\%$ to $5\%$, but
-every value in the block is 38, 39 or 40, and the seed study already reports a
-$2.5\%$ spread on this family from seed alone. A single run per setting cannot
-separate a parameter effect from that noise. What can be said is bounded: no
-setting we tried collapses performance, and \texttt{lns\_start\_free}$=8$ returns
-40 where the default returns 39 --- which is either a better setting or a luckier
-seed, and this experiment cannot tell which.
-
-\input{tables/sensitivity}
-
-\paragraph{Initial number of released vertices} The online rule adapts $k$, but
-it starts from $k_0=4$, and a reader may ask whether that start matters.
-Table~\ref{tab:ksweep} varies $k_0$ from $1$ to $1024$, a factor of $1024$, on
-four instances with one run per cell. On \texttt{del18} the results span
-$82\,641$--$82\,660$ ($0.023\%$, the same as the seed-to-seed spread of
-$0.024\%$ reported above), and on \texttt{web-Stanford} and \texttt{roadNet-PA}
-they span one or two vertices; on \texttt{rgg16} every setting returns 16\,086.
-The rule forgets its start where it matters: on \texttt{del18} the value of $k$
-at the end of the run is $80$--$128$ for every $k_0$, and on \texttt{roadNet-PA}
-it is $256$ for five of six. On \texttt{web-Stanford} and \texttt{rgg16} the
-final $k$ does depend on $k_0$ ($128$--$1024$ and $32$--$512$), but the result does
-not, which says that the objective is flat in $k$ there.
-
-\input{tables/ksweep}
-
-
-
-\subsection{Exact solvers}
-\label{sec:exact}
-
-The method proposed here is a heuristic, and the question of how far its answers
-sit from optimal is separate from how they compare with other heuristics. To
-place them we ran three exact solvers and one integer-programming solver on the
-instances small enough to admit them: the branch-and-reduce solver built from
-our own components (\textsc{Cascade}-exact, the sub-solver of
-Section~\ref{sec:implementation} applied to the whole graph), VCSolver
-\citep{akiba2016}, the winner of the vertex cover track of PACE 2019
-\citep{pace2019,hespe2020}, and HiGHS on the natural
-integer program. Table~\ref{tab:exact} reports the results.
-
-Three conclusions follow, and only the first is favourable to us. On the
-instances that reduce almost completely --- \texttt{ca-AstroPh},
-\texttt{ca-CondMat}, \texttt{email-Enron} --- all four prove optimality, and our
-sub-solver is the fastest of them --- by a factor of 25 to 40 over HiGHS, three
-to five over VCSolver, and a more modest 1.1 to 1.4 over the PACE portfolio ---
-which is the property
-the region move depends on: the sub-problems it generates are of exactly this
-shape, and at $10^3$ to $10^4$ moves per second (Table~\ref{tab:regional}) they must each be solved in a fraction
-of a millisecond.
-
-Second, our exact solver is not competitive as an exact solver. On the BHOSLIB
-family the PACE 2019 portfolio proves the optimum of \texttt{frb30-15-1},
-\texttt{frb35-17-1} and \texttt{frb40-19-1} in under four seconds each, while
-ours returns 25, 28 and 30 against the true 30, 35 and 40 and proves nothing.
-It is built to be restarted millions of times on graphs of a few dozen vertices,
-not to prove optimality on a dense graph of a thousand, and the table shows the
-cost of that choice. Where a proof is wanted on instances of this kind, the
-portfolio approach is the right tool.
-
-Third, the integer-programming route is not a usable baseline at this scale, and
-we record its failures rather than omitting it. HiGHS matches the optimum on the
-three easy instances but exceeds the 60-second budget on most others, taking up
-to 360\,s; on \texttt{frb45-21-1} through \texttt{frb53-24-1} it returns a single
-vertex, on \texttt{rgg18} none at all, and on \texttt{del18} and
-\texttt{web-Stanford} it emits no solution we could verify. On
-\texttt{email-Enron} it reports optimality but the solution it writes has 22\,253
-vertices against the 22\,255 that the other three solvers prove optimal and that
-our verifier confirms; we therefore treat its optimality claims as unreliable
-and its numbers as a lower bound on what a tuned commercial solver would do.
-This is a statement about the formulation at this size, not about HiGHS: the
-natural model has one variable per vertex and one constraint per edge, which for
-the larger instances in the benchmark means tens of millions of constraints.
-
-\input{tables/exact}
-
-\subsection{Ablation}
-\label{sec:ablation}
-
-Table~\ref{tab:ablation} reports four variants on seven instances spanning the
-families: \textsc{no-lns} disables region moves entirely, leaving kernelization
-plus the greedy dive and its restarts; \textsc{dive} replaces the region move
-with the decision-space move described in Section~\ref{sec:algorithm}; \textsc{no-pert}
-removes the perturbation step; and \textsc{no-lp} removes the
-Nemhauser--Trotter LP reduction. These are separate runs from the main study, so
-the full-solver column differs from Table~\ref{tab:quality-geometric} by a few
-vertices; the comparison is within the table.
-
-The region move is the component that carries the result. Removing it costs
-$1.2\%$ on \texttt{del18} and $1.4\%$ on \texttt{del16} --- an order of magnitude
-more than the margin the full solver holds over the strongest baseline on those
-instances --- and $32.5\%$ on \texttt{frb40-19-1}, where the fallback is reduced
-to a restarting greedy. Summed over the seven instances the loss is 1577
-vertices. Nothing else in the solver comes close to that.
-
-The other three results are negative, and we report them as such. The
-decision-space move recovers almost none of the gap: on \texttt{del18},
-\texttt{roadNet-PA} and \texttt{web-Stanford} it returns exactly the value
-obtained with no neighbourhood move at all (81\,639, 533\,385 and 163\,369), so
-on those instances it contributes nothing whatever. It is the move we designed
-first, and the ablation is what showed it to be worthless; only on the dense
-instances does it recover part of the loss. It survives in the implementation
-as an option, not as a default.
-
-Perturbation and the LP reduction are both within noise on this benchmark, and
-on the family where the margin lives the shipped configuration is not the best
-of the variants: without perturbation and restarts \texttt{del16} returns 20\,656
-against 20\,648, and without the LP reduction \texttt{del18} returns 82\,666
-against 82\,661. Both differences are of the order of the seed spread
-($0.024\%$), so they are not evidence that the components hurt, but neither
-are they evidence that they help.
-Removing perturbation changes the summed total by $+2$ vertices, and hurts only
-\texttt{frb40-19-1}, by two. Removing the LP reduction changes it by $+8$, and
-on \texttt{frb59-26-1} the solver without it returns 57 rather than 56 --- which
-is the value ReduMIS reaches and we do not. We keep both because each is cheap
-and each is standard, and because a seven-instance ablation is too small to
-conclude that they never help; but we have no evidence from these runs that
-either pays for itself, and a reader looking to reimplement the method should
-start with the region move and add the rest only if measurement justifies it.
-
-\subsection{Exact against heuristic repair, and regional reductions}
-\label{sec:regional}
-
-Table~\ref{tab:ablation} removes whole components; it does not separate the two
-ingredients the method rests on, namely that the region is solved \emph{exactly}
-and that the reductions run \emph{inside} the region. Table~\ref{tab:regional}
-does, under one implementation, one region-selection rule (the walk of
-Algorithm~\ref{alg:cascade}), one budget and three seeds. The two variants
-change only the sub-solve: \emph{heuristic repair} applies the root reduction
-pass to the region and then a single greedy pass (lowest degree first), with no
-branching and the same acceptance test $|T|\ge|F|$; \emph{no regional
-reductions} runs the exact branch-and-bound on the raw region. In both, the
-online rule for $k$ is the same code; for heuristic repair a sub-solve is
-treated as ``solved'' whenever the region is below the size cap $\rho$, since
-there is no proof signal to react to.
-
-\input{tables/regional}
-
-Both ingredients matter on the instances where the search has room to improve.
-On \texttt{del18}, heuristic repair loses 143 vertices and removing the regional
-reductions loses 210, against 1018 for removing region moves altogether; on
-\texttt{del16}, 31, 50 and 269; on \texttt{roadNet-PA}, 20, 54 and 252. Exact
-repair with reductions is the best of the four on every instance and the others
-are never ahead (the two instances that reduce nearly completely, \texttt{rgg16}
-and \texttt{com-amazon}, show no difference). So of the loss from removing
-region moves, exact repair and regional reductions each recover most of it and
-neither alone is the whole.
-
-The process columns show why. Without reductions the sub-solver cannot afford
-large regions: the online rule settles at $k=16$--$32$ released vertices and
-regions of $36$--$53$ vertices on the four instances where it matters, against
-$k=64$--$256$ and regions of $89$--$203$ vertices on the Delaunay and road
-instances in the full configuration, which the root reduction pass collapses to
-$5$--$17$ live vertices (a factor of $11$--$19$). With heuristic repair the rule has
-no brake and $k$ climbs to $512$--$1024$, so a single greedy pass is applied to
-regions of $177$--$589$ vertices, of which $33$--$137$ survive reduction. The share of
-sub-solves proved optimal is close to $100\%$ in the full configuration on all
-five instances, which is by construction: a sub-solve that fails halves $k$, so
-the rule keeps the proved share high and the information is in the \emph{size}
-of the region it can hold. The move rate is $1.3\times10^3$ to $8.4\times10^3$
-region moves per second in the full configuration (1787 on \texttt{del18},
-i.e.\ $560\,\mu\mathrm{s}$ per move; the earlier figure of $543\,\mu\mathrm{s}$ is
-from the main-table machine).
-
-\subsection{Independent Delaunay graphs}
-\label{sec:delaunay}
-
-All three strict wins of Table~\ref{tab:quality-geometric} are on one sample of one
-generator, so the obvious question is whether they are a property of Delaunay
-graphs or of that sample. Table~\ref{tab:delaunay} runs \textsc{Cascade} on six
-independent samples at $2^{16}$ and $2^{18}$ points (generator seeds 1--6; seed 1
-is the graph of the main benchmark) and on the public DIMACS10
-\texttt{delaunay\_n16}, \texttt{n18} and \texttt{n20}, three solver seeds each
-(two for seeds 4--6).
-
-\input{tables/delaunay}
-
-\emph{This experiment does not test the comparison.} The baselines were not run
-on these graphs, because building and running them was outside what was done for
-this revision, so Table~\ref{tab:delaunay} says nothing about whether
-\textsc{Cascade} is ahead of ReduMIS or FastVC on a new Delaunay graph. What it
-does show is how much a one-graph margin can mean. The mean over solver seeds
-varies by $50.8$ vertices ($0.25\%$) across the six $2^{16}$ samples and by $84.5$
-($0.10\%$) across the six $2^{18}$ samples, while the spread over solver seeds on
-a fixed graph is at most 11 and 13. The between-sample range is thus several
-times larger than the margins claimed on the seed-1 graph ($0.03\%$ and
-$0.09\%$), and the seed-1 graph sits near the bottom of the range for $2^{16}$
-(20\,648 against a mean of $20\,669$). A margin of that size measured on one
-graph is within the variation between graphs, so it can only be interpreted as
-a paired difference on the same graph, which is how Table~\ref{tab:quality-geometric}
-reports it; it cannot be extrapolated to the family without paired runs on
-more samples.
-
-\subsection{Replication on different hardware}
-\label{sec:replication}
-
-A computational study is only as convincing as its independence from the machine
-it was run on. We therefore repeated the comparison on a second, unrelated
-platform: virtual machines with two Intel Xeon cores at 2.20\,GHz and 12\,GB of
-memory, against the four-core workstation used for the main tables. Every solver
-was rebuilt from source on that platform by the provisioning script included
-with our code, so nothing is carried over except the source.
-
-Two properties of the replication are worth stating explicitly. First, all
-solvers for a given instance were run on the same virtual machine, so each row
-of the replication table is internally consistent; only different rows may come
-from different machines, and those machines are of identical specification.
-Splitting a single instance's solvers across machines would have made the
-comparison meaningless, since the budget is a wall-clock budget and the amount
-of work that fits into it depends on the processor. Second, the two largest
-instances were excluded, because 12\,GB of memory is not enough for them; the
-replication therefore covers 25 of the 27 instances.
-
-Table~\ref{tab:replication} reports the outcome. The weak statement that
-survives is that on each of the 25 instances the set of solvers attaining the
-best value on the replication machine intersects the set attaining it on the
-original machine. That statement alone does not say that the \emph{ranking} is
-preserved, so we also compared every pair of the seven solvers on every
-instance, 519 pairs in total with a value from both platforms. The sign of the
-difference between the two solvers (better, equal, worse) is the same on both
-platforms for 498 of them ($96.0\%$). In the remaining 21 the pair is equal on
-one platform and strictly ordered on the other, and \emph{in none of the 519 does
-the order reverse}. Restricted to \textsc{Cascade} against each baseline, 9 of
-149 pairs change from equal to strict or back. The comparisons in
-Section~\ref{sec:experiments} are therefore not artefacts of the machine to the
-extent that two machines of this class can show.
-
-The individual values move a little, and the table shows where. The two
-deterministic solvers, reducing-peeling and near-linear kernelization, return
-\emph{identical} values on all 25 instances, which is the control: it confirms that
-the instances, the conversions and the verifier are the same on both platforms,
-so any difference elsewhere comes from the solver rather than from the pipeline.
-The five randomised solvers differ by a fraction of a percent on average, and
-what difference there is concentrates on BHOSLIB, where the optima are small
-enough that a one-vertex change is one to two percent. Away from that family our
-own solver returns the same value on both machines on every road, web and social
-instance, and differs by an average of $0.016\%$ on the geometric family.
-
-Two caveats belong with this. The replication machine is slower, so a solver
-that spends its whole budget does less work within it; that is visible as the
-larger spreads for the vertex cover local search solvers, which have no
-reduction phase to fall back on, and most sharply as NuMVC exceeding the cutoff
-altogether on \texttt{roadNet-CA}, an instance it completed on the faster
-machine. And a fixed wall-clock budget on two machines
-of different speed is not the same experiment twice --- it is the same
-\emph{protocol} twice, which is what a practitioner choosing a solver under a
-deadline actually faces.
-
-\input{tables/replication}
+The supplement reports three more studies. \emph{Convergence traces} show \textsc{Cascade}
+reaching its final value early on sparse instances and late on dense ones. \emph{Exact solvers}
+(VCSolver, the PACE 2019 winner, HiGHS) prove optima on the instances that reduce away, and
+the PACE portfolio is far stronger than our exact mode on dense graphs. A \emph{replication on a
+second platform} compares all 519 solver pairs with a value on both machines: 498 keep the sign
+of the difference, 21 change between equal and strictly ordered, and none reverses.
 
 \subsection{Threats to validity}
 \label{sec:threats}
 
-\paragraph{Measurement} All timings are wall-clock and include reading the
-instance. Kernelization is bounded by a share of the budget but is not
-interruptible in the middle of a rule, so our own solver can overrun slightly;
-Table~\ref{tab:budget} reports the distribution for every solver, and the
-baseline that overruns most is the one our comparison is least favourable to.
+\paragraph{Baselines not run} The baselines date from 2012--2019. InfVC
+\citep{sun2025infvc} is the task-matched recent candidate, a local search for unweighted
+vertex cover on massive graphs; running it would require building it under the same
+formats, hardware and timing rules, which was not done, and published numbers under
+different conditions cannot stand in. The ranking claims are therefore claims against the
+2012--2019 generation, and FastVC having the lowest mean gap suggests the vertex-cover line
+deserves a current baseline. The dynamic framework of \citet{borowitz2025} was not run, so
+the comparison with it is of constructions (Table~\ref{tab:frameworks}), not performance.
 
-\paragraph{Two machines} The additions of this revision (kernel statistics,
-whole-input exact solves, the regional ablation, the sweep over $k_0$ and the
-independent Delaunay graphs) were run on a four-core Intel Xeon at 2.80\,GHz
-under Ubuntu 24.04 with GCC 13.3, with three single-threaded processes at a
-time. The main tables were produced on the machine of Section~\ref{sec:setup-machine}.
-The two are not interchangeable: kernelization under a time cap, in particular,
-depends on speed, as the three measurements of \texttt{com-lj} in
-Section~\ref{sec:kernels} show. Tables~\ref{tab:kernels}--\ref{tab:ksweep} are
-internally consistent but are not directly comparable with the main tables in
-absolute terms.
+\paragraph{How narrow the positive result is} \textsc{Cascade} is strictly ahead on three
+of 27 instances, all Delaunay graphs from one generator seed; it ties on thirteen and is
+behind on eleven; it is ahead of OnlineMIS, NearLinear and LinearTime and not
+significantly different from ReduMIS, NuMVC or FastVC; by mean gap it is third of seven.
+The claim that survives is narrow: on planar bounded-degree graphs whose kernel stays
+large it is ahead of every solver we ran on the one graph compared; on graphs that reduce
+away it is level with the best; on dense instances it is behind.
 
-\paragraph{Unverified values} The reference implementations of reducing-peeling
-report a solution size without emitting the corresponding set, so those values
-cannot be checked by our verifier and are taken on trust. All other values in
-this paper were re-derived from an emitted solution.
+\paragraph{Measurement and implementation} Timings include reading the instance;
+kernelization is bounded by a budget share but is not interruptible inside a rule, so our
+solver can overrun slightly (the budget table is in the supplement; NuMVC overran
+substantially, averaging 204\,s under a 60\,s budget, and is therefore compared under
+conditions that favour it). The baselines are mature codebases refined since 2013; ours is
+a research implementation, and a fixed-budget comparison cannot separate the merit of an
+algorithm from the quality of the code that runs it. We do not attribute the BHOSLIB result
+to maturity: the region is empty or the whole graph on a dense instance, and NuMVC
+reaches the final value in $0.2$\,s, which is the signature of a neighbourhood that suits
+the instance, not of a better-tuned loop.
 
-\paragraph{Instance provenance} The Delaunay and random geometric instances of
-the main benchmark are generated, reproducible from the seed in the generator we
-distribute, and are not byte-identical to the DIMACS10 graphs whose names they
-resemble; Section~\ref{sec:delaunay} therefore adds six independent generator
-seeds and the public DIMACS10 \texttt{delaunay\_n16}, \texttt{n18} and
-\texttt{n20}. Checksums of every downloaded and generated file are distributed
-with the source.
+\paragraph{Two machines} The additions of this revision (Tables~\ref{tab:kernels}
+and~\ref{tab:regional}--\ref{tab:ksweep}) ran on a four-core Intel Xeon at 2.80\,GHz,
+three single-threaded processes at a time; the main tables used the machine above.
+Kernelization under a time cap depends on speed, as the three measurements of
+\texttt{com-lj} show, so the two sets of tables are not comparable in absolute terms.
 
-\paragraph{Randomisation} Our solver, ReduMIS, OnlineMIS, NuMVC and FastVC are
-randomised. The main table reports a single seed per instance; the seed study
-repeats a subset with five seeds and reports both the best and the mean, and the
-statistical test is computed on per-instance aggregates.
-
-\paragraph{Failures} Two solvers failed to return any solution on some
-instance within the cutoff, which we report as a failure rather than excluding
-the instance. Excluding them would have removed exactly the cases that
-distinguish the solvers.
-
-\paragraph{Implementation maturity} The baselines are mature codebases. NuMVC
-and FastVC have been refined by their authors and others since 2013 and 2015
-respectively, and the KaMIS solvers likewise; ours is a research implementation
-written for this paper. A comparison of wall-clock results under a fixed budget
-cannot separate the merit of an algorithm from the quality of the code that runs
-it, and the reader should not read our numbers as though it could.
-
-We nevertheless report the comparison as measured, for three reasons. The
-strongest baseline on this benchmark, ReduMIS, is as heavily engineered as the
-vertex cover solvers, and it is the one against which we claim the least: no
-test in this paper separates us from it. Excluding the mature implementations
-would remove exactly the solvers a practitioner would otherwise choose. And the
-bias runs against us where we win and for us where we lose, which is the less
-convenient direction: our margins over NuMVC on the large sparse instances ---
-46\,054 vertices on \texttt{roadNet-CA}, 18\,645 on \texttt{del20} --- would only
-be larger if implementation quality were equalised, while our one- and two-vertex
-deficits on BHOSLIB might narrow.
-
-We do not, therefore, attribute the BHOSLIB result to implementation maturity.
-Section~\ref{sec:move} gives a structural reason for it --- on a dense graph the
-region is either empty or the whole graph, so the move degenerates --- and the
-convergence traces support that reading: NuMVC reaches the final value there in
-$0.2$ seconds, which is not the signature of a better-tuned inner loop but of a
-search whose neighbourhood suits the instance.
-
-\paragraph{Build differences between the two platforms} The replication
-machines rebuilt the solver from source, and that source had by then acquired
-the tracing used for Figure~\ref{fig:convergence}, which the machine used for
-the main tables did not carry. The two builds are therefore not bit-identical,
-and the replication in Section~\ref{sec:replication} varies build as well as
-machine. We measured the size of that confound rather than assuming it away:
-running both builds on the same machine, with the same seed and budget, they
-return identical values on \texttt{del18}, \texttt{rgg16}, \texttt{web-Stanford}
-and \texttt{roadNet-PA}, and differ by five vertices out of 20\,647 on
-\texttt{del16}, which is $0.024\%$. That is the same order as the seed-to-seed
-spread we report for the geometric family, and an order of magnitude below any
-difference the replication is used to argue about. It does not affect the
-ranking, which is what that section claims; but the per-instance agreement
-counts in Table~\ref{tab:replication} should be read as bounded by it rather
-than as pure machine effects.
-
-\paragraph{Baselines not run} The baselines were published between 2012 and
-2019. We did not run more recent solvers. InfVC \citep{sun2025infvc} is the
-task-matched candidate: a local search for unweighted vertex cover on massive
-graphs that compares against successors of FastVC. The comparison would require
-building it under the same instance formats, hardware and timing rules as the
-other solvers, which was not done for this paper, and published numbers obtained
-under different conditions cannot stand in for it. Until that is done the claims
-about ranking are claims against the 2012--2019 generation of solvers, and in
-particular the observation that FastVC has the lowest mean gap of the seven
-suggests the vertex-cover local search line deserves a current baseline. The
-dynamic framework of \citet{borowitz2025} was likewise not run, so the
-comparison with it is a comparison of constructions (Table~\ref{tab:frameworks}),
-not of performance. The weighted solvers cited in Section~\ref{sec:related}
-address a different problem.
-
-\paragraph{How narrow the positive result is} Our solver is strictly ahead of
-every baseline on three of 27 instances, all Delaunay graphs from a single
-generator seed. On thirteen instances it ties the best value and on eleven it is
-behind. The Wilcoxon tests of Table~\ref{tab:wilcoxon} are computed over
-relative gaps with Holm correction; they find it ahead of OnlineMIS,
-NearLinear and LinearTime, which degrade on large sparse graphs, and find no
-significant difference from ReduMIS, NuMVC or FastVC. By mean relative gap
-it is third of seven. The claim that survives is therefore narrow:
-on planar bounded-degree graphs whose kernel stays large it is ahead of
-every solver we ran, by a margin of $0.03$--$0.09\%$; on graphs that reduce away
-it is level with the best; on dense instances it is behind. Section~\ref{sec:delaunay}
-tests the Delaunay claim on independent samples. We know of no public
-collection of other large-kernel families, and we make no claim about them.
+\paragraph{Randomisation and instances} The main table reports one seed per instance; the
+seed study repeats ten instances with five. The geometric instances are generated and not
+byte-identical to the DIMACS10 graphs of similar name, hence Section~\ref{sec:delaunay}.
 
 \section{Conclusions}
 \label{sec:conclusions}
 
-We studied a region move for the maximum independence set problem: release part
-of an incumbent, collect the vertices that become eligible, and re-solve the
-region by branch-and-reduce. The move is admissible and monotone for any
-sub-solve that returns a set at least as large as the one released. Its region
-construction is that of \citet{borowitz2025}; our contribution is its use as the
-inner move of a static solver, with reductions applied inside the region, an online
-rule for the number of released vertices, and an empirical account of when it
-helps.
-
-The account is mixed. Against six solvers from 2012--2019 on 27 instances, the
-method is strictly ahead on three Delaunay graphs from one generator seed, level on
-13 and behind on 11; it is not significantly different from ReduMIS, NuMVC or
-FastVC, and by mean relative gap it is third of seven. Inside the
-method, exact repair and reductions inside the region each recover a substantial
-part of the loss from removing region moves, and the reductions are what allow the
-regions to be an order of magnitude larger. The residual kernel is large on 12
-of the 19 instances measured, but its size does not predict where the method
-wins; independent Delaunay samples vary more between graphs than the margin
-claimed on one. The claim we make is therefore narrow: on planar bounded-degree
-graphs with large kernels the method is ahead of the 2012--2019 solvers on the
-one graph where it was compared; on the rest of the sparse benchmark it is level
-with the best solver or within $0.06\%$ of it, the largest deficits being on web
-graphs and \texttt{soc-pokec}; on dense instances it is behind.
-
-Three things are needed before a stronger claim. A current baseline,
-for instance InfVC, run under the same rules; paired baseline runs on the
-independent Delaunay samples; and a second large-kernel family. The region
-definition and Theorem~\ref{thm:region} carry over to the weighted problem by
-replacing cardinality with weight.
+We studied a region move for the maximum independent set problem: release part of an
+incumbent, collect the vertices that become eligible, and re-solve the region by
+branch-and-reduce. The move is admissible and monotone for any sub-solve that returns a
+set at least as large as the one released. Its region construction is that of
+\citet{borowitz2025}; our contribution is its use as the inner move of a static solver,
+with reductions inside the region, an online rule for the number of released vertices and
+an account of when it helps. Against six solvers from 2012--2019 on 27 instances the
+method is strictly ahead on three Delaunay graphs from one generator seed, level on 13 and
+behind on 11, not significantly different from ReduMIS, NuMVC or FastVC, and third of
+seven by mean relative gap. Exact repair and reductions inside the region each recover a
+substantial part of the loss from removing region moves, and the reductions are what allow
+regions an order of magnitude larger. The residual kernel is large on 12 of 19 instances
+but its size does not predict where the method wins, and independent Delaunay samples vary
+more between graphs than the margin claimed on one. A stronger claim needs a current
+baseline such as InfVC under the same rules, paired baseline runs on independent Delaunay
+samples and a second large-kernel family. The definition of the region and
+Theorem~\ref{thm:region} carry over to the weighted problem by replacing cardinality with
+weight.
 
 \section*{Data availability}
 The source code, the instance generators and the raw per-run records behind
 every table and figure in this paper are available at
 \url{https://github.com/vinhqdang/max_independence_set}. The publicly archived
-instances are identified in \ref{app:provenance} by the name under
+instances are identified in the supplement by the name under
 which their repository distributes them, and the generated instances are
 reproduced by the generator in that repository at the seed recorded there.
 
@@ -1721,59 +1040,7 @@ to assist with drafting and language editing of the manuscript. After using
 these tools, the author reviewed and edited the content as needed and takes full
 responsibility for the content of the published article.
 
-\appendix
-\setcounter{table}{0}
-\setcounter{figure}{0}
-
-\section{Instance provenance}
-\label{app:provenance}
-
-Table~\ref{tab:provenance} records where each instance came from, so that the
-benchmark set can be rebuilt exactly. Three points deserve emphasis, because each
-is a way in which two studies can report different numbers for what they believe
-is the same graph.
-
-First, the real-world instances are distributed as directed or multiply-listed
-edge lists. We read every file as undirected, discard self-loops and duplicate
-edges, and renumber the vertices consecutively; the $n$ and $m$ in the table are
-the values after this normalisation, and they are what our solver and every
-baseline receive. Isolated vertices are retained rather than dropped. Removing $q$ isolated
-vertices lowers the independence number by exactly $q$, so a study that drops
-them reports values smaller by $q$ than one that keeps them, and the two are not
-comparable unless $q$ is stated.
-
-Second, the BHOSLIB instances are published in two forms, and the distinction is
-easy to miss. The Network Repository archive ships the \emph{clique} form, whose
-independence number is the size of a Model-RB domain rather than the advertised
-$\alpha$: on \texttt{frb30-15-1} that form has 83\,198 edges and every solver we
-tried returned exactly 15. The form used here, and the one the published
-$\alpha$ values refer to, is its complement, with 17\,827 edges and $\alpha=30$.
-Our converter takes the complement explicitly. A study that omits this step is
-not solving a hard instance at all, and its BHOSLIB numbers cannot be compared
-with anyone else's.
-
-Third, the geometric instances are generated rather than downloaded. They come
-from \texttt{tools/gen\_instances.py} at seed 1: the Delaunay instances are the
-Delaunay triangulation of $2^{k}$ uniform points in the unit square, and the
-random geometric instances connect points within the radius that gives an
-expected average degree of 8. The generator is deterministic given the seed, so
-the instances in the table are reproducible, but they are \emph{not} the DIMACS
-implementation-challenge graphs of the same names, and the two should not be
-compared.
-
-\input{tables/provenance}
-
-\setcounter{table}{0}
-\section{Complete per-instance results}
-\label{app:full}
-
-Table~\ref{tab:appendix} lists every run behind the summary tables, so that the
-aggregates can be checked against the individual measurements. The raw records,
-including the seed study and the replication, are distributed with the source.
-
-\input{tables/appendix}
-
 \bibliographystyle{elsarticle-harv}
-\bibliography{refs}
+{\small\bibliography{refs}}
 
 \end{document}

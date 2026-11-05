@@ -27,3 +27,13 @@ If the journal asks for a revision, in this order:
    (`results/instance_checksums.sha256` lists the files; seeds 1-6 and DIMACS10).
 2. Add InfVC to the main benchmark under the same rules.
 3. Check the InfVC author list and the two arXiv entries in `paper/refs.bib`.
+
+## EJOR technical check (5 November 2026)
+
+Sent back for: (1) more than 35 pages at 1.5 line spacing, (2) more than 5 keywords.
+Resubmitted version: `paper/cascade-mis.tex` is 30 pages at 1.5 spacing (11 pt, A4, 2.5 cm
+margins, references included) with 5 keywords. Material that does not fit is in
+`paper/supplement.tex` (19 pages): proofs of the standard reduction rules, per-family tables,
+convergence, exact solvers, replication, other parameters, implementation notes and the
+instance appendices. Build the main file first, then the supplement (it cross-references the
+main file's labels through `xr`).

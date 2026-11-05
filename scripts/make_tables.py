@@ -59,6 +59,33 @@ def quality_tables(best, meta, out_dir):
         open(os.path.join(out_dir, "quality_%s.tex" % fam), "w").write("\n".join(lines) + "\n")
 
 
+def quality_all(best, meta, out_dir):
+    """Single compact table with every instance, for the page-limited main text."""
+    insts = []
+    for fam in FAMILY_ORDER:
+        insts += sorted([i for i in meta if meta[i][0] == fam], key=lambda i: meta[i][1])
+    lines = [r"\begin{table}[htbp]", r"\centering",
+             r"\caption{Size of the independent set found within the 60\,s budget (larger is better), all 27 "
+             r"instances. Best value per instance in bold; -- means no solution within the cutoff. "
+             r"Family order: geometric, road, social, web, BHOSLIB.}",
+             r"\label{tab:quality}", r"\footnotesize",
+             r"\fittable{\begin{tabular}{llr" + "r" * len(SOLVERS) + "}", r"\toprule",
+             "Instance & Family & $n$ & " + " & ".join(lab for _, lab in SOLVERS) + r" \\", r"\midrule"]
+    last = None
+    for i in insts:
+        if last is not None and meta[i][0] != last:
+            lines.append(r"\midrule")
+        last = meta[i][0]
+        top = max(best[k].get(i, 0) for k, _ in SOLVERS)
+        cells = []
+        for key, _ in SOLVERS:
+            v = best[key].get(i)
+            cells.append("--" if v is None else (r"\textbf{%d}" % v if v == top else str(v)))
+        lines.append("%s & %s & %d & %s \\\\" % (esc(i), meta[i][0], meta[i][1], " & ".join(cells)))
+    lines += [r"\bottomrule", r"\end{tabular}}", r"\end{table}"]
+    open(os.path.join(out_dir, "quality_all.tex"), "w").write("\n".join(lines) + "\n")
+
+
 def summary_table(best, meta, out_dir):
     insts = sorted(meta)
     lines = [r"\begin{table}[htbp]", r"\centering",
@@ -151,6 +178,7 @@ def main():
     main_csv = os.path.join(args.results, args.main)
     best, meta = load(main_csv)
     quality_tables(best, meta, args.out)
+    quality_all(best, meta, args.out)
     summary_table(best, meta, args.out)
     budget_table(main_csv, args.out)
     ablation_table(os.path.join(args.results, "ablation.csv"), args.out)
