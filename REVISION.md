@@ -37,3 +37,8 @@ margins, references included) with 5 keywords. Material that does not fit is in
 convergence, exact solvers, replication, other parameters, implementation notes and the
 instance appendices. Build the main file first, then the supplement (it cross-references the
 main file's labels through `xr`).
+
+Resubmitted to EJOR after the technical check (EJOR-D-26-05254) on 5 November 2026:
+main manuscript (30 pp) plus supplement (19 pp), 5 keywords. Next step is the editor's
+scientific assessment; the open items above (InfVC, baselines on the independent Delaunay
+graphs) still apply.
