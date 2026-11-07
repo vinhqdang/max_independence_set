@@ -42,3 +42,27 @@ Resubmitted to EJOR after the technical check (EJOR-D-26-05254) on 5 November 20
 main manuscript (30 pp) plus supplement (19 pp), 5 keywords. Next step is the editor's
 scientific assessment; the open items above (InfVC, baselines on the independent Delaunay
 graphs) still apply.
+
+## EJOR outcome (reported 7 November 2026)
+
+EJOR-D-26-05254 was desk-rejected. The editor's stated reason was fit: the paper is better
+suited to a computing-oriented journal than to EJOR. No scientific assessment was made, so
+there are no new reviewer comments.
+
+Next: transfer to a computing / operations-research journal (named by the author as
+"Computers and Operations Research"; note that the first submission, CAOR-D-26-02865, was
+rejected by that journal on 23 September 2026 reviews, so confirm whether this is the same
+journal or a different one before reformatting).
+
+Submission history:
+
+| date | journal | reference | outcome |
+| --- | --- | --- | --- |
+| 23 Sep 2026 | Computers & Operations Research | CAOR-D-26-02865 | rejected after review (four reports) |
+| 4 Nov 2026 | European Journal of Operational Research | EJOR-D-26-05254 | sent back at technical check (35 pages at 1.5 spacing, 3-5 keywords) |
+| 5 Nov 2026 | European Journal of Operational Research | EJOR-D-26-05254 | resubmitted, 30 pp + 19 pp supplement, 5 keywords |
+| 7 Nov 2026 | European Journal of Operational Research | EJOR-D-26-05254 | desk-rejected on fit (editor: better suited to a computing journal) |
+
+The EJOR-format manuscript (30 pages, 5 keywords, separate supplement) and the response
+letter remain valid for a new target; only the journal name in `\journal{}`, the cover letter
+and the highlights/keyword limits need checking against the new guide for authors.
