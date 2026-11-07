@@ -86,4 +86,9 @@ Submission history addendum:
 
 | date | journal | outcome |
 | --- | --- | --- |
-| 7 Nov 2026 | Computational Optimization and Applications | manuscript prepared, to be submitted |
+| 7 Nov 2026 | Computational Optimization and Applications | submitted (Springer Nature template, 27 pp + Online Resource 1, 19 pp) |
+
+Submitted to Computational Optimization and Applications on 7 November 2026. Next step: the
+editor's decision. If reviewers ask for it: run ReduMIS, FastVC and InfVC on the independent
+Delaunay graphs (checksums in `results/instance_checksums.sha256`), add InfVC to the main
+benchmark, and check the InfVC author list and the two arXiv entries in `paper/refs.bib`.
