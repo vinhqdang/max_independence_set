@@ -1,0 +1,59 @@
+Quang-Vinh Dang
+British University Vietnam
+Hung Yen, Vietnam
+vinh.dq4@buv.edu.vn
+ORCID 0000-0002-3877-8024
+
+To the Editors
+Computational Optimization and Applications
+
+Dear Editors,
+
+Please consider the enclosed manuscript, "Exact Large-Neighbourhood Search for the
+Maximum Independent Set Problem on Massive Sparse Graphs", for publication in
+Computational Optimization and Applications. It is a computational study of a
+local-search method for a core combinatorial optimization problem, with an algorithm,
+a proof of admissibility and monotonicity of its move, an implementation and an
+experimental evaluation.
+
+WHAT THE PAPER DOES
+
+The maximum independent set problem (equivalently minimum vertex cover) is usually
+attacked on large sparse graphs by safe reduction rules followed by local search. The
+paper studies a region move for that search: release a set of incumbent vertices,
+collect the outside vertices whose incumbent neighbours all lie in the set, and re-solve
+the resulting region by branch-and-reduce. Nothing outside the region conflicts with it,
+so the incumbent never worsens, including when sub-solves are truncated by a budget.
+
+WHAT IS AND IS NOT NEW
+
+The region construction is that of Borowitz, Grossmann and Schulz (ALENEX 2025) for
+dynamic independent sets, and the manuscript says so. Its contribution is the use of
+that construction as the inner move of a static solver, with reductions applied inside
+each region and an online rule for the number of released vertices, together with an
+experimental study that includes negative results. On 27 instances in five families at
+a 60-second budget the method matches or exceeds the best of six established solvers on
+16 and is strictly best on three Delaunay triangulations; it is not significantly
+different from ReduMIS, NuMVC or FastVC under a Holm-corrected Wilcoxon test on relative
+gaps. Ablations separate exact repair from reductions inside the region, and kernel
+measurements show that residual kernel size alone does not predict where the method
+helps. The comparison solvers date from 2012-2019, and the manuscript states that more
+recent solvers (for example InfVC) were not run.
+
+PRIOR REVIEW AND TRANSPARENCY
+
+An earlier version was reviewed by another journal and not accepted, and a later version
+was declined by a second journal on grounds of scope without scientific assessment. The
+reviews identified missing prior art, errors in the statistical comparison and missing
+experiments; these are addressed in this version. The manuscript is not under
+consideration elsewhere. No related unpublished work by the author exists. Generative AI
+tools were used for drafting, language editing and script preparation, as documented in
+Section 5.1; the author is responsible for all content.
+
+Every solution that a solver emits is independently verified. Source code, instance
+generators, checksums of every instance file and the raw per-run records are available
+at https://github.com/vinhqdang/max_independence_set. Supplementary material is provided
+as Online Resource 1.
+
+Sincerely,
+Quang-Vinh Dang

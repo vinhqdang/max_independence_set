@@ -66,3 +66,24 @@ Submission history:
 The EJOR-format manuscript (30 pages, 5 keywords, separate supplement) and the response
 letter remain valid for a new target; only the journal name in `\journal{}`, the cover letter
 and the highlights/keyword limits need checking against the new guide for authors.
+
+## Computational Optimization and Applications (Springer), 7 November 2026
+
+The target is *Computational Optimization and Applications* (the author's clarification: not
+Computers & Operations Research, which already rejected the paper). Springer Nature template
+(`sn-jnl`, numbered references, `sn-mathphys-num`).
+
+* Main manuscript: `paper/cascade-mis-coap.tex` (27 pp). Abstract 167 words (limit 150-250),
+  5 keywords (limit 4-6), declarations section before the references, AI use documented in
+  Section 5.1 (Methods), supplement cited as Online Resource 1.
+* Online Resource 1: `paper/supplement-coap.tex` (19 pp; build the main file first).
+* Cover letter: `paper/cover-letter-coap.txt`.
+* The Elsevier-format files (`cascade-mis.tex`, `supplement.tex`) are kept for reference.
+* Springer wants editable source: submit the `.tex`, `sn-jnl.cls`, `sn-mathphys-num.bst`,
+  `refs.bib`/`.bbl`, tables, figures and the compiled PDF.
+
+Submission history addendum:
+
+| date | journal | outcome |
+| --- | --- | --- |
+| 7 Nov 2026 | Computational Optimization and Applications | manuscript prepared, to be submitted |

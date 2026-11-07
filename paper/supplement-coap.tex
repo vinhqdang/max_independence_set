@@ -1,0 +1,417 @@
+%% European Journal of Operational Research -- Elsevier elsarticle class.
+%% Compile with: latexmk -pdf main.tex   (or: make)
+\documentclass[preprint,authoryear,11pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\graphicspath{{./}}
+\usepackage{url}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+% Parameter and instance names are set in a monospaced face, which TeX will
+% not hyphenate by default, so a long one pushes its line into the margin.
+\usepackage[htt]{hyphenat}
+% A table with one column per instance is naturally wide. This shrinks a
+% table only when it would otherwise run into the margin, and leaves one
+% that already fits at its natural size, so the type size stays uniform
+% across the tables that do fit.
+\newcommand{\fittable}[1]{%
+  \resizebox{\ifdim\width>\linewidth\linewidth\else\width\fi}{!}{#1}}
+\usepackage{tikz}
+\usetikzlibrary{fit,backgrounds,arrows.meta,positioning,shapes.geometric}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{remark}[theorem]{Remark}
+
+\journal{Computational Optimization and Applications}
+\usepackage{xr}
+\externaldocument[M-]{cascade-mis-coap}
+\begin{document}
+\begin{frontmatter}
+\title{Supplementary material for ``Exact Large-Neighbourhood Search for the
+Maximum Independent Set Problem on Massive Sparse Graphs''}
+\author{Quang-Vinh Dang}
+\address{British University Vietnam, Hung Yen, Vietnam. Corresponding author: vinh.dq4@buv.edu.vn}
+\end{frontmatter}
+
+\noindent\textbf{Article:} Exact Large-Neighbourhood Search for the Maximum Independent Set Problem on Massive Sparse Graphs.
+\textbf{Journal:} Computational Optimization and Applications.
+\textbf{Author:} Quang-Vinh Dang, British University Vietnam, vinh.dq4@buv.edu.vn.
+\par\medskip
+
+This document (Online Resource 1) holds material that supports the main manuscript but does not fit
+its page limit: proofs of the standard reduction rules, the per-family result
+tables, and the secondary experiments (seed study, convergence, long budget,
+exact solvers, replication on a second platform), the implementation notes and the
+instance appendices. Section, table and figure numbers prefixed with ``M-'' in the
+source refer to the main manuscript.
+
+\section{Proofs for the reduction rules}
+\begin{lemma}[Simplicial vertices]
+\label{lem:simplicial}
+If $N(v)$ induces a clique then some maximum independent set contains $v$.
+\end{lemma}
+
+\begin{proof}
+Let $S$ be a maximum independent set with $v \notin S$. Since $N(v)$ is a
+clique, $|S \cap N(v)| \le 1$. If $S \cap N(v) = \emptyset$ then $S \cup \{v\}$
+is independent and larger, contradicting maximality. Otherwise
+$S \cap N(v) = \{u\}$ for a single $u$, and $(S \setminus \{u\}) \cup \{v\}$ is
+independent, of the same size, and contains $v$.
+\end{proof}
+
+Degree-0 and degree-1 vertices are the special cases $|N(v)| \in \{0,1\}$.
+
+\begin{lemma}[Domination]
+\label{lem:domination}
+If $uv \in E$ and $N[u] \subseteq N[v]$ then some maximum independent set
+excludes $v$.
+\end{lemma}
+
+\begin{proof}
+Let $S$ be a maximum independent set containing $v$. Then $u \notin S$, because
+$u$ and $v$ are adjacent. Consider $S' = (S \setminus \{v\}) \cup \{u\}$. Any
+neighbour of $u$ lies in $N[u] \subseteq N[v]$, that is, it is either $v$, which
+has been removed, or a neighbour of $v$, which is not in $S$ because $v \in S$.
+Hence $S'$ is independent, has the same size as $S$, and excludes $v$.
+\end{proof}
+
+\begin{lemma}[Degree-2 folding]
+\label{lem:fold}
+Let $N(v) = \{u,w\}$ with $uw \notin E$, and let $G'$ be obtained from $G$ by
+deleting $v,u,w$ and adding a vertex $f$ adjacent to
+$(N(u) \cup N(w)) \setminus \{v,u,w\}$. Then $\alpha(G) = \alpha(G') + 1$.
+\end{lemma}
+
+\begin{proof}
+($\ge$) Let $T$ be a maximum independent set of $G'$. If $f \notin T$ then
+$T \cup \{v\}$ is independent in $G$, since $v$'s only neighbours are $u$ and
+$w$, neither of which is in $T$. If $f \in T$ then $(T \setminus \{f\}) \cup
+\{u,w\}$ is independent in $G$: $u$ and $w$ are non-adjacent by assumption, and
+any other neighbour of $u$ or $w$ is adjacent to $f$ and hence outside $T$.
+Either way we obtain an independent set of size $|T| + 1$.
+
+($\le$) Let $S$ be a maximum independent set of $G$. We first argue that $S$
+may be taken to contain $v$, or to contain both $u$ and $w$. Note that
+Lemma~\ref{lem:simplicial} is \emph{not} available here: its hypothesis is that
+$N(v)$ induces a clique, and $N(v) = \{u,w\}$ with $uw \notin E$ is precisely the
+case in which it does not. We argue directly instead. If $S$ contains neither
+$u$ nor $w$, then $S \cup \{v\}$ is independent, because $u$ and $w$ are the only
+neighbours of $v$; maximality of $S$ therefore forces $v \in S$ already. If $S$
+contains exactly one of them, say $u$, then $(S \setminus \{u\}) \cup \{v\}$ is
+independent --- the only neighbours of $v$ are $u$, which has been removed, and
+$w$, which is not in $S$ --- and has the same size, so we may replace $S$ by it
+and again have $v \in S$. In the one remaining case $u,w \in S$, and then
+$v \notin S$ because $v$ is adjacent to both. In the first case
+$S \setminus \{v\}$ is independent in $G'$ and avoids $f$. In the second,
+$(S \setminus \{u,w\}) \cup \{f\}$ is independent in $G'$, because no neighbour
+of $f$ other than through $u$ or $w$ exists. Either way we obtain an independent
+set of $G'$ of size $|S| - 1$.
+\end{proof}
+
+
+\section{Per-family results}
+\label{sec:s-quality}
+Tables~\ref{tab:quality-geometric}--\ref{tab:quality-bhoslib} give, for each family, the size of the
+independent set each solver returned at the 60\,s budget.
+\input{tables/quality_geometric}
+\input{tables/quality_road}
+\input{tables/quality_social}
+\input{tables/quality_web}
+\input{tables/quality_bhoslib}
+\input{tables/whence}
+\section{Convergence}
+\label{sec:convergence}
+
+Table~\ref{M-tab:longbudget} shows what each solver reaches by the end of its
+budget; Figure~\ref{fig:convergence} shows how it gets there. Four instances
+were re-run with every improvement of the incumbent recorded against the wall
+clock. Only the three solvers that report improvements as they happen are
+plotted; the reduction-only baselines produce a single point.
+
+The shapes differ more than the endpoints do. On \texttt{del18} and
+\texttt{roadNet-PA} our solver reaches a value the others need most of the
+budget to approach, and then flattens: the kernelization and the first dive do
+most of the work, and the region moves refine it. On \texttt{web-Stanford} it
+converges almost immediately and improves six times in sixty seconds, which is
+the same observation the long-budget run makes from the other direction --- there
+is very little left to find once the graph has been reduced. The dense instance
+inverts the picture. All three solvers finish on the same value of 40, but NuMVC
+reaches it after $0.2$ seconds and FastVC after $0.8$, where we need $6.6$: on a
+graph this dense the region move has to work its way to what a specialised local
+search finds almost at once, and the tie at the deadline hides a large
+difference in how quickly it was reached.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{figures/convergence}
+\caption{Incumbent size against wall-clock time at a 60-second budget, on a
+symmetric-log time axis so the first second is legible. Note that the solvers
+report at different granularities: ours records one point per search batch
+(between 6 and 586 points here) while NuMVC and FastVC report every individual
+improvement (up to 33\,000), so the apparent smoothness of a curve reflects how
+often a solver reports, not how often it improves.}
+\label{fig:convergence}
+\end{figure}
+
+
+\section{Exact solvers}
+\label{sec:exact}
+
+The method proposed here is a heuristic, and the question of how far its answers
+sit from optimal is separate from how they compare with other heuristics. To
+place them we ran three exact solvers and one integer-programming solver on the
+instances small enough to admit them: the branch-and-reduce solver built from
+our own components (\textsc{Cascade}-exact, the sub-solver of
+Section~\ref{sec:implementation} applied to the whole graph), VCSolver
+\citep{akiba2016}, the winner of the vertex cover track of PACE 2019
+\citep{pace2019,hespe2020}, and HiGHS on the natural
+integer program. Table~\ref{tab:exact} reports the results.
+
+Three conclusions follow, and only the first is favourable to us. On the
+instances that reduce almost completely --- \texttt{ca-AstroPh},
+\texttt{ca-CondMat}, \texttt{email-Enron} --- all four prove optimality, and our
+sub-solver is the fastest of them --- by a factor of 25 to 40 over HiGHS, three
+to five over VCSolver, and a more modest 1.1 to 1.4 over the PACE portfolio ---
+which is the property
+the region move depends on: the sub-problems it generates are of exactly this
+shape, and at $10^3$ to $10^4$ moves per second (Table~\ref{M-tab:regional}) they must each be solved in a fraction
+of a millisecond.
+
+Second, our exact solver is not competitive as an exact solver. On the BHOSLIB
+family the PACE 2019 portfolio proves the optimum of \texttt{frb30-15-1},
+\texttt{frb35-17-1} and \texttt{frb40-19-1} in under four seconds each, while
+ours returns 25, 28 and 30 against the true 30, 35 and 40 and proves nothing.
+It is built to be restarted millions of times on graphs of a few dozen vertices,
+not to prove optimality on a dense graph of a thousand, and the table shows the
+cost of that choice. Where a proof is wanted on instances of this kind, the
+portfolio approach is the right tool.
+
+Third, the integer-programming route is not a usable baseline at this scale, and
+we record its failures rather than omitting it. HiGHS matches the optimum on the
+three easy instances but exceeds the 60-second budget on most others, taking up
+to 360\,s; on \texttt{frb45-21-1} through \texttt{frb53-24-1} it returns a single
+vertex, on \texttt{rgg18} none at all, and on \texttt{del18} and
+\texttt{web-Stanford} it emits no solution we could verify. On
+\texttt{email-Enron} it reports optimality but the solution it writes has 22\,253
+vertices against the 22\,255 that the other three solvers prove optimal and that
+our verifier confirms; we therefore treat its optimality claims as unreliable
+and its numbers as a lower bound on what a tuned commercial solver would do.
+This is a statement about the formulation at this size, not about HiGHS: the
+natural model has one variable per vertex and one constraint per edge, which for
+the larger instances in the benchmark means tens of millions of constraints.
+
+\input{tables/exact}
+
+
+\section{Replication on different hardware}
+\label{sec:replication}
+
+A computational study is only as convincing as its independence from the machine
+it was run on. We therefore repeated the comparison on a second, unrelated
+platform: virtual machines with two Intel Xeon cores at 2.20\,GHz and 12\,GB of
+memory, against the four-core workstation used for the main tables. Every solver
+was rebuilt from source on that platform by the provisioning script included
+with our code, so nothing is carried over except the source.
+
+Two properties of the replication are worth stating explicitly. First, all
+solvers for a given instance were run on the same virtual machine, so each row
+of the replication table is internally consistent; only different rows may come
+from different machines, and those machines are of identical specification.
+Splitting a single instance's solvers across machines would have made the
+comparison meaningless, since the budget is a wall-clock budget and the amount
+of work that fits into it depends on the processor. Second, the two largest
+instances were excluded, because 12\,GB of memory is not enough for them; the
+replication therefore covers 25 of the 27 instances.
+
+Table~\ref{tab:replication} reports the outcome. The weak statement that
+survives is that on each of the 25 instances the set of solvers attaining the
+best value on the replication machine intersects the set attaining it on the
+original machine. That statement alone does not say that the \emph{ranking} is
+preserved, so we also compared every pair of the seven solvers on every
+instance, 519 pairs in total with a value from both platforms. The sign of the
+difference between the two solvers (better, equal, worse) is the same on both
+platforms for 498 of them ($96.0\%$). In the remaining 21 the pair is equal on
+one platform and strictly ordered on the other, and \emph{in none of the 519 does
+the order reverse}. Restricted to \textsc{Cascade} against each baseline, 9 of
+149 pairs change from equal to strict or back. The comparisons in
+Main-text Section~
+ef{M-sec:experiments} are therefore not artefacts of the machine to the
+extent that two machines of this class can show.
+
+The individual values move a little, and the table shows where. The two
+deterministic solvers, reducing-peeling and near-linear kernelization, return
+\emph{identical} values on all 25 instances, which is the control: it confirms that
+the instances, the conversions and the verifier are the same on both platforms,
+so any difference elsewhere comes from the solver rather than from the pipeline.
+The five randomised solvers differ by a fraction of a percent on average, and
+what difference there is concentrates on BHOSLIB, where the optima are small
+enough that a one-vertex change is one to two percent. Away from that family our
+own solver returns the same value on both machines on every road, web and social
+instance, and differs by an average of $0.016\%$ on the geometric family.
+
+Two caveats belong with this. The replication machine is slower, so a solver
+that spends its whole budget does less work within it; that is visible as the
+larger spreads for the vertex cover local search solvers, which have no
+reduction phase to fall back on, and most sharply as NuMVC exceeding the cutoff
+altogether on \texttt{roadNet-CA}, an instance it completed on the faster
+machine. And a fixed wall-clock budget on two machines
+of different speed is not the same experiment twice --- it is the same
+\emph{protocol} twice, which is what a practitioner choosing a solver under a
+deadline actually faces.
+
+\input{tables/replication}
+
+
+\section{Other parameters and time budgets}
+Table~\ref{tab:sensitivity} varies four further parameters one at a time on three instances.
+The comparison that makes the numbers interpretable is with the seed-to-seed spread
+($0.024\%$ on the Delaunay family): a parameter whose range moves the answer by less than
+that is not one the user needs to think about. \texttt{kernel\_share}, \texttt{lns\_start\_free}
+and \texttt{lns\_slice} move \texttt{del18} by at most $0.013\%$ and \texttt{web-Stanford} by
+at most $0.001\%$. \texttt{restart\_idle\_dives} is sensitive: $82\,592$ at 50, $82\,639$ at
+100, $82\,659$ at the default 200, then $82\,655$ at both 400 and 800, so the safe direction
+to err in is upwards. On the dense instance the spreads are $2.5$--$5\%$, within the seed
+spread of that family, and one run per setting cannot separate a parameter effect from it.
+\input{tables/sensitivity}
+Table~\ref{tab:budget} gives the wall-clock time actually taken under the 60\,s budget.
+\input{tables/budget}
+
+\section{Implementation notes}
+
+\label{sec:implementation}
+
+Reductions and branching decisions both mutate the graph and must be reversible,
+at every node of the sub-searches and after every region move. We use a compressed
+adjacency array in which each entry stores the position of its twin, together
+with a per-vertex pointer separating the live neighbours from the dead ones.
+Deleting a vertex $v$ swaps its entry to the end of each live neighbour's range
+and decrements that neighbour's pointer; undoing the deletion merely increments
+the pointers again. Nothing has to be swapped back, because no later operation
+touches an entry outside the live range. Both directions cost $O(\deg v)$ and
+carry no payload, and degrees remain exact throughout.
+
+Degree-2 folding introduces edges that do not fit in the static array; these go
+into per-vertex overflow lists which are append-only and undone by a pop, and
+which are allocated only for vertices that actually take part in a fold.
+
+Two engineering details matter for throughput. First, each node of a sub-search
+owns an exact list of its live vertices, built by filtering its parent's. An
+earlier version shared one list and could drop a vertex when a fold created a new
+one; the clique-cover bound then failed to cover that vertex, came out too small,
+and pruned optimal solutions while still reporting that optimality had been
+proven. Second, the sub-solver is reused across region moves instead of being
+constructed afresh, since at a hundred thousand moves per minute the set-up of
+the graph and reduction state costs more than the search itself.
+
+To give these choices a number, the full configuration in the ablation runs of
+Main-text Section~
+ef{M-sec:regional} (three seeds, three processes sharing the machine)
+kernelizes \texttt{del18}, 262\,144 vertices, in $1.6$--$2.0$\,s, completes the
+first dive in a further $0.55$--$0.63$\,s and performs $102\,906$--$112\,414$
+region moves in the rest of the 60\,s, one every $560\,\mu$s on average. On
+\texttt{web-Stanford} the figures are $1.0$--$1.1$\,s, $0.03$--$0.05$\,s and
+$70\,496$--$91\,130$ moves. Those rates are what the reuse of the sub-solver and
+the payload-free undo buy; the throughput, not the asymptotics, is what makes
+an exactly-solved neighbourhood practical.
+
+The reduction queue is seeded in increasing order of degree, so that the cheap
+rules fire on the vertices most likely to trigger cascades before any expensive
+test is attempted on a hub. This is a design choice, not a measured result of
+this paper: we did not keep a plain-order variant and report no comparison.
+
+The last of these details is the one that decides whether the solver keeps its
+promise at all. Kernelization is run to exhaustion in principle, but on some
+graphs exhaustion is unaffordable: on \texttt{soc-pokec}, 1.6 million vertices,
+running the rules to a fixed point takes $180.5$\,s in an early measurement on
+the main-table machine and $332$\,s in the loaded measurement of
+Table~\ref{M-tab:kernels}, three or more times the entire 60-second budget, so a
+solver that insisted on finishing would return nothing at all. We therefore give kernelization a fixed share of the budget --- $0.3$ by
+default --- and stop it where it stands when that share is spent, keeping
+whatever reductions have been applied and continuing with the rest. On
+\texttt{soc-pokec} the phase is cut off at $18.0$\,s, exactly the share, and the
+solver returns 788\,868 within its budget. The truncation is recorded in the
+run records, so a reader can see on which instances the kernel is partial.
+This is the difference between a method that respects a deadline and one that
+merely has a time limit in its interface.
+
+Correctness is checked by comparing the exact solver against exhaustive search on
+random graphs, repeating the comparison with each reduction rule disabled in
+turn, and by verifying that every solution our solver reports is independent and maximal.
+
+
+\begin{figure}[htbp]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/pipeline}}
+\caption{Where the work goes. Kernelization and the dive run once, the first of
+them bounded by a share $\kappa$ of the budget so that it cannot consume the
+whole of it; everything after that is region moves. The
+step set in italics is what distinguishes the method: the reduction rules are
+applied \emph{inside} each move, to the region rather than to the input, which is
+what makes solving the region exactly affordable. A move never returns a worse
+solution than it received, so the only reason to leave the loop is that it has
+stopped improving, and the escape mechanisms exist to put it back.}
+\label{fig:pipeline}
+\end{figure}
+\section{Instance provenance}
+\label{app:provenance}
+
+Table~\ref{tab:provenance} records where each instance came from, so that the
+benchmark set can be rebuilt exactly. Three points deserve emphasis, because each
+is a way in which two studies can report different numbers for what they believe
+is the same graph.
+
+First, the real-world instances are distributed as directed or multiply-listed
+edge lists. We read every file as undirected, discard self-loops and duplicate
+edges, and renumber the vertices consecutively; the $n$ and $m$ in the table are
+the values after this normalisation, and they are what our solver and every
+baseline receive. Isolated vertices are retained rather than dropped. Removing $q$ isolated
+vertices lowers the independence number by exactly $q$, so a study that drops
+them reports values smaller by $q$ than one that keeps them, and the two are not
+comparable unless $q$ is stated.
+
+Second, the BHOSLIB instances are published in two forms, and the distinction is
+easy to miss. The Network Repository archive ships the \emph{clique} form, whose
+independence number is the size of a Model-RB domain rather than the advertised
+$\alpha$: on \texttt{frb30-15-1} that form has 83\,198 edges and every solver we
+tried returned exactly 15. The form used here, and the one the published
+$\alpha$ values refer to, is its complement, with 17\,827 edges and $\alpha=30$.
+Our converter takes the complement explicitly. A study that omits this step is
+not solving a hard instance at all, and its BHOSLIB numbers cannot be compared
+with anyone else's.
+
+Third, the geometric instances are generated rather than downloaded. They come
+from \texttt{tools/gen\_instances.py} at seed 1: the Delaunay instances are the
+Delaunay triangulation of $2^{k}$ uniform points in the unit square, and the
+random geometric instances connect points within the radius that gives an
+expected average degree of 8. The generator is deterministic given the seed, so
+the instances in the table are reproducible, but they are \emph{not} the DIMACS
+implementation-challenge graphs of the same names, and the two should not be
+compared.
+
+\input{tables/provenance}
+
+\setcounter{table}{0}
+\section{Complete per-instance results}
+\label{app:full}
+
+Table~\ref{tab:appendix} lists every run behind the summary tables, so that the
+aggregates can be checked against the individual measurements. The raw records,
+including the seed study and the replication, are distributed with the source.
+
+\input{tables/appendix}
+
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{refs}
+\end{document}
